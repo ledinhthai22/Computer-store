@@ -1,7 +1,9 @@
 ﻿
 using System.Text;
+using Ecommerce.Data;
 using Ecommerce.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Ecommerce
@@ -83,7 +85,11 @@ namespace Ecommerce
                 });
             });
 
-
+            var conStr = builder.Configuration.GetConnectionString("DefaultConnect");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(conStr);
+            });
             var app = builder.Build();
 
           
