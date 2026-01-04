@@ -1,6 +1,6 @@
-﻿using Ecommerce.Middleware;
+﻿using Backend.Middleware;
 
-namespace Ecommerce.Extensions
+namespace Backend.Extensions
 {
     public static class MiddlewareExtensions
     {

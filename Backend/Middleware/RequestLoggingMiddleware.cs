@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Security.Claims;
 
-namespace Ecommerce.Middleware
+namespace Backend.Middleware
 {
     public class RequestLoggingMiddleware
     {

@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Ecommerce.Helper
+namespace Backend.Helper
 {
     public class JwtHelper
     {

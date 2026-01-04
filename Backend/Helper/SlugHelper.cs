@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Text;
-namespace Ecommerce.Helper
+namespace Backend.Helper
 {
     public static class SlugHelper
     {
