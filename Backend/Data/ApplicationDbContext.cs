@@ -2,7 +2,7 @@
 using Ecommerce.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ecommerce.Data
+namespace Backend.Data
 {
     public class ApplicationDbContext : DbContext
     {

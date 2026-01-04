@@ -1,21 +1,21 @@
 ﻿
 using System.Text;
-using Ecommerce.Data;
-using Ecommerce.Extensions;
+using Backend.Data;
+using Backend.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
-namespace Ecommerce
+using Backend.Services.Auth;
+namespace Backend
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddScoped<Ecommerce.Helper.JwtHelper>();
+            builder.Services.AddScoped<Backend.Helper.JwtHelper>();
 
-
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
