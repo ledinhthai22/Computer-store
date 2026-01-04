@@ -1,19 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Models
+namespace Backend.Models
 {
-    public class HinhAnhSanPham 
+    public class HinhAnhSanPham
     {
         [Key]
         public int MaHinhAnh { get; set; }
-        public string URL { get; set; } = null!;
-        public bool AnhChinh { set; get; }
-        public int ThuTuAnh { set; get; }
 
-        //public int MaBienThe { set; get; }
-        //[ForeignKey("MaBienThe")]
-        //public ICollection<BienThe> BienThe { set;get; } = new List<BienThe>();
+        [Required]
+        [MaxLength(500)]
+        public string URL { get; set; } = null!;
+
+        public bool AnhChinh { get; set; }
+        public int ThuTuAnh { get; set; }
+
+        public int MaBienThe { get; set; }
+        [ForeignKey(nameof(MaBienThe))]
+        public BienThe BienThe { get; set; } = null!;
     }
 }

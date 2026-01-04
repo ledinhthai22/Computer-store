@@ -1,29 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Ecommerce.Models;
 
 namespace Backend.Models
 {
     public class NguoiDung
     {
-        public int maNguoiDung { get; set; }
-        public int maVaiTro { get; set; }
+        [Key]
+        public int MaNguoiDung { get; set; }
 
-        public string hoTen { get; set; } = null!;
-        public string tenTaiKhoan { get; set; } = null!;
-        public string matKhauMaHoa { get; set; } = null!;
-        public string email { get; set; } = null!;
-        public string soDienThoai { get; set; } = null!;
-        public DateTime? ngaySinh { get; set; }
+        [Required]
+        public string HoTen { get; set; } = null!;
+        
+        [Required]
+        public string TenTaiKhoan { get; set; } = null!;
+        
+        [Required]
+        public string MatKhauMaHoa { get; set; } = null!;
+        
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = null!;
+        
+        public string SoDienThoai { get; set; } = null!;
+        public bool TrangThai { get; set; }
+        public DateTime NgayTao { get; set; } = DateTime.Now;
+        public DateTime NgayCapNhat { get; set; }
 
-        public bool trangThai { get; set; }
-        public DateTime ngayTao { get; set; }
-        public DateTime ngayCapNhat { get; set; }
-        public VaiTro Vaitro { get; set; } = null!;
-        // public ICollection<DiaChiNhanHang> Diachinhanhang { get; set; } = new List<DiaChiNhanHang>();
-        // public ICollection<DonHang> Donhang { get; set; } = new List<DonHang>();
-        // public ICollection<DanhGia> Danhgia { get; set; } = new List<DanhGia>();
+        public int MaVaiTro { get; set; }
+        [ForeignKey(nameof(MaVaiTro))]
+        public VaiTro VaiTro { get; set; } = null!;
+
+        public ICollection<DiaChiNhanHang> DiaChiNhanHang { get; set; } = new List<DiaChiNhanHang>();
+        public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
+        public ICollection<ChiTietGioHang> ChiTietGioHang { get; set; } = new List<ChiTietGioHang>();
+        public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();
+        public ICollection<DonHang> DonHang { get; set; } = new List<DonHang>(); 
     }
 }

@@ -1,18 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc;
+using Backend.Models;
 
-namespace Ecommerce.Models
+namespace Backend.Models
 {
-    public class ChiTietGioHang 
+    // Cần setup Composite Key [MaNguoiDung, MaBienThe] trong DbContext
+    public class ChiTietGioHang
     {
+        public int MaNguoiDung { get; set; }
+        [ForeignKey(nameof(MaNguoiDung))]
+        public NguoiDung NguoiDung { get; set; } = null!;
+
+        public int MaBienThe { get; set; }
+        [ForeignKey(nameof(MaBienThe))]
+        public BienThe BienThe { get; set; } = null!;
+
         public int SoLuong { get; set; }
-
-        //public int MaSanPham { set; get; }
-        //[ForeignKey("MaSanPham")]
-        //public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();
-
-        //public int MaBienThe { set; get; }
-        //[ForeignKey("MaBienThe")]
-        //public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>();
     }
 }

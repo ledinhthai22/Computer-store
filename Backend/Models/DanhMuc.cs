@@ -1,16 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using Backend.Models;
 
 namespace Backend.Models
 {
     public class DanhMuc
     {
-        public int maDanhMuc { get; set; }
-        public string tenDanhMuc { get; set; } = null!;
-        public string slug { get; set; } = null!;
-        public bool trangThai { get; set; } = true;
-        // public ICollection<SanPham> Sanpham { get; set; } = new List<SanPham>();
+        [Key]
+        public int Id { get; set; }
+        
+        [Required]
+        public string TenDanhMuc { get; set; } = null!;
+        
+        [Required]
+        public string Slug { get; set; } = null!;
+        
+        public bool TrangThai {get;set;} = true;
+        // 1 DanhMuc - N SanPham
+        public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();
     }
 }

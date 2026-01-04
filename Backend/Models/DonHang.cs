@@ -1,34 +1,40 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Models
+namespace Backend.Models
 {
-    public class DonHang    
+    public class DonHang
     {
         [Key]
         public int MaDH { get; set; }
-        public int MaKH { get; set; }
-        public int MaDiaChiNhanHang { get; set; }
-        public int MaBienThe { set; get; }
+
         public string MaDon { get; set; } = null!;
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal TongTienGoc { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal TongTienThanhToan { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal TongTienGiam { get; set; }
+
         public int PhuongThucThanhToan { get; set; }
         public int TrangThai { get; set; }
 
-        [ForeignKey("MaKH")]
-        public virtual NguoiDung KhanhHang { get; set; } = null!;
+        // FK NguoiDung
+        public int MaKH { get; set; }
+        [ForeignKey(nameof(MaKH))]
+        public virtual NguoiDung KhachHang { get; set; } = null!;
 
-        [ForeignKey("MaDiaChiNhanHang")]
-        public virtual DiaChiNhanHang DiaChiNhanHang { set; get; } = null!;
+        // FK DiaChiNhanHang
+        public int MaDiaChiNhanHang { get; set; }
+        [ForeignKey(nameof(MaDiaChiNhanHang))]
+        public virtual DiaChiNhanHang DiaChiNhanHang { get; set; } = null!;
 
-        [ForeignKey("MaBienThe")]
+        // FK BienThe (Sản phẩm trong đơn)
+        public int MaBienThe { get; set; }
+        [ForeignKey(nameof(MaBienThe))]
         public virtual BienThe BienThe { get; set; } = null!;
     }
 }

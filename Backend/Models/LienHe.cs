@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models
 {
     public class LienHe
     {
-        public int maLienHe { get; set; }
-        public string email { get; set; } = null!;
-        public DateTime noiDung { get; set; }
-        public bool trangThai { get; set; } = true;
+        [Key]
+        public int MaLienHe { get; set; }
+        public string Email { get; set; } = null!;
+        public string NoiDung { get; set; } = null!; 
+        public DateTime NgayGui { get; set; } = DateTime.Now; 
+        public bool TrangThai { get; set; } = true;
     }
 }

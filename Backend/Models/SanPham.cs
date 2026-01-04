@@ -1,37 +1,47 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
+using Ecommerce.Models;
 
-namespace Ecommerce.Models
+namespace Backend.Models
 {
-    public class SanPham 
+    public class SanPham
     {
         [Key]
         public int MaSanPham { get; set; }
+
+        [Required]
         public string TenSanPham { get; set; } = null!;
+
+        [Required]
         public string Slug { get; set; } = null!;
-        public float GiaCoBan { get; set; }
-        public float DanhGiaTrungBinh { get; set; }
-        public float KhuyenMai { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal GiaCoBan { get; set; }
+        
+        public double DanhGiaTrungBinh { get; set; }
+        public double KhuyenMai { get; set; }
         public int SoLuongTon { get; set; }
-        public int LuotXem { get; set; } 
+        public int LuotXem { get; set; }
         public int LuotMua { get; set; }
-        public DateTime NgayTao { get; set; }
+        public DateTime NgayTao { get; set; } = DateTime.Now;
         public bool TrangThai { get; set; } = true;
 
-        //public int MaDanhMuc { get; set; }
-        //[ForeignKey("MaDanhMuc")]
-        //public ICollection<DanhMuc> DanhMuc { get; set; } = new List<DanhMuc>();
-        //public int MaThuongHieu { get; set; }
-        //[ForeignKey("MaThuongHieu")]
-        //public ICollection<ThuongHieu> ThuongHieu { get; set; } = new List<ThuongHieu>();
-        //public int MaThongSoKyThuat { get; set; }
-        //[ForeignKey("MaThongSoKyThuat")]
-        //public ICollection<ThongSoKyThuat> ThongSoKyThuat { get; set; } = new List<ThongSoKyThuat>();
-        //public int MaDanhGia { set; get; }
-        //[ForeignKey("MaDanhGia")]
-        //public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();
 
+        public int MaDanhMuc { get; set; }
+        [ForeignKey(nameof(MaDanhMuc))]
+        public DanhMuc? DanhMuc { get; set; }
+
+
+        public int MaThuongHieu { get; set; }
+        [ForeignKey(nameof(MaThuongHieu))]
+        public ThuongHieu? ThuongHieu { get; set; }
+
+
+        public int MaThongSo { get; set; }
+        [ForeignKey(nameof(MaThongSo))]
+        public ThongSoKyThuat? ThongSoKyThuat { get; set; }
+
+
+        public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>(); // Quan trọng: List các biến thể
+        public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();
     }
 }

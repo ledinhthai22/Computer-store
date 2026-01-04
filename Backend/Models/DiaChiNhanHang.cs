@@ -1,20 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
     public class DiaChiNhanHang
     {
-        public int maDiaChiNhanHang { get; set; }
-        public int maNguoiDung { get; set; }
-        public string tenNguoiNhan { get; set; } = null!;
-        public string soDienThoai { get; set; } = null!;
-        public string diaChi { get; set; } = null!;
-        public string thuong { get; set; } = null!;
-        public string tinh { get; set; } = null!;
-        public bool diaChiMacDinh { get; set; } 
-        // public NguoiDung Nguoidung { get; set; } = null!;
+        [Key]
+        public int MaDiaChiNhanHang { get; set; }
+
+        [Required]
+        public string TenNguoiNhan { get; set; } = null!;
+
+        [Required]
+        [MaxLength(15)]
+        public string SoDienThoai { get; set; } = null!;
+
+        [Required]
+        public string DiaChi { get; set; } = null!;
+
+        [Required]
+        public string PhuongXa  { get; set; } = null!;
+
+        [Required]
+        public string TinhThanh { get; set; } = null!;
+
+        public bool DiaChiMacDinh { get; set; }
+
+    
+        public int MaNguoiDung { get; set; }
+        [ForeignKey(nameof(MaNguoiDung))]
+        public NguoiDung NguoiDung { get; set; } = null!;
     }
 }

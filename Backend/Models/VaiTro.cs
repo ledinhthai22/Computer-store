@@ -1,11 +1,16 @@
-﻿using Backend.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Ecommerce.Models
+namespace Backend.Models
 {
     public class VaiTro
     {
-        public int maVaiTro { get; set; }
-        public string? tenVaiTro { get; set; }
-        public ICollection<NguoiDung> Nguoidung { get; set; } = new List<NguoiDung>();
+        [Key]
+        public int MaVaiTro { get; set; }
+
+        [Required]
+        public string TenVaiTro { get; set; } = null!;
+
+        // 1 VaiTro - N NguoiDung
+        public ICollection<NguoiDung> NguoiDung { get; set; } = new List<NguoiDung>();
     }
 }
