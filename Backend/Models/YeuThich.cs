@@ -8,11 +8,9 @@ namespace Ecommerce.Models
     {
         [Key]
         public int MaYeuThich { get; set; }
-
         public int MaNguoiDung { get; set; }
         [ForeignKey(nameof(MaNguoiDung))]
         public virtual NguoiDung NguoiDung { get; set; } = null!;
-
         public int MaBienThe { get; set; }
         [ForeignKey(nameof(MaBienThe))]
         public virtual BienThe BienThe { get; set; } = null!;

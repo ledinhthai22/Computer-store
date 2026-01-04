@@ -41,7 +41,7 @@ namespace Backend.Models
         public ThongSoKyThuat? ThongSoKyThuat { get; set; }
 
 
-        public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>(); // Quan trọng: List các biến thể
+        public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>(); 
         public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();
     }
 }

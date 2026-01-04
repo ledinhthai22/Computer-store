@@ -15,7 +15,7 @@ namespace Backend.Models
         public string Slug { get; set; } = null!;
         
         public bool TrangThai {get;set;} = true;
-        // 1 DanhMuc - N SanPham
+        
         public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();
     }
 }

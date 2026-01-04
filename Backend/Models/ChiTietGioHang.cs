@@ -3,7 +3,7 @@ using Backend.Models;
 
 namespace Backend.Models
 {
-    // Cần setup Composite Key [MaNguoiDung, MaBienThe] trong DbContext
+   
     public class ChiTietGioHang
     {
         public int MaNguoiDung { get; set; }

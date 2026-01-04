@@ -6,11 +6,8 @@ namespace Backend.Models
     {
         [Key]
         public int MaVaiTro { get; set; }
-
         [Required]
         public string TenVaiTro { get; set; } = null!;
-
-        // 1 VaiTro - N NguoiDung
         public ICollection<NguoiDung> NguoiDung { get; set; } = new List<NguoiDung>();
     }
 }
