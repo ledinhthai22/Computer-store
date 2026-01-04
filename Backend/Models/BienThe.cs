@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Models
 {
-    public class BienThe : Controller
+    public class BienThe
     {
         [Key]
         public int MaBTSP { get; set; }
