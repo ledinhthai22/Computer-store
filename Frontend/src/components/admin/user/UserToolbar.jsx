@@ -1,7 +1,7 @@
 import { ArrowUpDown, Plus, History } from 'lucide-react';
 import Searchbar from '../Searchbar';
 import { Link } from 'react-router-dom';
-const CategoryToolbar = ({ 
+const UserToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
@@ -22,8 +22,8 @@ const CategoryToolbar = ({
             onChange={(e) => onSortChange(e.target.value)}
             className="w-full sm:w-auto pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white cursor-pointer"
           >
-            <option value="tenDanhMuc-asc">Tên danh mục (A-Z)</option>
-            <option value="tenDanhMuc-desc">Tên danh mục (Z-A)</option>
+            <option value="name-asc">Tên người dùng (A-Z)</option>
+            <option value="name-desc">Tên người dùng (Z-A)</option>
           </select>
         </div>
 
@@ -48,4 +48,4 @@ const CategoryToolbar = ({
   );
 };
 
-export default CategoryToolbar;
+export default UserToolbar;

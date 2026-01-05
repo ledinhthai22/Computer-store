@@ -18,7 +18,7 @@ const Category = () => {
     useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('https://dummyjson.com/products/categories');
+        const res = await axios.get('https://localhost:7012/api/Category');
         setCategories(res.data);
         setFiltered(res.data);
         setLoading(false);
@@ -36,18 +36,17 @@ const Category = () => {
         if (search) {
         const lowerSearch = search.toLowerCase();
         result = result.filter(c => 
-            c.name.toLowerCase().includes(lowerSearch) ||
-            c.slug.toLowerCase().includes(lowerSearch)
+            c.TenDanhMuc.toLowerCase().includes(lowerSearch)
         );
         }
 
         // Sắp xếp
         result.sort((a, b) => {
-        if (sortOrder === 'name-asc') {
-            return a.name.localeCompare(b.name);
+        if (sortOrder === 'tenDanhMuc-asc') {
+            return a.tenDanhMuc.localeCompare(b.tenDanhMuc);
         } 
-        if (sortOrder === 'name-desc') {
-            return b.name.localeCompare(a.name);
+        if (sortOrder === 'tenDanhMuc-desc') {
+            return b.tenDanhMuc.localeCompare(a.tenDanhMuc);
         }
         return 0;
         });

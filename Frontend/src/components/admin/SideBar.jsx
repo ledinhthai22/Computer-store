@@ -5,9 +5,10 @@ const Sidebar = () => {
   const location = useLocation();
   const menuItems = [
     { name: 'Thống kê', icon: LayoutDashboard, path: '#' },
-    { name: 'Sản phẩm', icon: ShoppingBag, path: '/admin/products' },
-    { name: 'Danh mục', icon: Layers, path: '/admin/categories' },
-    { name: 'Người dùng', icon: User, path: '#' },
+    { name: 'Sản phẩm', icon: ShoppingBag, path: '/quan-ly/san-pham' },
+    { name: 'Danh mục', icon: Layers, path: '/quan-ly/danh-muc' },
+    { name: 'Người dùng', icon: User, path: '/quan-ly/nguoi-dung' },
+
   ];
 
   return (

@@ -28,9 +28,10 @@ function App() {
         {/* --- Quản lý ROUTES --- */}
         {/* <Route element={<ProtectedRoute />}> */}
           <Route element={<AdminLayout />}>
-            <Route path="/admin"/>
-            <Route path="/admin/products" element={<Product />} />
-            <Route path="/admin/categories" element={<Category />} />
+            <Route path="/quan-ly"/>
+            <Route path="/quan-ly/san-pham" element={<Product />} />
+            <Route path="/quan-ly/danh-muc" element={<Category />} />
+            <Route path="/quan-ly/nguoi-dung" element={<Category />} />
           </Route>
         {/* </Route> */}
 

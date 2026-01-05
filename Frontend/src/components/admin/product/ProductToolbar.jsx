@@ -37,7 +37,7 @@ const ProductToolbar = ({
 
         {/* Add  */}
         <Link 
-          to="/admin/products/#" 
+          to="#" 
           className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
         >
           <Plus size={18} />
@@ -45,7 +45,7 @@ const ProductToolbar = ({
         </Link>
         {/* Restore */}
         <Link
-          to="/admin/products/#"
+          to="#"
           className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
         >
           <History size={18} />

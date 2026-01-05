@@ -1,6 +1,6 @@
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Star } from "lucide-react";
 
-const CategoryTable = ({data, loading}) => {
+const ProductTable = ({data, loading}) => {
     if(loading){
         return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
     }
@@ -11,17 +11,20 @@ const CategoryTable = ({data, loading}) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Danh mục</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Người dùng</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Email</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Số điện thoại</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Password</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center">Hành động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {data.length > 0 ? (
-              data.map((c) => (
-                <tr key={c.maDanhMuc} className="hover:bg-gray-50 transition-colors"> 
+              data.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors"> 
                   
                   <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{c.tenDanhMuc}</span>
+                    <span className="font-medium text-gray-800 capitalize">{user.name}</span>
                   </td>
     
                   <td className="p-4 text-right">
@@ -50,4 +53,4 @@ const CategoryTable = ({data, loading}) => {
   );
 };
 
-export default CategoryTable;
+export default ProductTable;
