@@ -1,14 +1,20 @@
+import NavBar from "../components/admin/navBar";
+import Sidebar from "../components/admin/SideBar";
+
 const AdminLayout = ({ children }) => {
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
-      <div className="fixed inset-y-0 left-0 z-50 w-64">
-         Sidebar
-      </div>
-      <main className="flex-1 ml-64 p-8"> 
-        <div className="max-w-7xl mx-auto">
-          {children}
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <NavBar />
+      <div className="flex">
+        <div className="fixed left-0 top-16 bottom-0 w-64 bg-white shadow-lg overflow-y-auto z-40">
+           <Sidebar />
         </div>
-      </main>
+        <main className="flex-1 ml-64 pt-20 p-8"> 
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
