@@ -1,0 +1,12 @@
+export {default as Home} from './Home';
+export {default as About} from './About';
+export {default as LienHe} from './LienHe';
+export {default as Details} from './DetailProduct';
+export {default as Login} from './Login';
+export {default as Register} from './Register';
+export {default as Cart} from './Cart';
+export {default as Profile} from './Profile';
+export {default as UserProduct} from './Product';
+export {default as NotFound} from './NotFound';
+export {default as Checkout} from './Checkout';
+export {default as WishList} from './WishList';
