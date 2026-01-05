@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260105034824_ReNameCollumnTenNguoiDungToHoTen")]
-    partial class ReNameCollumnTenNguoiDungToHoTen : Migration
+    [Migration("20260105080339_UpdateIdToMaDanhMuc")]
+    partial class UpdateIdToMaDanhMuc
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,11 +99,11 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Backend.Models.DanhMuc", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MaDanhMuc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -116,7 +116,7 @@ namespace Ecommerce.Migrations
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
-                    b.HasKey("Id");
+                    b.HasKey("MaDanhMuc");
 
                     b.ToTable("DanhMuc");
                 });
@@ -299,12 +299,8 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TenTaiKhoan")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
+                    b.Property<int>("TrangThai")
+                        .HasColumnType("int");
 
                     b.HasKey("MaNguoiDung");
 
@@ -319,12 +315,11 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$.WOtuIbf.34eZrATztvRN.6YPktm4csxnT2Xsm7rxFZBjLy9DX4oe",
-                            NgayCapNhat = new DateTime(2026, 1, 5, 10, 48, 23, 235, DateTimeKind.Local).AddTicks(3970),
-                            NgayTao = new DateTime(2026, 1, 5, 10, 48, 23, 235, DateTimeKind.Local).AddTicks(3950),
+                            MatKhauMaHoa = "$2a$11$wL6i3Ru064VEIJRUFOsST.BeLAEXVtMhWC51DG6omDofdeG1nxks2",
+                            NgayCapNhat = new DateTime(2026, 1, 5, 15, 3, 39, 376, DateTimeKind.Local).AddTicks(3447),
+                            NgayTao = new DateTime(2026, 1, 5, 15, 3, 39, 376, DateTimeKind.Local).AddTicks(3424),
                             SoDienThoai = "0999988884",
-                            TenTaiKhoan = "admin",
-                            TrangThai = true
+                            TrangThai = 1
                         });
                 });
 

@@ -96,11 +96,11 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Backend.Models.DanhMuc", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MaDanhMuc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -113,7 +113,7 @@ namespace Ecommerce.Migrations
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
-                    b.HasKey("Id");
+                    b.HasKey("MaDanhMuc");
 
                     b.ToTable("DanhMuc");
                 });
@@ -312,9 +312,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$cHfFv4qAhWk/SOZFEZuom.mZsKrIr2PpSt2gLmuTIuMQ9DAvGZFTe",
-                            NgayCapNhat = new DateTime(2026, 1, 5, 13, 5, 36, 420, DateTimeKind.Local).AddTicks(2538),
-                            NgayTao = new DateTime(2026, 1, 5, 13, 5, 36, 420, DateTimeKind.Local).AddTicks(2516),
+                            MatKhauMaHoa = "$2a$11$wL6i3Ru064VEIJRUFOsST.BeLAEXVtMhWC51DG6omDofdeG1nxks2",
+                            NgayCapNhat = new DateTime(2026, 1, 5, 15, 3, 39, 376, DateTimeKind.Local).AddTicks(3447),
+                            NgayTao = new DateTime(2026, 1, 5, 15, 3, 39, 376, DateTimeKind.Local).AddTicks(3424),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });

@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Text;
 namespace Backend.Helper
 {
-    public static class SlugHelper
+    public  class SlugHelper
     {
-        public static string GenerateSlug(string input)
+        public  string GenerateSlug(string input)
         {
             if(string.IsNullOrWhiteSpace(input))
             {
