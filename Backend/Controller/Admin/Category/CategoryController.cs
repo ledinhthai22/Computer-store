@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Category;
 using Backend.DTO.Category;
-using Microsoft.AspNetCore.Authorization; // 1. Cần thêm thư viện này
+using Microsoft.AspNetCore.Authorization; 
 
 namespace Backend.Controller.Category
 {
