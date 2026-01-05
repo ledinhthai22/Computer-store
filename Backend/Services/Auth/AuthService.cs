@@ -5,26 +5,27 @@ using Backend.Helper;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 using Backend.DTO.Auth;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Backend.Services.Auth
 {
     public class AuthService : IAuthService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _Dbcontext;
         private readonly JwtHelper _jwtHelper;
 
-        public AuthService(ApplicationDbContext context, JwtHelper jwtHelper)
+        public AuthService(ApplicationDbContext Dbcontext, JwtHelper jwtHelper)
         {
-            _context = context;
+            _Dbcontext = Dbcontext;
             _jwtHelper = jwtHelper;
         }
 
-        public async Task<AuthResult> LoginAsync(LoginRequest request)
+        public async Task<AuthResult> LoginAsync(LoginRequest req)
         {
 
-            var user = await _context.NguoiDung
+            var user = await _Dbcontext.NguoiDung
           .AsNoTracking()
-          .Where(u => u.TenTaiKhoan == request.TenTaiKhoan || u.Email == request.TenTaiKhoan)
+          .Where(u => u.Email == req.Email)
           .Select(u => new
           {
 
@@ -46,11 +47,11 @@ namespace Backend.Services.Auth
             bool isPasswordValid = false;
             try
             {
-                isPasswordValid = BCrypt.Net.BCrypt.Verify(request.MatKhau, user.MatKhauMaHoa);
+                isPasswordValid = BCrypt.Net.BCrypt.Verify(req.MatKhau, user.MatKhauMaHoa);
             }
             catch
             {
-                if (user.MatKhauMaHoa == request.MatKhau) isPasswordValid = true;
+                if (user.MatKhauMaHoa == req.MatKhau) isPasswordValid = true;
             }
 
             if (!isPasswordValid)
@@ -58,24 +59,79 @@ namespace Backend.Services.Auth
                 return new AuthResult { Success = false, Message = "Mật khẩu không chính xác." };
             }
 
-            // 4. Check trạng thái
-            if (user.TrangThai == false)
+
+            if (user.TrangThai == 2)
             {
                 return new AuthResult { Success = false, Message = "Tài khoản đã bị khóa." };
             }
 
-            // 5. Tạo Token
+
             var token = _jwtHelper.GenerateToken(user.MaNguoiDung, user.TenVaiTro);
 
-            // 6. Trả về kết quả
+
             return new AuthResult
             {
                 Success = true,
                 Message = "Đăng nhập thành công",
                 Token = token,
                 HoTen = user.HoTen,
-                Role = user.TenVaiTro
+                VaiTro = user.TenVaiTro
             };
         }
+        public async Task<AuthResult> RegisterAsync(RegisterRequest req)
+        {
+            
+            var existed = await _Dbcontext.NguoiDung
+                .FirstOrDefaultAsync(x => x.Email == req.Email);
+
+            if (existed != null)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "Email đã tồn tại"
+                };
+            }
+
+            
+            string hashPassWord = BCrypt.Net.BCrypt.HashPassword(req.MatKhau);
+
+            
+            var user = new NguoiDung
+            {
+                HoTen = req.HoTen,
+                Email = req.Email,
+                SoDienThoai = req.SoDienThoai,
+                MatKhauMaHoa = hashPassWord,
+                TrangThai = 1,
+                MaVaiTro = 2, 
+                NgayTao = DateTime.Now,
+                NgayCapNhat = DateTime.Now
+            };
+
+            
+            _Dbcontext.NguoiDung.Add(user);
+            await _Dbcontext.SaveChangesAsync();  
+
+            
+            var vaiTro = await _Dbcontext.VaiTro
+                .FirstOrDefaultAsync(r => r.MaVaiTro == user.MaVaiTro);
+
+            string tenVaiTro = vaiTro?.TenVaiTro ?? "NguoiDung";
+
+            
+            var token = _jwtHelper.GenerateToken(user.MaNguoiDung, tenVaiTro);
+
+            
+            return new AuthResult
+            {
+                Success = true,
+                Message = "Đăng ký thành công",
+                Token = token,
+                HoTen = user.HoTen,
+                VaiTro = tenVaiTro
+            };
+        }
+
     }
 }

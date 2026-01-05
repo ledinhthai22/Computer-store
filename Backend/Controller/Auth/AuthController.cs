@@ -1,11 +1,9 @@
 using Backend.Helper;
-using Backend.Models;
 using Backend.DTO; 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Backend.Data; 
-using Backend.Services;
 using Backend.Services.Auth;
+using Backend.DTO.Auth;
 
 namespace Backend.Controller.Auth
 {
@@ -41,8 +39,21 @@ namespace Backend.Controller.Auth
                 Token = result.Token,
                 Message = result.Message,
                 HoTen = result.HoTen,
-                Role = result.Role
+                Role = result.VaiTro
             });
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.RegisterAsync(request);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(result);
         }
     }
 }

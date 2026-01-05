@@ -11,10 +11,7 @@ namespace Backend.Models
 
         [Required]
         public string HoTen { get; set; } = null!;
-        
-        [Required]
-        public string TenTaiKhoan { get; set; } = null!;
-        
+         
         [Required]
         public string MatKhauMaHoa { get; set; } = null!;
         
@@ -23,7 +20,7 @@ namespace Backend.Models
         public string Email { get; set; } = null!;
         
         public string SoDienThoai { get; set; } = null!;
-        public bool TrangThai { get; set; }
+        public int TrangThai { get; set; }
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public DateTime NgayCapNhat { get; set; }
 
