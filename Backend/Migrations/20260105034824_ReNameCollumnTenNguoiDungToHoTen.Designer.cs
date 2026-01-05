@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105034824_ReNameCollumnTenNguoiDungToHoTen")]
+    partial class ReNameCollumnTenNguoiDungToHoTen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,8 +299,12 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TrangThai")
-                        .HasColumnType("int");
+                    b.Property<string>("TenTaiKhoan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
 
                     b.HasKey("MaNguoiDung");
 
@@ -312,11 +319,12 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$cHfFv4qAhWk/SOZFEZuom.mZsKrIr2PpSt2gLmuTIuMQ9DAvGZFTe",
-                            NgayCapNhat = new DateTime(2026, 1, 5, 13, 5, 36, 420, DateTimeKind.Local).AddTicks(2538),
-                            NgayTao = new DateTime(2026, 1, 5, 13, 5, 36, 420, DateTimeKind.Local).AddTicks(2516),
+                            MatKhauMaHoa = "$2a$11$.WOtuIbf.34eZrATztvRN.6YPktm4csxnT2Xsm7rxFZBjLy9DX4oe",
+                            NgayCapNhat = new DateTime(2026, 1, 5, 10, 48, 23, 235, DateTimeKind.Local).AddTicks(3970),
+                            NgayTao = new DateTime(2026, 1, 5, 10, 48, 23, 235, DateTimeKind.Local).AddTicks(3950),
                             SoDienThoai = "0999988884",
-                            TrangThai = 1
+                            TenTaiKhoan = "admin",
+                            TrangThai = true
                         });
                 });
 

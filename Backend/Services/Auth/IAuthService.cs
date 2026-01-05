@@ -10,5 +10,6 @@ namespace Backend.Services.Auth
     public interface IAuthService
     {
         Task<AuthResult> LoginAsync (LoginRequest req);
+        Task<AuthResult> RegisterAsync(RegisterRequest request);
     }
 }

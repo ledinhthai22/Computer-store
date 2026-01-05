@@ -142,11 +142,10 @@ namespace Backend.Data
                     MaNguoiDung = 1,
                     MaVaiTro = 1,
                     HoTen = "Quản trị viên",
-                    TenTaiKhoan = "admin",
                     MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
                     Email = "admin@gmail.com",
                     SoDienThoai = "0999988884",
-                    TrangThai = true,
+                    TrangThai = 1,
                     NgayTao = DateTime.Now,
                     NgayCapNhat = DateTime.Now
                 }

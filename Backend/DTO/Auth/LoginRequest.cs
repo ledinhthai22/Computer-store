@@ -9,7 +9,7 @@ namespace Backend.DTO
     public class LoginRequest
     {
         [Required]
-        public string TenTaiKhoan { get; set; } = null!;
+        public string Email { get; set; } = null!;
 
         [Required]
         public string MatKhau { get; set; } = null!;
