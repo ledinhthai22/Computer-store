@@ -6,7 +6,7 @@ const Sidebar = () => {
   const menuItems = [
     { name: 'Thống kê', icon: LayoutDashboard, path: '#' },
     { name: 'Sản phẩm', icon: ShoppingBag, path: '/admin/products' },
-    { name: 'Danh mục', icon: Layers, path: '#' },
+    { name: 'Danh mục', icon: Layers, path: '/admin/categories' },
     { name: 'Người dùng', icon: User, path: '#' },
   ];
 

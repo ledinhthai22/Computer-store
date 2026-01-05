@@ -10,7 +10,7 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('title-asc');
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
