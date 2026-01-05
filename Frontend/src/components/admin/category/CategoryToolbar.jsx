@@ -1,11 +1,12 @@
 import { ArrowUpDown, Plus, History } from 'lucide-react';
 import Searchbar from '../Searchbar';
 import { Link } from 'react-router-dom';
-const ProductToolbar = ({ 
+const CategoryToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
-  onSortChange
+  onSortChange,
+  onOpenAddModal
 }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -22,27 +23,18 @@ const ProductToolbar = ({
             onChange={(e) => onSortChange(e.target.value)}
             className="w-full sm:w-auto pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white cursor-pointer"
           >
-            <option value="title-asc">Tên sản phẩm (A-Z)</option>
-            <option value="title-desc">Tên sản phẩm (Z-A)</option>
-            <option value="category-asc">Danh mục (A-Z)</option>
-            <option value="category-desc">Danh mục (Z-A)</option>
-            <option value="price-asc">Giá (Thấp - Cao)</option>
-            <option value="price-desc">Giá (Cao - Thấp)</option>
-            <option value="discount-asc">Khuyến mãi (Thấp - Cao)</option>
-            <option value="discount-desc">Khuyến mãi (Cao - Thấp)</option>
-            <option value="stock-asc">Số lượng (Thấp - Cao)</option>
-            <option value="stock-desc">Số lượng (Cao - Thấp)</option>
+            <option value="tenDanhMuc-asc">Tên danh mục (A-Z)</option>
+            <option value="tenDanhMuc-desc">Tên danh mục (Z-A)</option>
           </select>
         </div>
 
         {/* Add  */}
-        <Link 
-          to="#" 
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+        <button 
+          onClick={onOpenAddModal}
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
         >
-          <Plus size={18} />
-          Thêm
-        </Link>
+          <Plus size={18} /> Thêm
+        </button>
         {/* Restore */}
         <Link
           to="#"
@@ -56,4 +48,4 @@ const ProductToolbar = ({
   );
 };
 
-export default ProductToolbar;
+export default CategoryToolbar;

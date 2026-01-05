@@ -11,13 +11,13 @@ const ProductTable = ({data, loading}) => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Thương hiệu</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">STT</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Sản phẩm</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Danh mục</th>
+              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Thương hiệu</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Giá</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Tồn kho</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Khuyến mãi</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Đánh giá</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Lượt xem</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Lượt mua</th>
               <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center">Hành động</th>
@@ -25,11 +25,11 @@ const ProductTable = ({data, loading}) => {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {data.length > 0 ? (
-              data.map((p) => (
+              data.map((p, index) => (
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors"> 
                   
                   <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{p.brand || 'N/A'}</span>
+                    <span className="font-medium text-gray-800 capitalize">{index+1}</span>
                   </td>
                   
                   <td className="p-4">
@@ -39,7 +39,11 @@ const ProductTable = ({data, loading}) => {
                   <td className="p-4">
                     <span className="font-medium text-gray-800 capitalize">{p.category}</span>
                   </td>
-                  
+
+                  <td className="p-4">
+                    <span className="font-medium text-gray-800 capitalize">{p.brand || 'N/A'}</span>
+                  </td>
+
                   <td className="p-4">
                     <span className="font-medium text-gray-800 capitalize">
                         {p.price?.toLocaleString('en-US', {style: 'currency', currency: 'USD'})}
@@ -54,13 +58,6 @@ const ProductTable = ({data, loading}) => {
                     <span className="font-medium text-green-600 capitalize">
                         {p.discountPercentage ? `-${p.discountPercentage}%` : 'Không'}
                     </span>
-                  </td>
-                  
-                  <td className="p-4">
-                    <div className="flex items-center gap-1">
-                        <Star size={14} fill="orange" className="text-orange-400" />
-                        <span className="font-medium text-gray-800">{p.rating}</span>
-                    </div>
                   </td>
                   <td className="p-4">
                     <span className="font-medium text-gray-800 capitalize">0</span>
