@@ -18,3 +18,5 @@ If you are developing a production application, we recommend using TypeScript wi
 npm install react-router
 npm install react-router-dom
 npm install lucide-react
+npm install react-icons
+npm install axios
