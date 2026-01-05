@@ -5,7 +5,8 @@ const CategoryToolbar = ({
   search, 
   onSearchChange, 
   sortOrder, 
-  onSortChange
+  onSortChange,
+  onOpenAddModal
 }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -28,13 +29,12 @@ const CategoryToolbar = ({
         </div>
 
         {/* Add  */}
-        <Link 
-          to="#" 
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+        <button 
+          onClick={onOpenAddModal}
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
         >
-          <Plus size={18} />
-          Thêm
-        </Link>
+          <Plus size={18} /> Thêm
+        </button>
         {/* Restore */}
         <Link
           to="#"
