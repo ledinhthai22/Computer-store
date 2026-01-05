@@ -121,15 +121,16 @@ namespace Backend.Data
                 .HasForeignKey(dh => dh.MaKH)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<DonHang>()
-                .HasOne(dh => dh.BienThe)
-                .WithMany(bt => bt.DonHang)
-                .HasForeignKey(dh => dh.MaBienThe)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<DonHang>()
+            //    .HasOne(dh => dh.BienThe)
+            //    .WithMany(bt => bt.DonHang)
+            //    .HasForeignKey(dh => dh.MaBienThe)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
 
-          
-            
+            modelBuilder.Entity<ChiTietDonHang>()
+                .HasKey(ct => new { ct.MaDonHang, ct.MaBienThe });
+
             modelBuilder.Entity<VaiTro>().HasData(
                 new VaiTro { MaVaiTro = 1, TenVaiTro = "QuanTriVien" },
                 new VaiTro { MaVaiTro = 2, TenVaiTro = "NguoiDung" }
