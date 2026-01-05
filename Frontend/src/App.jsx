@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
-import Product from './pages/Admin/Product'
+import {Product} from './pages/Admin'
 import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,WishList} from './pages/User'
 function App() {
   return (
@@ -22,10 +22,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<WishList />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/wishlist" element={<WishList />} />          
         </Route>
-
+        
         {/* --- Quản lý ROUTES --- */}
         {/* <Route element={<ProtectedRoute />}> */}
           <Route element={<AdminLayout />}>
@@ -33,6 +32,8 @@ function App() {
             <Route path="/admin/products" element={<Product />} />
           </Route>
         {/* </Route> */}
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

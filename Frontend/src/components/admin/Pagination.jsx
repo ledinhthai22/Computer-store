@@ -1,49 +1,122 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  // Nếu chỉ có 1 trang hoặc không có dữ liệu thì không hiển thị phân trang
+  const [jumpPage, setJumpPage] = useState('');
+
   if (totalPages <= 1) return null;
 
-  // Tạo mảng số trang [1, 2, 3...]
-  const pages = [...Array(totalPages).keys()].map(num => num + 1);
+  // Logic tạo danh sách trang hiển thị
+  const getVisiblePages = () => {
+    const delta = 1; // Số trang hiển thị quanh trang hiện tại
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+        range.push(i);
+      }
+    }
+
+    range.forEach((i) => {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    });
+
+    return rangeWithDots;
+  };
+
+  const handleJumpSubmit = (e) => {
+    if (e.key === 'Enter') {
+      const pageNum = parseInt(jumpPage);
+      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+        onPageChange(pageNum);
+        setJumpPage('');
+      }
+    }
+  };
 
   return (
     <div className="flex justify-center items-center gap-2 mt-6 select-none">
+      {/* Nút Về đầu trang */}
+      <button
+        onClick={() => onPageChange(1)}
+        disabled={currentPage === 1}
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+      >
+        <ChevronsLeft size={18} />
+      </button>
+
       {/* Nút Previous */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${
-          currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600'
-        }`}
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
       >
-        <ChevronLeft size={20} />
+        <ChevronLeft size={18} />
       </button>
 
-      {/* Danh sách số trang */}
-      {pages.map((page) => (
-        <button
-          key={page}
-          onClick={() => onPageChange(page)}
-          className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
-            currentPage === page
-              ? 'bg-blue-500 text-white shadow-md shadow-blue-200' // Style cho trang đang Active
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          {page}
-        </button>
-      ))}
+      {/* Danh sách trang */}
+      <div className="flex items-center gap-1">
+        {getVisiblePages().map((page, index) => {
+          if (page === '...') {
+            return (
+              <div key={`dots-${index}`} className="relative group flex items-center">
+                <span className="w-9 h-9 flex items-center justify-center text-gray-400 group-hover:hidden">
+                  ...
+                </span>
+                <input
+                  type="number"
+                  placeholder="Go"
+                  value={jumpPage}
+                  onChange={(e) => setJumpPage(e.target.value)}
+                  onKeyDown={handleJumpSubmit}
+                  className="hidden group-hover:block w-12 h-9 border border-blue-300 rounded-md text-center text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+            );
+          }
+
+          return (
+            <button
+              key={index}
+              onClick={() => onPageChange(page)}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
+                currentPage === page
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+              }`}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
 
       {/* Nút Next */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${
-          currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600'
-        }`}
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
       >
-        <ChevronRight size={20} />
+        <ChevronRight size={18} />
+      </button>
+
+      {/* Nút Đến cuối trang */}
+      <button
+        onClick={() => onPageChange(totalPages)}
+        disabled={currentPage === totalPages}
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+      >
+        <ChevronsRight size={18} />
       </button>
     </div>
   );

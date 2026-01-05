@@ -1,6 +1,6 @@
-import { ArrowUpDown, Plus } from 'lucide-react';
+import { ArrowUpDown, Plus, History } from 'lucide-react';
 import Searchbar from './Searchbar';
-
+import { Link } from 'react-router-dom';
 const ProductToolbar = ({ 
   search, 
   onSearchChange, 
@@ -35,13 +35,22 @@ const ProductToolbar = ({
           </select>
         </div>
 
-        {/* Add Button */}
-        <button
+        {/* Add  */}
+        <Link 
+          to="/admin/products/#" 
           className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
         >
           <Plus size={18} />
-          Thêm Sản Phẩm
-        </button>
+          Thêm
+        </Link>
+        {/* Restore */}
+        <Link
+          to="/admin/products/#"
+          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+        >
+          <History size={18} />
+          Khôi phục
+        </Link>
       </div>
     </div>
   );
