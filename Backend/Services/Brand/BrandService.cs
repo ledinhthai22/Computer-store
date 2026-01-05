@@ -72,11 +72,7 @@ namespace Backend.Services.Brand
                 throw new InvalidOperationException($"Thương hiệu '{BrandName}' đã tồn tại!");
             }
             brand.TenThuongHieu = BrandName;
-            bool updated = await _dbContext.SaveChangesAsync() > 0;
-            if (!updated)
-            {
-                throw new InvalidOperationException("Cập nhật thương hiệu thất bại!");
-            }
+            await _dbContext.SaveChangesAsync();
             return new BrandResult
             {
                 BrandID = brand.MaThuongHieu,
