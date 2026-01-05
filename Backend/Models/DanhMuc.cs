@@ -6,7 +6,7 @@ namespace Backend.Models
     public class DanhMuc
     {
         [Key]
-        public int Id { get; set; }
+        public int MaDanhMuc { get; set; }
         
         [Required]
         public string TenDanhMuc { get; set; } = null!;

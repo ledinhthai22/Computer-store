@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Services.Auth;
+using Backend.Services.Category;
 namespace Backend
 {
     public class Program
@@ -14,8 +15,9 @@ namespace Backend
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddScoped<Backend.Helper.JwtHelper>();
-
+            builder.Services.AddScoped<Backend.Helper.SlugHelper>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
