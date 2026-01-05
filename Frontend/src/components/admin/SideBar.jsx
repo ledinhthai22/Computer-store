@@ -4,10 +4,10 @@ import { Link, useLocation } from 'react-router-dom';
 const Sidebar = () => {
   const location = useLocation();
   const menuItems = [
-    { name: 'Thống kê', icon: LayoutDashboard, path: '/' },
-    { name: 'Sản phẩm', icon: ShoppingBag, path: '/products' },
-    { name: 'Danh mục', icon: Layers, path: '/categories' },
-    { name: 'Người dùng', icon: User, path: '/users' },
+    { name: 'Thống kê', icon: LayoutDashboard, path: '#' },
+    { name: 'Sản phẩm', icon: ShoppingBag, path: '/admin/products' },
+    { name: 'Danh mục', icon: Layers, path: '#' },
+    { name: 'Người dùng', icon: User, path: '#' },
   ];
 
   return (
