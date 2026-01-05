@@ -1,5 +1,4 @@
-﻿
-using System.Text;
+﻿using System.Text;
 using Backend.Data;
 using Backend.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -7,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Services.Auth;
 using Backend.Services.Category;
+using Backend.Services.Brand;
+
 namespace Backend
 {
     public class Program
@@ -18,6 +19,7 @@ namespace Backend
             builder.Services.AddScoped<Backend.Helper.SlugHelper>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IBrandService, BrandService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
