@@ -1,7 +1,7 @@
 import { ArrowUpDown, Plus } from 'lucide-react';
 import Searchbar from './Searchbar';
 
-const Toolbar = ({ 
+const ProductToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
@@ -47,4 +47,4 @@ const Toolbar = ({
   );
 };
 
-export default Toolbar;
+export default ProductToolbar;

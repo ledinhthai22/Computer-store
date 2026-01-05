@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductTable from '../../components/admin/product/ProductTable';
-import ProductToolbar from '../../components/admin/product/Toolbar';
+import ProductToolbar from '../../components/admin/product/ProductToolbar';
+import Pagination from '../../components/admin/Pagination';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -10,6 +11,9 @@ const Product = () => {
 
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,7 +79,13 @@ const Product = () => {
     });
 
     setFiltered(result);
+    setCurrentPage(1);
   }, [search, products, sortOrder]);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -86,10 +96,15 @@ const Product = () => {
         onSortChange={setSortOrder}
       />
 
-      <div>
+      <div className="flex flex-col gap-4">
         <ProductTable 
-          data={filtered} 
+          data={currentItems} 
           loading={loading} 
+        />
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>
