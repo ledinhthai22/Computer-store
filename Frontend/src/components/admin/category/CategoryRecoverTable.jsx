@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { History, ArrowUpIcon, ArrowLeft } from "lucide-react";
 import TableSearch from '../../admin/TableSearch';
+import Pagination from '../Pagination';
 
 const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
     const [filterText, setFilterText] = useState('');
@@ -84,12 +85,8 @@ const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
                     data={filteredItems}
                     progressPending={loading}
                     pagination
-                    paginationComponentOptions={{
-                        rowsPerPageText: 'Số dòng mỗi trang:',
-                        rangeSeparatorText: 'trên',
-                        selectAllRowsItem: true,
-                        selectAllRowsItemText: 'Tất cả',
-                    }}
+                    paginationComponent={Pagination}
+                    paginationPerPage={5}
                     persistTableHead
                     className="custom-datatable"
                     sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}

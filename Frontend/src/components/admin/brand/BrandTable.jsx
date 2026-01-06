@@ -3,7 +3,7 @@ import DataTable from 'react-data-table-component';
 import { Edit, Trash2, Plus, History, ArrowUpIcon } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import TableSearch from '../../admin/TableSearch';
-
+import Pagination from '../Pagination';
 const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
@@ -75,7 +75,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
                 >
                     <History size={16} />
-                    <span>Danh sách xóa</span>
+                    <span>Danh sách đã xóa</span>
                 </button>
             </div>
 
@@ -87,12 +87,8 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     progressPending={loading}
                     progressComponent={<div className="p-8 text-gray-500">Đang tải dữ liệu...</div>}
                     pagination
-                    paginationComponentOptions={{
-                        rowsPerPageText: 'Số dòng mỗi trang:',
-                        rangeSeparatorText: 'trên',
-                        selectAllRowsItem: true,
-                        selectAllRowsItemText: 'Tất cả',
-                    }}
+                    paginationComponent={Pagination}
+                    paginationPerPage={5}
                     persistTableHead
                     className="custom-datatable"
                     sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
@@ -100,7 +96,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     responsive
                     noDataComponent={
                         <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy dữ liệu thương hiệu nào.
+                            Không tìm thấy thương hiệu nào.
                         </div>
                     }
                 />

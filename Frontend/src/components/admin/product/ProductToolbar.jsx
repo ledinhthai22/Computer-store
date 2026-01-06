@@ -1,5 +1,4 @@
 import { ArrowUpDown, Plus, History } from 'lucide-react';
-import Searchbar from '../Searchbar';
 import { Link } from 'react-router-dom';
 const ProductToolbar = ({ 
   search, 
