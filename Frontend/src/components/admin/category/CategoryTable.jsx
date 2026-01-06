@@ -52,7 +52,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="2" className="p-8 text-center text-gray-500">
+                                <td colSpan="4" className="p-8 text-center text-gray-500">
                                     Không tìm thấy dữ liệu.
                                 </td>
                             </tr>

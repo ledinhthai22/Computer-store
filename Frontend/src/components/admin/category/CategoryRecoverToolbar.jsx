@@ -1,6 +1,6 @@
 import { ArrowUpDown, ArrowLeft } from 'lucide-react';
 import Searchbar from '../Searchbar';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const CategoryToolbar = ({ 
   search, 
   onSearchChange, 
