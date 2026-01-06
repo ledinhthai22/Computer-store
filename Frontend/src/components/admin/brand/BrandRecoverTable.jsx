@@ -80,7 +80,7 @@ const BrandRecoverTable = ({ data = [], loading, onRecover }) => {
                     responsive
                     noDataComponent={
                         <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy dữ liệu thương hiệu.
+                            Không tìm thấy thương hiệu nào trong danh sách xóa.
                         </div>
                     }
                 />

@@ -27,7 +27,6 @@ const Brand = () => {
         try {
             setLoading(true);
             const res = await axios.get(`https://localhost:7012/api/Brand`);
-            // Đảm bảo dữ liệu là mảng trước khi set
             const data = Array.isArray(res.data) ? res.data : [];
             setBrands(data);
         } catch (error) {

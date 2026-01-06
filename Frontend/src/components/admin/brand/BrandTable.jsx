@@ -75,7 +75,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
                 >
                     <History size={16} />
-                    <span>Danh sách xóa</span>
+                    <span>Danh sách đã xóa</span>
                 </button>
             </div>
 
@@ -96,7 +96,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     responsive
                     noDataComponent={
                         <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy dữ liệu thương hiệu nào.
+                            Không tìm thấy thương hiệu nào.
                         </div>
                     }
                 />

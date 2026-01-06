@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
-import {Product, Category, CategoryRecover, Brand, BrandRecover} from './pages/Admin'
+import {Product, Category, CategoryRecover, Brand, BrandRecover, Contact} from './pages/Admin'
 import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,WishList} from './pages/User'
 function App() {
   return (
@@ -34,6 +34,7 @@ function App() {
             <Route path="/quan-ly/danh-muc/khoi-phuc" element={<CategoryRecover />} />
             <Route path="/quan-ly/thuong-hieu" element={<Brand />} />
             <Route path="/quan-ly/thuong-hieu/khoi-phuc" element={<BrandRecover />} />
+            <Route path="/quan-ly/lien-he" element={<Contact />} />
           </Route>
         {/* </Route> */}
 
