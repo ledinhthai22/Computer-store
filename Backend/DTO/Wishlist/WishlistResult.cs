@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Ecommerce.DTO.Wishlist
+namespace Backend.DTO.WishList
 {
-    public class Wishlist : Controller
+    public class WishlistResult 
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public int WishlistId { get; set; }
+        public int UserId { get; set; }
+        public int ProductVariantID { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string HinhAnhChinh { get; set; } = string.Empty;
+        public decimal Price { get; set; }
     }
 }
