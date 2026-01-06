@@ -70,6 +70,12 @@ const BrandRecoverTable = ({ data = [], loading, onRecover }) => {
                     data={filteredItems}
                     progressPending={loading}
                     pagination
+                    paginationComponentOptions={{
+                        rowsPerPageText: 'Số dòng mỗi trang:',
+                        rangeSeparatorText: 'trên',
+                        selectAllRowsItem: true,
+                        selectAllRowsItemText: 'Tất cả',
+                    }}
                     persistTableHead
                     className="custom-datatable"
                     sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
