@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using Ecommerce.Models;
 namespace Backend.Models
 {
     public class DonHang
@@ -30,10 +30,10 @@ namespace Backend.Models
         public int MaDiaChiNhanHang { get; set; }
         [ForeignKey(nameof(MaDiaChiNhanHang))]
         public virtual DiaChiNhanHang DiaChiNhanHang { get; set; } = null!;
-
-       
-        public int MaBienThe { get; set; }
-        [ForeignKey(nameof(MaBienThe))]
-        public virtual BienThe BienThe { get; set; } = null!;
+        //public int MaBienThe { get; set; }
+        //[ForeignKey(nameof(MaBienThe))]
+        //public virtual BienThe BienThe { get; set; } = null!;
+        public DateTime NgayTao { get; set; } = DateTime.Now;
+        public ICollection<ChiTietDonHang> ChiTietDonHang { get; set; } = new List<ChiTietDonHang>();
     }
 }

@@ -66,7 +66,7 @@ namespace Ecommerce.Controller.Admin.Brand
         }
         [HttpDelete("{id}")]
         [Authorize(Roles = "QuanTriVien")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> SolfDelete(int id)
         {
             try
             {

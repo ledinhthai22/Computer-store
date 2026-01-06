@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105171626_CREATE-TABLE-CTHD-AND-FIX-DONHANG-YEUTHICH")]
+    partial class CREATETABLECTHDANDFIXDONHANGYEUTHICH
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,8 +261,8 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TrangThai")
-                        .HasColumnType("int");
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
 
                     b.HasKey("MaLienHe");
 
@@ -315,9 +318,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$PrRp08.PKgq45bi6ItiJKeCB0a/M45aK6gJA8XK7y3WzhlaTEwOL.",
-                            NgayCapNhat = new DateTime(2026, 1, 6, 8, 30, 9, 829, DateTimeKind.Local).AddTicks(9546),
-                            NgayTao = new DateTime(2026, 1, 6, 8, 30, 9, 829, DateTimeKind.Local).AddTicks(9528),
+                            MatKhauMaHoa = "$2a$11$R2lrMeGHBIRESeJYLQ3bcuZBvn.LPIa9jrW66rpJldJagCv6nGqmO",
+                            NgayCapNhat = new DateTime(2026, 1, 6, 0, 16, 23, 691, DateTimeKind.Local).AddTicks(9599),
+                            NgayTao = new DateTime(2026, 1, 6, 0, 16, 23, 691, DateTimeKind.Local).AddTicks(9584),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });
@@ -615,7 +618,7 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaYeuThich"));
 
-                    b.Property<DateTime?>("Deleted_At")
+                    b.Property<DateTime>("Deleted_At")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("MaBienThe")
