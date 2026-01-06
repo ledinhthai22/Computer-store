@@ -3,7 +3,7 @@ import DataTable from 'react-data-table-component';
 import { Edit, Trash2, Plus, History, ArrowUpIcon } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import TableSearch from '../../admin/TableSearch';
-
+import Pagination from '../Pagination';
 const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
@@ -87,12 +87,8 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     progressPending={loading}
                     progressComponent={<div className="p-8 text-gray-500">Đang tải dữ liệu...</div>}
                     pagination
-                    paginationComponentOptions={{
-                        rowsPerPageText: 'Số dòng mỗi trang:',
-                        rangeSeparatorText: 'trên',
-                        selectAllRowsItem: true,
-                        selectAllRowsItemText: 'Tất cả',
-                    }}
+                    paginationComponent={Pagination}
+                    paginationPerPage={5}
                     persistTableHead
                     className="custom-datatable"
                     sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}

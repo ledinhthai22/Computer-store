@@ -13,3 +13,48 @@
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+
+  /* Custom DataTable Style */
+.custom-datatable {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* Tùy chỉnh dòng tiêu đề */
+.custom-datatable .rdt_TableHeadRow {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    min-height: 52px !important;
+}
+
+/* Tùy chỉnh các ô tiêu đề */
+.custom-datatable .rdt_TableCol {
+    color: #000000 !important; /* gray-400 */
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    padding-left: 16px !important;
+}
+
+/* Tùy chỉnh các dòng dữ liệu */
+.custom-datatable .rdt_TableRow {
+    min-height: 70px !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+}
+
+/* Hiệu ứng hover cho dòng */
+.custom-datatable .rdt_TableRow:hover {
+    background-color: #f9fafb !important;
+}
+/* Tùy chỉnh các ô dữ liệu */
+.custom-datatable .rdt_TableCell {
+    padding-left: 16px !important;
+    color: #374151 !important; /* gray-700 */
+}
+
+/* Tùy chỉnh phần phân trang */
+.custom-datatable .rdt_Pagination {
+    border-top: none !important;
+    color: #6b7280 !important;
+}

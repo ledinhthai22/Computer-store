@@ -31,16 +31,14 @@ const Brand = () => {
             const data = Array.isArray(res.data) ? res.data : [];
             setBrands(data);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách thương hiệu:", error);
-            showToast("Không thể tải danh sách thương hiệu!", "error");
+            console.error("Lỗi fetch:", error);
+            showToast("Không thể tải danh sách thương hiệu", "error");
             setBrands([]);
         } finally {
             setLoading(false);
         }
     };
-    useEffect(() => {
-        fetchBrands();
-    }, []);
+    useEffect(() => {fetchBrands(); }, []);
 
     // MODAL XÓA
     const handleDeleteClick = (id) => {
@@ -55,7 +53,7 @@ const Brand = () => {
             await fetchBrands();
         } catch (err) {
             console.error(err);
-            showToast("Lỗi khi xóa dữ liệu!", "error");
+            showToast("Lỗi xóa dữ liệu", "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -63,14 +61,14 @@ const Brand = () => {
         }
     };
 
-    // MODAL THÊM/SỬA
+    // MODAL SỬA
     const handleEditClick = (brand) => {
         setEditingBrand(brand);
         setBrandNameInput(brand.brandName || '');
         setError('');
         setIsModalOpen(true);
     };
-
+    // CHỨC NĂNG THÊM VÀ SỬA
     const handleSave = async (e) => {
         e.preventDefault();
         const nameTrimmed = brandNameInput.trim();
@@ -98,7 +96,7 @@ const Brand = () => {
             setEditingBrand(null);
             setBrandNameInput('');
         } catch (err) {
-            showToast(err.response?.data?.message || "Có lỗi xảy ra!", "error");
+            showToast(err.response?.data?.message || "Có lỗi xảy ra");
         } finally {
             setIsSubmitting(false);
         }
@@ -106,7 +104,6 @@ const Brand = () => {
 
     return (
         <div className="space-y-6">
-
             <div className="flex flex-col gap-4">
                 <BrandTable 
                     data={brands} 
@@ -114,11 +111,11 @@ const Brand = () => {
                     onEdit={handleEditClick}
                     onDelete={handleDeleteClick}
                     onOpenAddModal={() => {
-                    setEditingBrand(null);
-                    setBrandNameInput('');
-                    setError('');
-                    setIsModalOpen(true);
-                }}
+                        setEditingBrand(null);
+                        setBrandNameInput('');
+                        setError('');
+                        setIsModalOpen(true);
+                    }}
                 />
             </div>
 
@@ -154,7 +151,7 @@ const Brand = () => {
                                     onClick={() => setIsModalOpen(false)}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                                 >
-                                    Hủy bỏ
+                                    Đóng
                                 </button>
                                 <button
                                     type="submit"
@@ -179,8 +176,7 @@ const Brand = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xóa thương hiệu"
-                message="Bạn có chắc chắn muốn xóa thương hiệu này khỏi hệ thống?"
+                message="Bạn có muốn xóa thương hiệu này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}

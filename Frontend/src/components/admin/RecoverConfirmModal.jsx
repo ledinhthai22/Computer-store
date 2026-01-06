@@ -7,7 +7,7 @@ const RestoreConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }
         {/* Header */}
         <div className="flex items-center justify-center p-4 border-b">
           <div className="flex items-center gap-2 text-gray-600">
-            <h3 className="font-bold text-lg">Xác nhận khôi phục</h3>
+            <h3 className="font-bold text-lg">Xác nhận</h3>
           </div>
         </div>
 
