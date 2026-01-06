@@ -11,6 +11,6 @@ namespace Backend.DTO.Category
         
         [Required]
         public string TenDanhMuc {get;set;} =null!;
-        public bool TrangThai {get;set;} = true;
+        public bool TrangThai {get;set;}
     }
 }

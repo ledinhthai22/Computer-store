@@ -30,7 +30,13 @@ namespace Backend.Controller.Category
             if (result == null) return NotFound(new { message = "Không tìm thấy danh mục" });
             return Ok(result);
         }
-
+        [HttpGet("deleted")]
+        [Authorize(Roles = "QuanTriVien")]
+        public async Task<IActionResult> GetDeteleListAll()
+        {
+            var result = await _categoryService.GetDeleteListAsync();
+            return Ok(result);
+        }
         [HttpPost]
         [Authorize(Roles = "QuanTriVien")]
         public async Task<IActionResult> Create(CreateCategoryRequest request)
@@ -78,7 +84,6 @@ namespace Backend.Controller.Category
             {
                 var success = await _categoryService.DeleteAsync(id);
 
-                // Nếu service trả về false => ID không tồn tại
                 if (!success)
                 {
                     return NotFound(new { message = "Không tìm thấy danh mục để xóa." });
@@ -88,13 +93,37 @@ namespace Backend.Controller.Category
             }
             catch (InvalidOperationException ex)
             {
-                // Bắt lỗi logic (Ví dụ: Danh mục đang có sản phẩm)
                 return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                // Bắt lỗi hệ thống khác
                 return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        [HttpPut("recover/{id:int}")]
+        [Authorize(Roles = "QuanTriVien")]
+        public async Task<IActionResult> Recover(int id)
+        {
+            try
+            {
+                bool result = await _categoryService.RecoverAsync(id);
+
+                if (!result)
+                    return NotFound(new { message = "Không tìm thấy danh mục." });
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Khôi phục danh mục thành công."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi server." });
             }
         }
     }

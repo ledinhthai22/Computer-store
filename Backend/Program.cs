@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Backend.Services.Auth;
 using Backend.Services.Category;
 using Backend.Services.Brand;
+using Backend.Services.Contact;
 
 namespace Backend
 {
@@ -20,6 +21,7 @@ namespace Backend
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IBrandService, BrandService>();
+            builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
