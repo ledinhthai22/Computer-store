@@ -92,5 +92,29 @@ namespace Backend.Services.Brand
             }
             return true;
         }
+        public async Task<IEnumerable<BrandResult>> GetAllHidenAsync()
+        {
+            return await _dbContext.ThuongHieu
+                .Where(x => x.TrangThai == false)
+                .Select(b => new BrandResult
+                {
+                    BrandID = b.MaThuongHieu,
+                    BrandName = b.TenThuongHieu,
+                    Status = b.TrangThai
+                })
+                .ToListAsync();
+        }
+        public async Task<bool> RestoreAsync(int id)
+        {
+            var brand = await _dbContext.ThuongHieu.FindAsync(id);
+            if (brand == null || brand.TrangThai == true) return false;
+            brand.TrangThai = true;
+            bool restored = await _dbContext.SaveChangesAsync() > 0;
+            if (!restored)
+            {
+                throw new InvalidOperationException("Khôi phục thương hiệu thất bại!");
+            }
+            return true;
+        }
     }
 }

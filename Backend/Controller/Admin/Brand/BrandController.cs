@@ -79,5 +79,27 @@ namespace Ecommerce.Controller.Admin.Brand
                 return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
             }
         }
+        [HttpGet("deleted")]
+        [Authorize(Roles = "QuanTriVien")]
+        public async Task<IActionResult> GetDeteleListAll()
+        {
+            var result = await _brandService.GetAllHidenAsync();
+            return Ok(result);
+        }
+        [HttpPut("recover/{id:int}")]
+        [Authorize(Roles = "QuanTriVien")]
+        public async Task<IActionResult> Recover(int id)
+        {
+            try
+            {
+                bool success = await _brandService.RestoreAsync(id);
+                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu đã xóa" });
+                return Ok(new { message = "Khôi phục thương hiệu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
     }
 }

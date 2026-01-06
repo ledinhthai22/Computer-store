@@ -9,5 +9,7 @@ namespace Backend.Services.Brand
         Task<BrandResult> CreateAsync(CreateBrandRequest request);
         Task<BrandResult?> UpdateAsync(int id, UpdateBrandRequest request);
         Task<bool> DeleteAsync(int id);
+        Task<bool> RestoreAsync(int id);
+        Task<IEnumerable<BrandResult>> GetAllHidenAsync();
     }
 }
