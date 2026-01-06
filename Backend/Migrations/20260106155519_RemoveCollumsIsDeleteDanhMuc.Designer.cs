@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106155519_RemoveCollumsIsDeleteDanhMuc")]
+    partial class RemoveCollumsIsDeleteDanhMuc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,9 +111,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
-
-                    b.Property<DateTime?>("Is_Delete")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -328,9 +328,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$RWubdK/soQ6y7Df9acTQBefquOeeAKNG/1eQvQVe3OuCUvKB75P5q",
-                            NgayCapNhat = new DateTime(2026, 1, 6, 22, 56, 2, 688, DateTimeKind.Local).AddTicks(6983),
-                            NgayTao = new DateTime(2026, 1, 6, 22, 56, 2, 688, DateTimeKind.Local).AddTicks(6965),
+                            MatKhauMaHoa = "$2a$11$SuN6RxSf4PpMjyDEv74pZeK1Z3saYb2xhXVn7rfh/Df6SJAJXUdca",
+                            NgayCapNhat = new DateTime(2026, 1, 6, 22, 55, 19, 26, DateTimeKind.Local).AddTicks(2282),
+                            NgayTao = new DateTime(2026, 1, 6, 22, 55, 19, 26, DateTimeKind.Local).AddTicks(2262),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });

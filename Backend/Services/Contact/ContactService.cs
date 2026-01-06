@@ -16,26 +16,28 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllAsync()
         {
             return await _DbContext.LienHe
-                .Where(x => x.TrangThai == 1  || x.TrangThai == 2)
+                .Where(x => x.Is_Delete == null )
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
                     TrangThai = l.TrangThai,
+                    NgayGui = l.NgayGui,
+                    Message = l.TrangThai ? "Đã đọc" : "Chưa đọc"
                 })
                 .ToListAsync();
         }
         public async Task<IEnumerable<ContactResult>> GetAllUnreadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == 1)
+            .Where(x => x.TrangThai ==true)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
-                    TrangThai = l.TrangThai,
+                    TrangThai = l.TrangThai ,
                     Message = "Chưa đọc"
                 })
                 .ToListAsync();
@@ -43,7 +45,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllReadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == 2)
+            .Where(x => x.TrangThai == true)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -61,7 +63,8 @@ namespace Backend.Services.Contact
 
                 Email = req.Email,
                 NoiDung = req.NoiDung,
-                TrangThai = 1,
+                TrangThai = false,
+                Is_Delete = null,
                 NgayGui = DateTime.Now
             };
 
@@ -87,7 +90,7 @@ namespace Backend.Services.Contact
                 return false;
             }
 
-            Contact.TrangThai = 0;
+            Contact.TrangThai = false;
 
             await _DbContext.SaveChangesAsync();
 
@@ -102,7 +105,7 @@ namespace Backend.Services.Contact
                 throw new KeyNotFoundException($"Contact with id {id} not found.");
             }
 
-            contact.TrangThai = 2;
+            contact.TrangThai = true;
             await _DbContext.SaveChangesAsync();
 
             return new ContactResult
@@ -110,7 +113,7 @@ namespace Backend.Services.Contact
                 MaLienHe = contact.MaLienHe,
                 Email = contact.Email,
                 NoiDung = contact.NoiDung,
-                TrangThai = 2,
+                TrangThai = true,
                 NgayGui = contact.NgayGui,
                 Message = "Đã đánh dấu là đã đọc"
             };
