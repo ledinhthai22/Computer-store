@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import CategoryTable from '../../components/admin/category/CategoryTable';
 import CategoryToolbar from '../../components/admin/category/CategoryToolbar';
 import Pagination from '../../components/admin/Pagination';
+import Toast from '../../components/admin/Toast';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -23,6 +24,12 @@ const Category = () => {
 
     const [editingCategory, setEditingCategory] = useState(null);
 
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    };
+
     const fetchCategories = async () => {
         try {
             const res = await axios.get('https://localhost:7012/api/Category');
@@ -31,6 +38,7 @@ const Category = () => {
             setLoading(false);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
+            showToast("Không thể tải danh sách danh mục!", "error");
             setLoading(false);
         }
     };
@@ -60,10 +68,10 @@ const Category = () => {
         if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) return;
         try {
             await axios.delete(`https://localhost:7012/api/Category/${id}`);
-            alert("Xóa thành công!");
+            showToast("Đã xóa danh mục thành công!", "success");
             fetchCategories();
         } catch (err) {
-            alert("Lỗi khi xóa danh mục.", err);
+            showToast(err.response?.data?.message || "Lỗi khi xóa danh mục!", "error");
         }
     };
 
@@ -87,12 +95,12 @@ const Category = () => {
                 await axios.put(`https://localhost:7012/api/Category/${editingCategory.maDanhMuc}`, {
                     tenDanhMuc: nameTrimmed
                 });
-                alert("Cập nhật thành công!");
+                showToast("Cập nhật thành công!", "success");
             } else {
                 await axios.post('https://localhost:7012/api/Category', {
                     tenDanhMuc: nameTrimmed
                 });
-                alert("Thêm thành công!");
+                showToast("Thêm mới thành công!", "success");
             }
             
             await fetchCategories();
@@ -181,6 +189,15 @@ const Category = () => {
                         </form>
                     </div>
                 </div>
+            )}
+            
+            {/* Hiển thị Toast */}
+            {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
             )}
         </div>
     );
