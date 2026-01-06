@@ -1,15 +1,22 @@
-import { ArrowUpDown, Plus, History } from 'lucide-react';
+import { ArrowUpDown, ArrowLeft } from 'lucide-react';
 import Searchbar from '../Searchbar';
-import { Link } from 'react-router-dom';
-const UserToolbar = ({ 
+import { Link, useNavigate } from 'react-router-dom';
+const CategoryToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
-  onSortChange
+  onSortChange,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-      
+      <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Quay lại</span>
+        </button>
       {/* Search */}
       <Searchbar value={search} onChange={onSearchChange} />
 
@@ -22,30 +29,13 @@ const UserToolbar = ({
             onChange={(e) => onSortChange(e.target.value)}
             className="w-full sm:w-auto pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white cursor-pointer"
           >
-            <option value="name-asc">Tên người dùng (A-Z)</option>
-            <option value="name-desc">Tên người dùng (Z-A)</option>
+            <option value="tenDanhMuc-asc">Tên danh mục (A-Z)</option>
+            <option value="tenDanhMuc-desc">Tên danh mục (Z-A)</option>
           </select>
         </div>
-
-        {/* Add  */}
-        <Link 
-          to="#" 
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-        >
-          <Plus size={18} />
-          Thêm
-        </Link>
-        {/* Restore */}
-        <Link
-          to="#"
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-        >
-          <History size={18} />
-          Khôi phục
-        </Link>
       </div>
     </div>
   );
 };
 
-export default UserToolbar;
+export default CategoryToolbar;

@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106023443_TransferBoolToIntTrangThaiLienHe")]
+    partial class TransferBoolToIntTrangThaiLienHe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,7 +171,7 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDH"));
 
-                    b.Property<int?>("BienTheMaBTSP")
+                    b.Property<int>("MaBienThe")
                         .HasColumnType("int");
 
                     b.Property<int>("MaDiaChiNhanHang")
@@ -180,9 +183,6 @@ namespace Ecommerce.Migrations
 
                     b.Property<int>("MaKH")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("PhuongThucThanhToan")
                         .HasColumnType("int");
@@ -201,7 +201,7 @@ namespace Ecommerce.Migrations
 
                     b.HasKey("MaDH");
 
-                    b.HasIndex("BienTheMaBTSP");
+                    b.HasIndex("MaBienThe");
 
                     b.HasIndex("MaDiaChiNhanHang");
 
@@ -315,9 +315,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$PrRp08.PKgq45bi6ItiJKeCB0a/M45aK6gJA8XK7y3WzhlaTEwOL.",
-                            NgayCapNhat = new DateTime(2026, 1, 6, 8, 30, 9, 829, DateTimeKind.Local).AddTicks(9546),
-                            NgayTao = new DateTime(2026, 1, 6, 8, 30, 9, 829, DateTimeKind.Local).AddTicks(9528),
+                            MatKhauMaHoa = "$2a$11$br0UzZJlGFweu3zE.YkYk.HhgTIYMveWwnK9pos9FbfYZP02A33py",
+                            NgayCapNhat = new DateTime(2026, 1, 6, 9, 34, 43, 563, DateTimeKind.Local).AddTicks(7123),
+                            NgayTao = new DateTime(2026, 1, 6, 9, 34, 43, 563, DateTimeKind.Local).AddTicks(7105),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });
@@ -553,27 +553,6 @@ namespace Ecommerce.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Ecommerce.Models.ChiTietDonHang", b =>
-                {
-                    b.Property<int>("MaDonHang")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MaBienThe")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MaCTDH")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SoLuong")
-                        .HasColumnType("int");
-
-                    b.HasKey("MaDonHang", "MaBienThe");
-
-                    b.HasIndex("MaBienThe");
-
-                    b.ToTable("ChiTietDonHang");
-                });
-
             modelBuilder.Entity("Ecommerce.Models.DanhGia", b =>
                 {
                     b.Property<int>("MaDanhGia")
@@ -614,9 +593,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaYeuThich"));
-
-                    b.Property<DateTime?>("Deleted_At")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("MaBienThe")
                         .HasColumnType("int");
@@ -676,9 +652,11 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Backend.Models.DonHang", b =>
                 {
-                    b.HasOne("Backend.Models.BienThe", null)
+                    b.HasOne("Backend.Models.BienThe", "BienThe")
                         .WithMany("DonHang")
-                        .HasForeignKey("BienTheMaBTSP");
+                        .HasForeignKey("MaBienThe")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Backend.Models.DiaChiNhanHang", "DiaChiNhanHang")
                         .WithMany()
@@ -691,6 +669,8 @@ namespace Ecommerce.Migrations
                         .HasForeignKey("MaKH")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("BienThe");
 
                     b.Navigation("DiaChiNhanHang");
 
@@ -746,25 +726,6 @@ namespace Ecommerce.Migrations
                     b.Navigation("ThuongHieu");
                 });
 
-            modelBuilder.Entity("Ecommerce.Models.ChiTietDonHang", b =>
-                {
-                    b.HasOne("Backend.Models.BienThe", "BienThe")
-                        .WithMany()
-                        .HasForeignKey("MaBienThe")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.DonHang", "DonHang")
-                        .WithMany("ChiTietDonHang")
-                        .HasForeignKey("MaDonHang")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BienThe");
-
-                    b.Navigation("DonHang");
-                });
-
             modelBuilder.Entity("Ecommerce.Models.DanhGia", b =>
                 {
                     b.HasOne("Backend.Models.NguoiDung", "NguoiDung")
@@ -817,11 +778,6 @@ namespace Ecommerce.Migrations
             modelBuilder.Entity("Backend.Models.DanhMuc", b =>
                 {
                     b.Navigation("SanPham");
-                });
-
-            modelBuilder.Entity("Backend.Models.DonHang", b =>
-                {
-                    b.Navigation("ChiTietDonHang");
                 });
 
             modelBuilder.Entity("Backend.Models.NguoiDung", b =>

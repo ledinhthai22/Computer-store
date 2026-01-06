@@ -1,6 +1,6 @@
-import { Edit, Trash2 } from "lucide-react";
+import {History } from "lucide-react";
 
-const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
+const CategoryRecoverTable = ({ data, loading, onRecover }) => {
     if (loading) {
         return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
     }
@@ -32,19 +32,12 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-center gap-2">
-                                            {/* Nút Sửa */}
+                                            {/* Nút Khôi phục */}
                                             <button 
-                                                onClick={() => onEdit(c)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                            >
-                                                <Edit size={16} />
-                                            </button>
-                                            {/* Nút Xóa */}
-                                            <button 
-                                                onClick={() => onDelete(c.maDanhMuc)}
+                                                onClick={() => onRecover(c.maDanhMuc)}
                                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                             >
-                                                <Trash2 size={16} />
+                                                <History size={16} />
                                             </button>
                                         </div>
                                     </td>
@@ -52,7 +45,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="2" className="p-8 text-center text-gray-500">
+                                <td colSpan="4" className="p-8 text-center text-gray-500">
                                     Không tìm thấy dữ liệu.
                                 </td>
                             </tr>
@@ -64,4 +57,4 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
     );
 };
 
-export default CategoryTable;
+export default CategoryRecoverTable;

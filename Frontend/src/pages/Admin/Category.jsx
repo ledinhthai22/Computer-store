@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import CategoryTable from '../../components/admin/category/CategoryTable';
 import CategoryToolbar from '../../components/admin/category/CategoryToolbar';
 import Pagination from '../../components/admin/Pagination';
+import Toast from '../../components/admin/Toast';
+import ConfirmModal from '../../components/admin/DeleteConfirmModal';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -23,6 +25,16 @@ const Category = () => {
 
     const [editingCategory, setEditingCategory] = useState(null);
 
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    };
+
     const fetchCategories = async () => {
         try {
             const res = await axios.get('https://localhost:7012/api/Category');
@@ -31,6 +43,7 @@ const Category = () => {
             setLoading(false);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
+            showToast("Không thể tải danh sách danh mục!", "error");
             setLoading(false);
         }
     };
@@ -56,14 +69,23 @@ const Category = () => {
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
     // --- CHỨC NĂNG XÓA ---
-    const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) return;
+    const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+    };
+    const handleConfirmDelete = async () => {
         try {
-            await axios.delete(`https://localhost:7012/api/Category/${id}`);
-            alert("Xóa thành công!");
-            fetchCategories();
+            setIsDeleting(true);
+            await axios.delete(`https://localhost:7012/api/Category/${deleteId}`);
+            showToast("Đã xóa danh mục thành công!", "success");
+            await fetchCategories();
         } catch (err) {
-            alert("Lỗi khi xóa danh mục.", err);
+            console.error(err);
+            showToast("Lỗi khi xóa dữ liệu!", "error");
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
         }
     };
 
@@ -87,12 +109,12 @@ const Category = () => {
                 await axios.put(`https://localhost:7012/api/Category/${editingCategory.maDanhMuc}`, {
                     tenDanhMuc: nameTrimmed
                 });
-                alert("Cập nhật thành công!");
+                showToast("Cập nhật thành công!", "success");
             } else {
                 await axios.post('https://localhost:7012/api/Category', {
                     tenDanhMuc: nameTrimmed
                 });
-                alert("Thêm thành công!");
+                showToast("Thêm mới thành công!", "success");
             }
             
             await fetchCategories();
@@ -126,7 +148,7 @@ const Category = () => {
                     data={currentItems} 
                     loading={loading} 
                     onEdit={handleEditClick}
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteClick}
                 />
                 <Pagination 
                     currentPage={currentPage}
@@ -182,6 +204,23 @@ const Category = () => {
                     </div>
                 </div>
             )}
+
+            {/* Hiển thị Toast */}
+            {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
+            )}
+            <ConfirmModal 
+                isOpen={isConfirmOpen}
+                title="Xóa danh mục"
+                message="Bạn có chắc chắn muốn xóa danh mục này khỏi hệ thống không?"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setIsConfirmOpen(false)}
+                isLoading={isDeleting}
+            />
         </div>
     );
 }

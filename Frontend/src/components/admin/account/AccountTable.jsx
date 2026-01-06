@@ -1,6 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 
-const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
+const AccountTable = ({ data, loading, onEdit, onDelete }) => {
     if (loading) {
         return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
     }
@@ -12,36 +12,42 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
                     <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
                             <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">STT</th>
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Danh mục</th>
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Slug</th>
+                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Họ tên</th>
+                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Email</th>
+                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Mật khẩu</th>
+                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Ngày tạo</th>
                             <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center">Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {data.length > 0 ? (
-                            data.map((c, index) => (
-                                <tr key={c.maDanhMuc} className="hover:bg-gray-50 transition-colors">
-                                    <td className="p-4">
+                            data.map((data, index) => (
+                                <tr key={data.maNguoiDung} className="hover:bg-gray-50 transition-colors">
+                                  <td className="p-4">
                                         <span className="font-medium text-gray-800 capitalize">{index + 1}</span>
                                     </td>
                                     <td className="p-4">
-                                        <span className="font-medium text-gray-800 capitalize">{c.tenDanhMuc}</span>
+                                        <span className="font-medium text-gray-800 capitalize">{data.hoTen}</span>
                                     </td>
                                     <td className="p-4">
-                                        <span className="font-medium text-gray-800 capitalize">{c.slug}</span>
+                                        <span className="font-medium text-gray-800 capitalize">{data.email}</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="font-medium text-gray-800 capitalize">{data.password}</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="font-medium text-gray-800 capitalize">{data.created_at}</span>
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-center gap-2">
-                                            {/* Nút Sửa */}
                                             <button 
-                                                onClick={() => onEdit(c)}
+                                                onClick={() => onEdit(data)}
                                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                             >
                                                 <Edit size={16} />
                                             </button>
-                                            {/* Nút Xóa */}
                                             <button 
-                                                onClick={() => onDelete(c.maDanhMuc)}
+                                                onClick={() => onDelete(data.maNguoiDung)}
                                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                             >
                                                 <Trash2 size={16} />
@@ -64,4 +70,4 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
     );
 };
 
-export default CategoryTable;
+export default AccountTable;
