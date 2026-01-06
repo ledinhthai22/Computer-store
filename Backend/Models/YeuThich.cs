@@ -14,6 +14,6 @@ namespace Ecommerce.Models
         public int MaBienThe { get; set; }
         [ForeignKey(nameof(MaBienThe))]
         public virtual BienThe BienThe { get; set; } = null!;
-        public DateTime Deleted_At { get; set; } = DateTime.Now;
+        public DateTime? Deleted_At { get; set; }
     }
 }
