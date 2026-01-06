@@ -1,7 +1,7 @@
 import { ArrowUpDown, ArrowLeft } from 'lucide-react';
 import Searchbar from '../Searchbar';
 import { useNavigate } from 'react-router-dom';
-const CategoryRecoverToolbar = ({ 
+const BrandRecoverToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
@@ -29,8 +29,8 @@ const CategoryRecoverToolbar = ({
             onChange={(e) => onSortChange(e.target.value)}
             className="w-full sm:w-auto pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white whitespace-nowrap cursor-pointer"
           >
-            <option value="tenDanhMuc-asc">Tên danh mục (A-Z)</option>
-            <option value="tenDanhMuc-desc">Tên danh mục (Z-A)</option>
+            <option value="tenDanhMuc-asc">Tên thương hiệu (A-Z)</option>
+            <option value="tenDanhMuc-desc">Tên thương hiệu (Z-A)</option>
           </select>
         </div>
       </div>
@@ -38,4 +38,4 @@ const CategoryRecoverToolbar = ({
   );
 };
 
-export default CategoryRecoverToolbar;
+export default BrandRecoverToolbar;

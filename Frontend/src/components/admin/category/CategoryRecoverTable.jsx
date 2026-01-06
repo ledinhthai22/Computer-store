@@ -35,9 +35,9 @@ const CategoryRecoverTable = ({ data, loading, onRecover }) => {
                                             {/* Nút Khôi phục */}
                                             <button 
                                                 onClick={() => onRecover(c.maDanhMuc)}
-                                                className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                                                className="p-2 bg-green-400 hover:bg-green-500 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                             >
-                                                <History size={20} />
+                                                <History size={20} /> Khôi phục
                                             </button>
                                         </div>
                                     </td>
@@ -46,7 +46,7 @@ const CategoryRecoverTable = ({ data, loading, onRecover }) => {
                         ) : (
                             <tr>
                                 <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    Không tìm thấy dữ liệu.
+                                    Không tìm thấy danh mục nào trong danh sách xóa.
                                 </td>
                             </tr>
                         )}

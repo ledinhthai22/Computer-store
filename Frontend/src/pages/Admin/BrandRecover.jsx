@@ -1,13 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import CategoryRecoverTable from '../../components/admin/category/CategoryRecoverTable';
-import CategoryRecoverToolbar from '../../components/admin/category/CategoryRecoverToolbar';
 import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/admin/Toast';
 import ConfirmModal from '../../components/admin/RecoverConfirmModal';
+import BrandRecoverTable from '../../components/admin/brand/BrandRecoverTable';
+import BrandRecoverToolbar from '../../components/admin/brand/BrandRecoverToolbar';
 
-const CategoryRecover = () => {
-    const [categories, setCategories] = useState([]);
+const BrandRecover = () => {
+    const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [filtered, setFiltered] = useState([]);
@@ -27,24 +27,24 @@ const CategoryRecover = () => {
         setToast({ show: true, message, type });
     };
 
-    const fetchCategoriesRecover = async () => {
+    const fetchDataRecover = async () => {
         try {
             setLoading(false);
-            const res = await axios.get('https://localhost:7012/api/Category/deleted');
+            const res = await axios.get('https://localhost:7012/api/Brand');
             const data = Array.isArray(res.data) ? res.data : [];
-            setCategories(data);
+            setBrands(data);
             setFiltered(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
-            showToast("Không thể tải danh sách danh mục!", "error");
+            showToast("Không thể tải danh sách thương hiệu!", "error");
         }finally{
             setLoading(false);}
     };
 
-    useEffect(() => { fetchCategoriesRecover(); }, []);
+    useEffect(() => { fetchDataRecover(); }, []);
 
     useEffect(() => {
-        let result = [...categories];
+        let result = [...brands];
         if (search) {
             result = result.filter(c => c.tenDanhMuc?.toLowerCase().includes(search.toLowerCase()));
         }
@@ -55,7 +55,7 @@ const CategoryRecover = () => {
         });
         setFiltered(result);
         setCurrentPage(1);
-    }, [search, categories, sortOrder]);
+    }, [search, brands, sortOrder]);
 
     // Phân trang
     const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -69,10 +69,10 @@ const CategoryRecover = () => {
     const handleConfirmRecover = async () => {
     try {
         setIsRecover(true);
-        await axios.post(`https://localhost:7012/api/Category/recover/${recoverId}`);
+        await axios.post(`https://localhost:7012/api/Brand/recover/${recoverId}`);
         
         showToast("Khôi phục thành công!", "success");
-        await fetchCategoriesRecover();
+        await fetchDataRecover();
     } catch (err) {
         console.error(err);
         showToast("Lỗi khi khôi phục dữ liệu!", "error");
@@ -85,7 +85,7 @@ const CategoryRecover = () => {
 
     return (
         <div className="space-y-6">
-            <CategoryRecoverToolbar 
+            <BrandRecoverToolbar
                 search={search}
                 onSearchChange={setSearch}
                 sortOrder={sortOrder}
@@ -93,7 +93,7 @@ const CategoryRecover = () => {
             />
 
             <div className="flex flex-col gap-4">
-                <CategoryRecoverTable 
+                <BrandRecoverTable 
                     data={currentItems} 
                     loading={loading}
                     onRecover={handleRecover}
@@ -115,8 +115,8 @@ const CategoryRecover = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xác nhận khôi phục danh mục"
-                message="Bạn có muốn khôi phục danh mục này không?"
+                title="Xác nhận khôi phục thương hiệu"
+                message="Bạn có muốn khôi phục thương hiệu này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isRecover}
@@ -125,4 +125,4 @@ const CategoryRecover = () => {
     );
 }
 
-export default CategoryRecover;
+export default BrandRecover;

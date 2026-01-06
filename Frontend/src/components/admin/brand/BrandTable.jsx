@@ -30,17 +30,17 @@ const BrandTable = ({ data, loading, onEdit, onDelete }) => {
                                         <div className="flex items-center justify-center gap-2">
                                             <button 
                                                 onClick={() => onEdit(data)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                                 title="Sửa"
                                             >
-                                                <Edit size={16} />
+                                                <Edit size={20} /> Sửa
                                             </button>
                                             <button 
                                                 onClick={() => onDelete(data.brandID)}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                                 title="Xóa"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={20} /> Xóa
                                             </button>
                                         </div>
                                     </td>

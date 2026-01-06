@@ -31,20 +31,20 @@ const CategoryTable = ({ data, loading, onEdit, onDelete }) => {
                                         <span className="font-medium text-gray-800 capitalize">{c.slug}</span>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <div className="flex items-center justify-center gap-2">
+                                        <div className="flex items-center justify-center gap-2 cursor-pointer">
                                             {/* Nút Sửa */}
                                             <button 
                                                 onClick={() => onEdit(c)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                             >
-                                                <Edit size={16} />
+                                                <Edit size={20} /> Sửa
                                             </button>
                                             {/* Nút Xóa */}
                                             <button 
                                                 onClick={() => onDelete(c.maDanhMuc)}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={20} /> Xóa
                                             </button>
                                         </div>
                                     </td>

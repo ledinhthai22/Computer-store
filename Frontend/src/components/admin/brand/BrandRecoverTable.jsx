@@ -1,6 +1,6 @@
 import { History } from "lucide-react";
 
-const BrandTable = ({ data, loading, onRecover }) => {
+const BrandRecoverTable = ({ data, loading, onRecover }) => {
     if (loading) {
         return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
     }
@@ -31,9 +31,9 @@ const BrandTable = ({ data, loading, onRecover }) => {
                                             {/* Nút Khôi phục */}
                                             <button 
                                                 onClick={() => onRecover(data.brandID)}
-                                                className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                                                className="p-2 bg-green-400 hover:bg-green-500 rounded-lg transition-colors text-center flex items-center gap-1 white-space-nowrap cursor-pointer"
                                             >
-                                                <History size={20} />
+                                                <History size={20} /> Khôi phục
                                             </button>
                                         </div>
                                     </td>
@@ -42,7 +42,7 @@ const BrandTable = ({ data, loading, onRecover }) => {
                         ) : (
                             <tr>
                                 <td colSpan="3" className="p-8 text-center text-gray-500">
-                                    Không tìm thấy dữ liệu thương hiệu nào.
+                                    Không tìm thấy thương hiệu nào trong danh sách xóa.
                                 </td>
                             </tr>
                         )}
@@ -53,4 +53,4 @@ const BrandTable = ({ data, loading, onRecover }) => {
     );
 };
 
-export default BrandTable;
+export default BrandRecoverTable;

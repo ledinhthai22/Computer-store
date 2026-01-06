@@ -32,15 +32,15 @@ const BrandToolbar = ({
         {/* Nút thêm mới */}
         <button 
           onClick={onOpenAddModal}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
         >
           <Plus size={18} /> Thêm mới
         </button>
 
         {/* Khôi phục */}
         <Link
-          to="#"
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+          to="/quan-ly/thuong-hieu/khoi-phuc"
+          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
         >
           <History size={18} /> Khôi phục
         </Link>
