@@ -1,21 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import CategoryRecoverTable from '../../components/admin/category/CategoryRecoverTable';
-import CategoryRecoverToolbar from '../../components/admin/category/CategoryRecoverToolbar';
-import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/admin/Toast';
 import ConfirmModal from '../../components/admin/RecoverConfirmModal';
 
 const CategoryRecover = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const [filtered, setFiltered] = useState([]);
-    const [search, setSearch] = useState('');
-    const [sortOrder, setSortOrder] = useState('tenDanhMuc-asc');
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -33,7 +24,6 @@ const CategoryRecover = () => {
             const res = await axios.get('https://localhost:7012/api/Category/deleted');
             const data = Array.isArray(res.data) ? res.data : [];
             setCategories(data);
-            setFiltered(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
             showToast("Không thể tải danh sách danh mục!", "error");
@@ -42,24 +32,6 @@ const CategoryRecover = () => {
     };
 
     useEffect(() => { fetchCategoriesRecover(); }, []);
-
-    useEffect(() => {
-        let result = [...categories];
-        if (search) {
-            result = result.filter(c => c.tenDanhMuc?.toLowerCase().includes(search.toLowerCase()));
-        }
-        result.sort((a, b) => {
-            if (sortOrder === 'tenDanhMuc-asc') return a.tenDanhMuc?.localeCompare(b.tenDanhMuc);
-            if (sortOrder === 'tenDanhMuc-desc') return b.tenDanhMuc?.localeCompare(a.tenDanhMuc);
-            return 0;
-        });
-        setFiltered(result);
-        setCurrentPage(1);
-    }, [search, categories, sortOrder]);
-
-    // Phân trang
-    const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
     // MODAL Recover
     const handleRecover = (id) => {
@@ -85,23 +57,11 @@ const CategoryRecover = () => {
 
     return (
         <div className="space-y-6">
-            <CategoryRecoverToolbar 
-                search={search}
-                onSearchChange={setSearch}
-                sortOrder={sortOrder}
-                onSortChange={setSortOrder}
-            />
-
             <div className="flex flex-col gap-4">
                 <CategoryRecoverTable 
-                    data={currentItems} 
+                    data={categories} 
                     loading={loading}
                     onRecover={handleRecover}
-                />
-                <Pagination 
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
                 />
             </div>
             
