@@ -12,6 +12,9 @@ namespace Backend.Models
         public string Pin { get; set; } = null!;
         public string HeDieuHanh { get; set; } = null!;
         public string DoPhanGiaiManHinh { get; set; } = null!;
+        public string LoaiXuLyTrungTam {get;set;} = null!;
+        public string LoaiXuLyDoHoa {get;set;} = null!;
+        public string CongGiaoTiep {get;set;} = null!;
         public SanPham? SanPham { get; set; }
     }
 }
