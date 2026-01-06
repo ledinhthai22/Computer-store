@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 
 const Toast = ({ message, type = 'success', onClose }) => {

@@ -4,6 +4,7 @@ import BrandTable from '../../components/admin/brand/BrandTable';
 import BrandToolbar from '../../components/admin/brand/BrandToolbar';
 import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/admin/Toast';
+import ConfirmModal from '../../components/admin/DeleteConfirmModal';
 
 const Brand = () => {
     const [brands, setBrands] = useState([]);
@@ -22,6 +23,10 @@ const Brand = () => {
     const [editingBrand, setEditingBrand] = useState(null);
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -65,20 +70,32 @@ const Brand = () => {
         setCurrentPage(1);
     }, [search, brands, sortOrder]);
 
+    // Phân trang
     const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc muốn xóa thương hiệu này?")) return;
+    // MODAL XÓA
+    const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+    };
+    const handleConfirmDelete = async () => {
         try {
-            await axios.delete(`https://localhost:7012/api/Brand/${id}`);
+            setIsDeleting(true);
+            await axios.delete(`https://localhost:7012/api/Brand/${deleteId}`);
             showToast("Đã xóa thương hiệu thành công!", "success");
-            fetchBrands();
+            await fetchBrands();
         } catch (err) {
-            showToast(err.response?.data?.message || "Lỗi khi xóa dữ liệu!", "error");
+            console.error(err);
+            showToast("Lỗi khi xóa dữ liệu!", "error");
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
         }
     };
 
+    // MODAL THÊM/SỬA
     const handleEditClick = (brand) => {
         setEditingBrand(brand);
         setBrandNameInput(brand.brandName || '');
@@ -136,7 +153,7 @@ const Brand = () => {
                     data={currentItems} 
                     loading={loading} 
                     onEdit={handleEditClick}
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteClick}
                 />
                 <Pagination 
                     currentPage={currentPage}
@@ -200,6 +217,14 @@ const Brand = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+            <ConfirmModal 
+                isOpen={isConfirmOpen}
+                title="Xóa thương hiệu"
+                message="Bạn có chắc chắn muốn xóa thương hiệu này khỏi hệ thống?"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setIsConfirmOpen(false)}
+                isLoading={isDeleting}
+            />
         </div>
     );
 }

@@ -1,16 +1,22 @@
-import { ArrowUpDown, Plus, History } from 'lucide-react';
+import { ArrowUpDown, ArrowLeft } from 'lucide-react';
 import Searchbar from '../Searchbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 const CategoryToolbar = ({ 
   search, 
   onSearchChange, 
   sortOrder, 
   onSortChange,
-  onOpenAddModal
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-      
+      <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Quay lại</span>
+        </button>
       {/* Search */}
       <Searchbar value={search} onChange={onSearchChange} />
 
@@ -27,22 +33,6 @@ const CategoryToolbar = ({
             <option value="tenDanhMuc-desc">Tên danh mục (Z-A)</option>
           </select>
         </div>
-
-        {/* Add  */}
-        <button 
-          onClick={onOpenAddModal}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-        >
-          <Plus size={18} /> Thêm
-        </button>
-        {/* Restore */}
-        <Link
-          to="/quan-ly/danh-muc/khoi-phuc"
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-        >
-          <History size={18} />
-          Khôi phục
-        </Link>
       </div>
     </div>
   );
