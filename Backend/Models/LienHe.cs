@@ -9,6 +9,6 @@ namespace Backend.Models
         public string Email { get; set; } = null!;
         public string NoiDung { get; set; } = null!; 
         public DateTime NgayGui { get; set; } = DateTime.Now; 
-        public bool TrangThai { get; set; } = true;
+        public int TrangThai { get; set; } = 1;
     }
 }

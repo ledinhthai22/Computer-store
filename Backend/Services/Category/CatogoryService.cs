@@ -3,7 +3,6 @@ using Backend.DTO.Category;
 using Backend.Helper;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace Backend.Services.Category
 {
@@ -17,6 +16,7 @@ namespace Backend.Services.Category
             _dbContext = dbContext;
             _slugHelper = slugHelper;
         }
+
 
         public async Task<IEnumerable<CategoryResult>> GetAllAsync()
         {
@@ -32,11 +32,11 @@ namespace Backend.Services.Category
                 .ToListAsync();
         }
 
+
         public async Task<CategoryResult?> GetByIdAsync(int id)
         {
             var category = await _dbContext.DanhMuc.FindAsync(id);
-
-            if (category == null || category.TrangThai == false) return null;
+            if (category == null || !category.TrangThai) return null;
 
             return new CategoryResult
             {
@@ -47,36 +47,43 @@ namespace Backend.Services.Category
             };
         }
 
+        public async Task<IEnumerable<CategoryResult>> GetDeleteListAsync()
+        {
+            return await _dbContext.DanhMuc
+                .Where(x => x.TrangThai == false)
+                .Select(d => new CategoryResult
+                {
+                    MaDanhMuc = d.MaDanhMuc,
+                    TenDanhMuc = d.TenDanhMuc,
+                    Slug = d.Slug,
+                    TrangThai  = d.TrangThai
+                })
+                .ToListAsync();
+        }
+
+
         public async Task<CategoryResult> CreateAsync(CreateCategoryRequest request)
         {
-
-            string tenDanhMucChuan = request.TenDanhMuc.Trim();
-
+            string ten = request.TenDanhMuc.Trim();
 
             bool isDuplicate = await _dbContext.DanhMuc
-                .AnyAsync(x => x.TenDanhMuc == tenDanhMucChuan && x.TrangThai == true);
+                .AnyAsync(x => x.TenDanhMuc == ten && x.TrangThai == true);
 
             if (isDuplicate)
-            {
+                throw new InvalidOperationException($"Danh mục '{ten}' đã tồn tại.");
 
-                throw new InvalidOperationException($"Danh mục '{tenDanhMucChuan}' đã tồn tại.");
-            }
-
-
-            string baseSlug = _slugHelper.GenerateSlug(tenDanhMucChuan);
+            string baseSlug = _slugHelper.GenerateSlug(ten);
             string uniqueSlug = await GenerateUniqueSlugAsync(baseSlug);
-
 
             var category = new DanhMuc
             {
-                TenDanhMuc = tenDanhMucChuan,
-                TrangThai = true,
-                Slug = uniqueSlug
+                TenDanhMuc = ten,
+                Slug = uniqueSlug,
+                TrangThai = true
             };
 
             _dbContext.DanhMuc.Add(category);
             await _dbContext.SaveChangesAsync();
-
 
             return new CategoryResult
             {
@@ -94,31 +101,19 @@ namespace Backend.Services.Category
 
             string tenMoi = request.TenDanhMuc.Trim();
 
-
-            if (category.TenDanhMuc != tenMoi)
+            if (tenMoi != category.TenDanhMuc)
             {
-
                 bool isDuplicate = await _dbContext.DanhMuc
-                    .AnyAsync(x => x.TenDanhMuc == tenMoi
-                                   && x.TrangThai == true
-                                   && x.MaDanhMuc != id);
+                    .AnyAsync(x => x.MaDanhMuc != id && x.TenDanhMuc == tenMoi && x.TrangThai == true);
 
                 if (isDuplicate)
-                {
-                    throw new InvalidOperationException($"Tên danh mục '{tenMoi}' đã được sử dụng.");
-                }
-
+                    throw new InvalidOperationException($"Tên danh mục '{tenMoi}' đã tồn tại.");
 
                 string baseSlug = _slugHelper.GenerateSlug(tenMoi);
-
-                category.Slug = await GenerateUniqueSlugAsync(baseSlug);
-
+                category.Slug = await GenerateUniqueSlugAsync(baseSlug, id);
 
                 category.TenDanhMuc = tenMoi;
             }
-
-
-            category.TrangThai = request.TrangThai;
 
             await _dbContext.SaveChangesAsync();
 
@@ -130,39 +125,55 @@ namespace Backend.Services.Category
                 TrangThai = category.TrangThai
             };
         }
+
+       
         public async Task<bool> DeleteAsync(int id)
         {
-
             var category = await _dbContext.DanhMuc.FindAsync(id);
-
-            if (category == null || category.TrangThai == false) return false;
+            if (category == null) return false;
 
             bool isUsed = await _dbContext.SanPham
                 .AnyAsync(p => p.MaDanhMuc == id && p.TrangThai == true);
 
             if (isUsed)
-            {
-                throw new InvalidOperationException("Danh mục đang chứa sản phẩm, không thể xóa.");
-            }
+                throw new InvalidOperationException("Danh mục đang được sử dụng bởi sản phẩm, không thể xóa.");
 
             category.TrangThai = false;
 
             await _dbContext.SaveChangesAsync();
-
             return true;
         }
+
+
+        public async Task<bool> RecoverAsync(int id)
+        {
+            var category = await _dbContext.DanhMuc.FindAsync(id);
+            if (category == null) return false;
+
+            bool isDuplicate = await _dbContext.DanhMuc
+                .AnyAsync(x => x.MaDanhMuc != id
+                            && x.TrangThai == true
+                            && x.TenDanhMuc == category.TenDanhMuc);
+
+            if (isDuplicate)
+                throw new InvalidOperationException("Tên danh mục bị trùng, không thể khôi phục.");
+
+            category.TrangThai = true;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
 
         private async Task<string> GenerateUniqueSlugAsync(string baseSlug, int? ignoreId = null)
         {
             string finalSlug = baseSlug;
-            int counter = 1;
+            int count = 1;
 
-
-            while (await _dbContext.DanhMuc.AnyAsync(c => c.Slug == finalSlug && c.MaDanhMuc != ignoreId))
+            while (await _dbContext.DanhMuc
+                .AnyAsync(x => x.Slug == finalSlug && x.MaDanhMuc != ignoreId))
             {
-
-                finalSlug = $"{baseSlug}-{counter}";
-                counter++;
+                finalSlug = $"{baseSlug}-{count}";
+                count++;
             }
 
             return finalSlug;
