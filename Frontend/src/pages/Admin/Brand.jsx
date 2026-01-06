@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import BrandTable from '../../components/admin/brand/BrandTable';
 import BrandToolbar from '../../components/admin/brand/BrandToolbar';
 import Pagination from '../../components/admin/Pagination';
+import Toast from '../../components/admin/Toast';
 
 const Brand = () => {
     const [brands, setBrands] = useState([]);
@@ -20,32 +21,38 @@ const Brand = () => {
     const [brandNameInput, setBrandNameInput] = useState('');
     const [editingBrand, setEditingBrand] = useState(null);
 
-    const API_URL = 'https://localhost:7012/api/Brand';
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-    // Cấu hình header đính kèm token để tránh lỗi 401
-    const getAuthConfig = () => {
-        const token = localStorage.getItem('token');
-        return {
-            headers: { Authorization: `Bearer ${token}` }
-        };
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
     };
 
+    // Hàm lấy dữ liệu từ API
     const fetchBrands = async () => {
         try {
-            const res = await axios.get(API_URL);
-            setBrands(res.data);
-            setFiltered(res.data);
-            setLoading(false);
+            setLoading(true);
+            const res = await axios.get(`https://localhost:7012/api/Brand`);
+            // Đảm bảo dữ liệu là mảng trước khi set
+            const data = Array.isArray(res.data) ? res.data : [];
+            setBrands(data);
+            setFiltered(data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách thương hiệu:", error);
+            showToast("Không thể tải danh sách thương hiệu!", "error");
+            setBrands([]);
+        } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchBrands(); }, []);
-
+    // Gọi fetchBrands khi trang được tải lần đầu
     useEffect(() => {
-        let result = [...brands];
+        fetchBrands();
+    }, []);
+
+    // Xử lý Tìm kiếm và Sắp xếp
+    useEffect(() => {
+        let result = Array.isArray(brands) ? [...brands] : [];
         if (search) {
             result = result.filter(b => b.brandName?.toLowerCase().includes(search.toLowerCase()));
         }
@@ -64,17 +71,17 @@ const Brand = () => {
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn có chắc muốn xóa thương hiệu này?")) return;
         try {
-            await axios.delete(`${API_URL}/${id}`, getAuthConfig());
-            alert("Xóa thương hiệu thành công!");
+            await axios.delete(`https://localhost:7012/api/Brand/${id}`);
+            showToast("Đã xóa thương hiệu thành công!", "success");
             fetchBrands();
         } catch (err) {
-            alert("Lỗi khi xóa dữ liệu.", err);
+            showToast(err.response?.data?.message || "Lỗi khi xóa dữ liệu!", "error");
         }
     };
 
     const handleEditClick = (brand) => {
         setEditingBrand(brand);
-        setBrandNameInput(brand.brandName);
+        setBrandNameInput(brand.brandName || '');
         setError('');
         setIsModalOpen(true);
     };
@@ -86,14 +93,16 @@ const Brand = () => {
 
         try {
             setIsSubmitting(true);
-            const payload = { brandName: nameTrimmed }; // Gửi đúng key brandName
+            const payload = { brandName: nameTrimmed };
 
             if (editingBrand) {
-                await axios.put(`${API_URL}/${editingBrand.brandID}`, payload, getAuthConfig());
-                alert("Cập nhật thương hiệu thành công!");
+                // Sửa thương hiệu
+                await axios.put(`https://localhost:7012/api/Brand/${editingBrand.brandID}`, payload);
+                showToast("Cập nhật thành công!", "success");
             } else {
-                await axios.post(API_URL, payload, getAuthConfig());
-                alert("Thêm thương hiệu thành công!");
+                // Thêm mới thương hiệu
+                await axios.post(`https://localhost:7012/api/Brand`, payload);
+                showToast("Thêm mới thành công!", "success");
             }
             
             await fetchBrands();
@@ -101,8 +110,7 @@ const Brand = () => {
             setEditingBrand(null);
             setBrandNameInput('');
         } catch (err) {
-            // Hiển thị lỗi từ server hoặc thông báo mặc định
-            setError(err.response?.data?.message || 'Có lỗi xảy ra hoặc bạn không có quyền thực hiện.');
+            showToast(err.response?.data?.message || "Có lỗi xảy ra!", "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -182,6 +190,15 @@ const Brand = () => {
                         </form>
                     </div>
                 </div>
+            )}
+            
+            {/* Hiển thị Toast */}
+            {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
             )}
         </div>
     );
