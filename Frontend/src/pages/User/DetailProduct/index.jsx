@@ -32,17 +32,28 @@ export default function Details() {
   }
 
   return (
-    <div className="p-6 max-w-[80%] mx-auto">
+    <div className="p-6 max-w-[80%] mx-auto shadow rounded-lg">
       <div className="flex gap-6">
-        <div className="h-full p-10 w-auto relative m-2">
-            <img className="border w-100" src={product.thumbnail} alt={product.title} />
-            <div className="flex">
-              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
-              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
-              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
-              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
-            </div>
-        </div>
+         <div>
+              <div className="border rounded-lg p-4">
+                <img
+                  src={product.thumbnail}
+                  alt={product.title}
+                  className="w-full h-80 object-contain"
+                />
+              </div>
+
+              <div className="flex gap-2 mt-4">
+                {[1, 2, 3, 4].map(i => (
+                  <img
+                    key={i}
+                    src={product.thumbnail}
+                    alt=""
+                    className="w-20 h-20 border rounded object-cover cursor-pointer hover:border-[#2f9ea0]"
+                  />
+                ))}
+              </div>
+          </div>
         <div className="w-1/2">
           <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
           <h1 className="text-2xl mb-4">Giá: {product.price}$</h1>
