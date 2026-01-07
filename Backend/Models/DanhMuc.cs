@@ -13,7 +13,7 @@ namespace Backend.Models
         
         [Required]
         public string Slug { get; set; } = null!;
-        
+        public DateTime? Delete_At {get;set;}
         public bool TrangThai {get;set;} = true;
         
         public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();

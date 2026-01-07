@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106154621_AddCollumsIsDeleteLienHe")]
+    partial class AddCollumsIsDeleteLienHe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,7 +112,7 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
 
-                    b.Property<DateTime?>("Delete_At")
+                    b.Property<DateTime?>("Is_Delete")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Slug")
@@ -257,12 +260,12 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaLienHe"));
 
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Is_Delete")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayGui")
                         .HasColumnType("datetime2");
@@ -328,9 +331,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$D.XS3zH9nvhK6f3AQpap7e.M.UcdPfTYINjiY6KF250s32IXuDYj6",
-                            NgayCapNhat = new DateTime(2026, 1, 6, 23, 42, 4, 210, DateTimeKind.Local).AddTicks(5173),
-                            NgayTao = new DateTime(2026, 1, 6, 23, 42, 4, 210, DateTimeKind.Local).AddTicks(5155),
+                            MatKhauMaHoa = "$2a$11$cHBK2DkngvpaFmiHRH70DeP7vTLm2TOr2OLX7oUsizC23P01jlz1i",
+                            NgayCapNhat = new DateTime(2026, 1, 6, 22, 46, 21, 595, DateTimeKind.Local).AddTicks(5664),
+                            NgayTao = new DateTime(2026, 1, 6, 22, 46, 21, 595, DateTimeKind.Local).AddTicks(5640),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });
@@ -346,9 +349,6 @@ namespace Ecommerce.Migrations
 
                     b.Property<double>("DanhGiaTrungBinh")
                         .HasColumnType("float");
-
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("GiaCoBan")
                         .HasColumnType("decimal(18,2)");

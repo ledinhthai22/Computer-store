@@ -11,7 +11,7 @@ namespace Backend.DTO.Contact
         public string Email { get; set; } = null!;
         public string NoiDung { get; set; } = null!; 
         public DateTime NgayGui { get; set; } = DateTime.Now; 
-        public int TrangThai { get; set; }
+        public bool TrangThai { get; set; }
         public string Message {get;set;} = null!;
     }
 }

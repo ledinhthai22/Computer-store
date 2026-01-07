@@ -8,15 +8,12 @@ namespace Backend.Models
     {
         [Key]
         public int MaSanPham { get; set; }
-
         [Required]
         public string TenSanPham { get; set; } = null!;
-
-        [Required]
         public string Slug { get; set; } = null!;
         [Column(TypeName = "decimal(18,2)")]
+        [Required]
         public decimal GiaCoBan { get; set; }
-        
         public double DanhGiaTrungBinh { get; set; }
         public double KhuyenMai { get; set; }
         public int SoLuongTon { get; set; }
@@ -24,8 +21,7 @@ namespace Backend.Models
         public int LuotMua { get; set; }
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public bool TrangThai { get; set; } = true;
-
-
+        public DateTime? Delete_At {get;set;}
         public int MaDanhMuc { get; set; }
         [ForeignKey(nameof(MaDanhMuc))]
         public DanhMuc? DanhMuc { get; set; }
