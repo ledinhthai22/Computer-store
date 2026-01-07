@@ -17,44 +17,45 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpGet]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllAsync()
         {
             return Ok(await _IUserService.GetAllAsync());
         }
         [HttpGet("lock")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetLockListAsync()
         {
             return Ok(await _IUserService.GetLockListAsync());
         }
         [HttpGet("unlock")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetUnLockListAsync()
         {
             return Ok(await _IUserService.GetUnLockListAsync());
         }
         [HttpGet("deleted")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetDeleteListAsync()
         {
             return Ok(await _IUserService.GetDeleteListAsync());
         }
         [HttpGet("Userinfo/{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize]
         public async Task<IActionResult> GetUserInfoAsync(int id)
         {
             return Ok(await _IUserService.GetUserInfoAsync(id));
         }
+        
         [HttpPut("Userinfo/{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize]
         public async Task<IActionResult> UpdateUserAsync(int id ,UpdateUserRequest request)
         {
             return Ok(await _IUserService.UpdateUserAsync(id,request));
         }
 
         [HttpPost]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         
         public async Task<IActionResult> Create(CreateUserRequest request)
         {
@@ -63,7 +64,7 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(int id, UpdateUserRequest request)
         {
             await _IUserService.UpdateAdminAsync(id, request);
@@ -71,7 +72,7 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpPut("{id}/lock")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Lock(int id)
         {
             await _IUserService.LockAsync(id);
@@ -79,7 +80,7 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpPut("{id}/unlock")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Unlock(int id)
         {
             await _IUserService.UnLockAsync(id);
@@ -87,7 +88,7 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             await _IUserService.DeleteAsync(id);
@@ -95,7 +96,7 @@ namespace Backend.Controllers.Admin
         }
 
         [HttpPut("{id}/restore")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Restore(int id)
         {
             await _IUserService.RestoreAsync(id);

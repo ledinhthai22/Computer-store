@@ -16,7 +16,7 @@ namespace Ecommerce.Controller.Customer.Cart
             _cartService = cartService;
         }
         [HttpGet("{UserId}")]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> GetByUserId(int UserId)
         {
             var result = await _cartService.GetByUserIdAsync(UserId);
@@ -24,7 +24,7 @@ namespace Ecommerce.Controller.Customer.Cart
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> Create(CartItemRequest request)
         {
             try
@@ -42,7 +42,7 @@ namespace Ecommerce.Controller.Customer.Cart
             }
         }
         [HttpPut]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> Update(CartItemRequest request)
         {
             try
@@ -61,7 +61,7 @@ namespace Ecommerce.Controller.Customer.Cart
             }
         }
         [HttpDelete]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> Delete(DeleteCartRequest request)
         {
             try

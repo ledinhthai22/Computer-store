@@ -29,7 +29,7 @@ namespace Ecommerce.Controller.Admin.Brand
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateBrandRequest request)
         {
             try
@@ -47,7 +47,7 @@ namespace Ecommerce.Controller.Admin.Brand
             }
         }
         [HttpPut("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(int id, UpdateBrandRequest request)
         {
             try
@@ -66,7 +66,7 @@ namespace Ecommerce.Controller.Admin.Brand
             }
         }
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SolfDelete(int id)
         {
             try
@@ -81,14 +81,14 @@ namespace Ecommerce.Controller.Admin.Brand
             }
         }
         [HttpGet("deleted")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetHidenAll()
         {
             var result = await _brandService.GetAllHidenAsync();
             return Ok(result);
         }
         [HttpPut("recover/{id:int}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Restore(int id)
         {
             try

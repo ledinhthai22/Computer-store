@@ -117,6 +117,14 @@ namespace Backend
             {
                 options.UseSqlServer(conStr);
             });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly",
+                    policy => policy.RequireRole("QuanTriVien"));
+
+                options.AddPolicy("UserOnly",
+                    policy => policy.RequireRole("NguoiDung"));
+            });
             var app = builder.Build();
 
 

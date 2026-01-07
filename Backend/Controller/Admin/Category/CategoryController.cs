@@ -31,14 +31,14 @@ namespace Backend.Controller.Category
             return Ok(result);
         }
         [HttpGet("deleted")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetDeteleListAll()
         {
             var result = await _categoryService.GetDeleteListAsync();
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateCategoryRequest request)
         {
             try
@@ -59,7 +59,7 @@ namespace Backend.Controller.Category
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(int id, UpdateCategoryRequest request)
         {
             try
@@ -77,7 +77,7 @@ namespace Backend.Controller.Category
 
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -101,7 +101,7 @@ namespace Backend.Controller.Category
             }
         }
         [HttpPut("recover/{id:int}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Restore(int id)
         {
             try
