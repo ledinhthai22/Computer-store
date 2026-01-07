@@ -18,7 +18,7 @@ export default function Footer(){
         }
         if (!emailRegex.test(email)) {
             setToast({
-                message: "Email không đúng định dạng",
+                message: "Email không đúng định",
                 type: "error"
             });
             return;
