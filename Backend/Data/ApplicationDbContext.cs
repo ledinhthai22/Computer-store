@@ -146,7 +146,7 @@ namespace Backend.Data
                     MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
                     Email = "admin@gmail.com",
                     SoDienThoai = "0999988884",
-                    TrangThai = 1,
+                    TrangThai = true,
                     NgayTao = DateTime.Now,
                     NgayCapNhat = DateTime.Now
                 }

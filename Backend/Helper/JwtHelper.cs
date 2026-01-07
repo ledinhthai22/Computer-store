@@ -1,5 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +13,7 @@ namespace Backend.Helper
         {
             _configuration = configuration;
         }
+
 
         public string GenerateToken(int userId, string role)
         {
@@ -32,11 +32,8 @@ namespace Backend.Helper
             };
 
             double expiresMinutes = 60;
-            var expiresString = jwtSettings["ExpiresMinutes"];
-            if (!string.IsNullOrEmpty(expiresString) && double.TryParse(expiresString, out double parsedMinutes))
-            {
-                expiresMinutes = parsedMinutes;
-            }
+            if (double.TryParse(jwtSettings["ExpiresMinutes"], out double parsed))
+                expiresMinutes = parsed;
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
@@ -48,15 +45,15 @@ namespace Backend.Helper
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
         public string GenerateRefreshToken(int userId)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
-
-            var keyString = jwtSettings["RefreshKey"];
-            if (string.IsNullOrEmpty(keyString))
+            var refreshKey = _configuration["Jwt:RefreshKey"];
+            if (string.IsNullOrEmpty(refreshKey))
                 throw new InvalidOperationException("JWT Refresh Key is not configured.");
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(refreshKey));
 
             var claims = new[]
             {
@@ -72,27 +69,48 @@ namespace Backend.Helper
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         public ClaimsPrincipal ValidateRefreshToken(string refreshToken)
         {
-            if (string.IsNullOrEmpty(refreshToken))
-                throw new ArgumentException("Refresh token is null or empty.");
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                throw new ArgumentException("Refresh token is empty.");
 
             var refreshKey = _configuration["Jwt:RefreshKey"];
             if (string.IsNullOrEmpty(refreshKey))
                 throw new InvalidOperationException("JWT Refresh Key is not configured.");
-            var key = Encoding.UTF8.GetBytes(refreshKey);
 
             var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(refreshKey);
+
             var validationParams = new TokenValidationParameters
             {
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
                 ClockSkew = TimeSpan.Zero
             };
 
-            var principal = tokenHandler.ValidateToken(refreshToken, validationParams, out SecurityToken validatedToken);
+            var principal = tokenHandler.ValidateToken(
+                refreshToken,
+                validationParams,
+                out SecurityToken validatedToken
+            );
+
+
+            if (validatedToken is not JwtSecurityToken jwt ||
+                !jwt.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token algorithm");
+            }
+            
+            var tokenType = principal.FindFirst("type")?.Value;
+            if (tokenType != "refresh")
+            {
+                throw new SecurityTokenException("Invalid refresh token type");
+            }
+
             return principal;
         }
     }

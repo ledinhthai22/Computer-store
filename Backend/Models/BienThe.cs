@@ -16,7 +16,6 @@ namespace Backend.Models
         public string MauSac { get; set; } = null!;
         public string Ram { get; set; } = null!;
         public string OCung { get; set; } = null!;
-        public string ManHinh { get; set; } = null!;
         public string BoXuLyDoHoa { get; set; } = null!;
         public string BoXuLyTrungTam { get; set; } = null!;
         public int SoLuongTon { get; set; }

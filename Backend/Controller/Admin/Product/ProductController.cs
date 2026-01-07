@@ -17,7 +17,7 @@ namespace Backend.Controller.Admin.Product
         }
 
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize(Roles = "QuanTriVien")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest request)
         {
