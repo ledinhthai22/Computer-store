@@ -78,10 +78,10 @@ const ProductTable = ({ data, loading}) => {
                 <div className="flex items-center gap-1">
                     <button 
                         onClick={() => navigate(`/quan-ly/san-pham/${row.maSanPham}`)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer whitespace-nowrap"
                         title="Xem chi tiết"
                     >
-                        <Eye size={18} />
+                        <Eye size={18} /> Xem chi tiết
                     </button>
                 </div>
             ),
