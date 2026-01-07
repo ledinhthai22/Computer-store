@@ -9,6 +9,7 @@ using Backend.Services.Category;
 using Backend.Services.Brand;
 using Backend.Services.WishList;
 using Backend.Services.Contact;
+using Backend.Services.Cart;
 using Backend.Services.Product;
 using Backend.Services.User;
 
@@ -26,6 +27,7 @@ namespace Backend
             builder.Services.AddScoped<IBrandService, BrandService>();
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
+            builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddControllers();

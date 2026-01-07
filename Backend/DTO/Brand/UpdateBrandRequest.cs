@@ -10,6 +10,6 @@ namespace Backend.DTO.Brand
     {
        [Required]
        public string BrandName { get; set; } = null!;
-       public bool Status { get; set; } = true;
+       public DateTime IsDeleted { get; set; }
     }
 }

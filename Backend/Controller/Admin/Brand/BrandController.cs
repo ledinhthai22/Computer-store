@@ -20,6 +20,7 @@ namespace Ecommerce.Controller.Admin.Brand
             var result = await _brandService.GetAllAsync();
             return Ok(result);
         }
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -81,19 +82,19 @@ namespace Ecommerce.Controller.Admin.Brand
         }
         [HttpGet("deleted")]
         [Authorize(Roles = "QuanTriVien")]
-        public async Task<IActionResult> GetDeteleListAll()
+        public async Task<IActionResult> GetHidenAll()
         {
             var result = await _brandService.GetAllHidenAsync();
             return Ok(result);
         }
         [HttpPut("recover/{id:int}")]
         [Authorize(Roles = "QuanTriVien")]
-        public async Task<IActionResult> Recover(int id)
+        public async Task<IActionResult> Restore(int id)
         {
             try
             {
-                bool success = await _brandService.RestoreAsync(id);
-                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu đã xóa" });
+                var success = await _brandService.RestoreAsync(id);
+                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu" });
                 return Ok(new { message = "Khôi phục thương hiệu thành công" });
             }
             catch (Exception ex)

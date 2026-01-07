@@ -9,6 +9,6 @@ namespace Backend.DTO.Brand
     {
         public int BrandID { get; set; }
         public string BrandName { get; set; } = null!;
-        public bool Status { get; set; } = true;
+        public DateTime? IsDeleted { get; set; } 
     }
 }

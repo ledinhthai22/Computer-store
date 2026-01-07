@@ -8,7 +8,7 @@ namespace Backend.Models
         public int MaThuongHieu { get; set; }
         [Required]
         public string TenThuongHieu { get; set; } = null!;
-        public bool TrangThai { get; set; } = true;
+        public DateTime? IsDeleted { get; set; }
         public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();
     }
 }
