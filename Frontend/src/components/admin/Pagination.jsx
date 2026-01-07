@@ -50,7 +50,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
       <button
         onClick={() => onChangePage(1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronsLeft size={18} />
       </button>
@@ -59,7 +59,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
       <button
         onClick={() => onChangePage(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronLeft size={18} />
       </button>
@@ -70,7 +70,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
           if (page === '...') {
             return (
               <div key={`dots-${index}`} className="relative group flex items-center">
-                <span className="w-9 h-9 flex items-center justify-center text-gray-400 group-hover:hidden">
+                <span className="w-9 h-9 flex items-center justify-center text-gray-400 group-hover:hidden cursor-pointer whitespace-nowrap">
                   ...
                 </span>
                 <input
@@ -89,7 +89,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
             <button
               key={index}
               onClick={() => onChangePage(page)}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
+              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                 currentPage === page
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
@@ -105,7 +105,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
       <button
         onClick={() => onChangePage(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronRight size={18} />
       </button>
@@ -114,7 +114,7 @@ const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
       <button
         onClick={() => onChangePage(totalPages)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronsRight size={18} />
       </button>

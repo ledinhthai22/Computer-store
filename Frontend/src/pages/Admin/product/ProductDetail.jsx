@@ -157,7 +157,7 @@ const ProductDetail = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-20 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium cursor-pointer whitespace-nowrap">
           <ArrowLeft size={20} /> Quay lại
         </button>
         <div className="flex gap-3">
@@ -272,7 +272,7 @@ const ProductDetail = () => {
         <h2 className="text-xl font-black text-gray-800 uppercase mb-8 border-b pb-4">Thông Số Kỹ Thuật</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField label="Màn hình" value={specs.kichThuocManHinh} onChange={(v) => setSpecs({...specs, kichThuocManHinh: v})} />
-          <InputField label="RAM" value={specs.soKheRam} onChange={(v) => setSpecs({...specs, soKheRam: v})} />
+          <InputField label="Số khe RAM" value={specs.soKheRam} onChange={(v) => setSpecs({...specs, soKheRam: v})} />
           <InputField label="Ổ cứng" value={specs.oCung} onChange={(v) => setSpecs({...specs, oCung: v})} />
           <InputField label="PIN" value={specs.pin} onChange={(v) => setSpecs({...specs, pin: v})} />
           <InputField label="Hệ điều hành" value={specs.heDieuHanh} onChange={(v) => setSpecs({...specs, heDieuHanh: v})} />
@@ -301,18 +301,18 @@ const ProductDetail = () => {
                   <Trash2 size={20} />
                 </button>
               )}
+              <div className="w-full mb-5">
+              <InputField label="Tên biến thể" value={v.tenBienThe} onChange={(val) => updateVariant(v.maBienThe || v.id, 'tenBienThe', val)} />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <InputField label="Tên biến thể" value={v.tenBienThe} onChange={(val) => updateVariant(v.maBienThe || v.id, 'tenBienThe', val)} />
-                <InputField label="Giá bán" type="number" value={v.giaBan} onChange={(val) => updateVariant(v.maBienThe || v.id, 'giaBan', Number(val))} />
-                <InputField label="Tồn kho" type="number" value={v.soLuongTon} onChange={(val) => updateVariant(v.maBienThe || v.id, 'soLuongTon', Number(val))} />
-                <InputField label="Màu sắc" value={v.mauSac} onChange={(val) => updateVariant(v.maBienThe || v.id, 'mauSac', val)} />
-                
+                <InputField label="Màu sắc" value={v.mauSac} onChange={(val) => updateVariant(v.maBienThe || v.id, 'mauSac', val)} /> 
                 <InputField label="Giá khuyến mãi" value={v.giaKhuyenMai} onChange={(val) => updateVariant(v.maBienThe || v.id, 'giaKhuyenMai', val)} />
                 <InputField label="RAM" value={v.ram} onChange={(val) => updateVariant(v.maBienThe || v.id, 'ram', val)} />
+                <InputField label="Giá bán" type="number" value={v.giaBan} onChange={(val) => updateVariant(v.maBienThe || v.id, 'giaBan', Number(val))} />
                 <InputField label="Ổ cứng" value={v.oCung} onChange={(val) => updateVariant(v.maBienThe || v.id, 'oCung', val)} />
-                <InputField label="Màn hình" value={v.manHinh} onChange={(val) => updateVariant(v.maBienThe || v.id, 'manHinh', val)} />
-                <InputField label="GPU" value={v.boXuLyDoHoa} onChange={(val) => updateVariant(v.maBienThe || v.id, 'boXuLyDoHoa', val)} />
                 <InputField label="CPU" value={v.boXuLyTrungTam} onChange={(val) => updateVariant(v.maBienThe || v.id, 'boXuLyTrungTam', val)} />
+                <InputField label="GPU" value={v.boXuLyDoHoa} onChange={(val) => updateVariant(v.maBienThe || v.id, 'boXuLyDoHoa', val)} />
+                <InputField label="Tồn kho" type="number" value={v.soLuongTon} onChange={(val) => updateVariant(v.maBienThe || v.id, 'soLuongTon', Number(val))} />
               </div>
             </div>
           ))}
