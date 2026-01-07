@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import ProductTable from '../../components/admin/product/ProductTable';
-import Pagination from '../../components/admin/Pagination';
+import ProductTable from '../../../components/admin/product/ProductTable';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -10,11 +9,12 @@ const Product = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://dummyjson.com/products?limit=100');
-        setProducts(res.data.products);
-        setLoading(false);
+        const res = await axios.get('https://localhost:7012/all');
+        const actualData = res.data && Array.isArray(res.data.data) ? res.data.data : [];
+        setProducts(actualData);
       } catch (error) {
         console.error("Lỗi khi fetch data:", error);
+      }finally{
         setLoading(false);
       }
     };
@@ -23,7 +23,6 @@ const Product = () => {
   }, []);
   return (
     <div className="space-y-6">
-
       <div className="flex flex-col gap-4">
         <ProductTable 
           data={products} 

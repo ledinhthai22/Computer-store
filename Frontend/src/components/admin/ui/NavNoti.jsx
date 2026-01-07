@@ -71,7 +71,7 @@ const NavNotifications = ({ isOpen, onToggle, onClose }) => {
                   </Link>
                 </div>
               ))
-            ) : (
+            ) : ( 
               <div className="px-4 py-8 text-center text-gray-400 text-sm">
                 Không có thông báo mới
               </div>
