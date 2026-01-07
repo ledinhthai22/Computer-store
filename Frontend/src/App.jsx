@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
 import {Product, Category, CategoryRecover, Brand, BrandRecover, Contact} from './pages/Admin'
-import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,WishList} from './pages/User'
+import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,
+  WishList,CategoryProduct,BrandProduct} from './pages/User'
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +23,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<WishList />} />          
+          <Route path="/wishlist" element={<WishList />} />
+          <Route path="/products/category/:id" element={<CategoryProduct />} />
+          <Route path="/products/brand/:id" element={<BrandProduct />} />    
         </Route>
 
         {/* --- Quản lý ROUTES --- */}
