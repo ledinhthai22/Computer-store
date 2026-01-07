@@ -97,7 +97,7 @@ const ProductTable = ({ data, loading}) => {
                     placeholder="Tìm kiếm sản phẩm..."
                 />
                 <button 
-                    onClick={() => navigate('/quan-ly/san-pham/them-moi')}
+                    onClick={() => navigate('/quan-ly/san-pham/them-san-pham')}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer whitespace-nowrap"
                 >
                     <Plus size={16} />
