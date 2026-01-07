@@ -15,16 +15,24 @@ const NavNotifications = ({ isOpen, onToggle, onClose }) => {
   // Fetch số lượng thông báo mới
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`https://dummyjson.com/quotes?limit=5`); // Lấy 5 cái mới nhất
-      const data = res.data?.quotes || [];
-      setLatestContacts(data);
-      setUnreadCount(res.data?.total || 0); // Lấy tổng số lượng từ API
+      const res = await axios.get(`https://localhost:7012/api/Contact/AllUnread`);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.$values || []);
+      setUnreadCount(data.length);
+      const top5 = data.slice(0, 10); 
+      setLatestContacts(top5);
     } catch (error) {
       console.error("Lỗi fetch thông báo:", error);
     }
   };
 
-  useEffect(() => { fetchNotifications(); }, []);
+  useEffect(() => {
+    fetchNotifications();
+    window.addEventListener('contactUpdated', fetchNotifications);
+    
+    return () => {
+      window.removeEventListener('contactUpdated', fetchNotifications);
+    };
+  }, []);
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -54,11 +62,13 @@ const NavNotifications = ({ isOpen, onToggle, onClose }) => {
             {latestContacts.length > 0 ? (
               latestContacts.map((item) => (
                 <div key={item.id} className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 bg-blue-50/20">
-                  <div className="flex justify-between items-start">
-                    <p className="text-sm font-medium text-gray-800 line-clamp-1">{item.author}</p>
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic">"{item.quote}"</p>
+                  <Link to={`/quan-ly/lien-he/`}>
+                    <div className="flex justify-between items-start">
+                      <p className="text-sm font-medium text-gray-800 line-clamp-1">{item.email}</p>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2 italic">"{item.noiDung}"</p>
+                  </Link>
                 </div>
               ))
             ) : (

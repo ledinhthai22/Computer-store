@@ -4,12 +4,12 @@ import { Eye, Trash2, ArrowUpIcon } from "lucide-react";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const ContactTable = ({ data, loading, onDelete }) => { 
+const ContactTable = ({ data, loading, onDelete, onView }) => { 
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.author && item.author.toLowerCase().includes(filterText.toLowerCase()) ||
-                item.quote && item.quote.toLowerCase().includes(filterText.toLowerCase())
+        item => item.email && item.email.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.noiDung && item.noiDung.toLowerCase().includes(filterText.toLowerCase())
     );
     const truncateText = (text, wordLimit) => {     
         if (!text) return "";
@@ -28,36 +28,45 @@ const ContactTable = ({ data, loading, onDelete }) => {
         },
         {
             name: 'EMAIL LIÊN HỆ',
-            selector: row => row.author,
+            selector: row => row.email,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.author}
+                    {row.email}
                 </span>
             ),
         },
         {
             name: 'NỘI DUNG',
-            selector: row => row.quote,
+            selector: row => row.noiDung,
             sortable: true,
             grow: 2,
             cell: row => (
-                <span className="text-gray-700" title={row.quote}>
-                {truncateText(row.quote, 6)}
+                <span className="text-gray-700" title={row.noiDung}>
+                {truncateText(row.noiDung, 6)}
         </span>
             ),
         },
         {
             name: 'TRẠNG THÁI',
-            selector: row => row.author,
+            selector: row => row.message,
             sortable: true,
-            grow: 2,
-            cell: row => (
-                <span className="font-semibold text-gray-700 capitalize">
-                    {row.author}
-                </span>
-            ),
+            width: '160px', // Tăng nhẹ độ rộng để nhãn không bị gò bó
+            cell: row => {
+                // Kiểm tra chính xác giá trị text trả về từ API
+                const isRead = row.message?.toLowerCase() === "đã đọc";
+                
+                return (
+                    <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+                        isRead 
+                            ? "bg-green-100 text-green-700 border-green-200"
+                            : "bg-red-100 text-red-700 border-red-200"
+                    }`}>
+                        {row.message}
+                    </span>
+                );
+            },
         },
         {
             name: 'HÀNH ĐỘNG',
@@ -66,14 +75,14 @@ const ContactTable = ({ data, loading, onDelete }) => {
             cell: row => (
                 <div className="flex items-center gap-2">
                     <button 
-
+                        onClick={() => onView(row)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xem"
                     >
                         <Eye size={18} /> Xem
                     </button>
                     <button 
-                        //onClick={() => onDelete(row.maLienHe)}
+                        onClick={() => onDelete(row.maLienHe)}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xóa"
                     >

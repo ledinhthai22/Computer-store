@@ -3,6 +3,7 @@ import {useState, useEffect, useCallback} from 'react';
 import ContactTable from '../../components/admin/contact/ContactTable';
 import Toast from '../../components/admin/Toast';
 import ConfirmModal from '../../components/admin/DeleteConfirmModal';
+import ContactModal from '../../components/admin/contact/ContactModal';
 
 const Contact = () => {
     const [contacts, setContacts] = useState([]);
@@ -12,9 +13,12 @@ const Contact = () => {
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-    // const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    // const [deleteId, setDeleteId] = useState(null);
-    // const [isDeleting, setIsDeleting] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [selectedContact, setSelectedContact] = useState(null);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -23,12 +27,11 @@ const Contact = () => {
     const fetchContacts = useCallback(async () => {
         try {
             setLoading(true);
-            let url = `https://localhost:7012/api/Brand`;
-            
+            let url = `https://localhost:7012/api/Contact`;         
             if (filterType === 'unread') {
-                url = `https://localhost:7012/api/Contact/unread`;
+                url = `https://localhost:7012/api/Contact/AllUnread`;
             } else if (filterType === 'read') {
-                url = `https://localhost:7012/api/Contact/read`;
+                url = `https://localhost:7012/api/Contact/AllRead`;
             }
             const res = await axios.get(url);
             const data = Array.isArray(res.data) ? res.data : [];
@@ -46,25 +49,49 @@ const Contact = () => {
     useEffect(() => {fetchContacts();}, [fetchContacts]);
 
     // MODAL XÓA
-    // const handleDeleteClick = (id) => {
-    //     setDeleteId(id);
-    //     setIsConfirmOpen(true);
-    // };
-    // const handleConfirmDelete = async () => {
-    //     try {
-    //         setIsDeleting(true);
-    //         await axios.delete(`https://localhost:7012/api/Contact/${deleteId}`);
-    //         showToast("Đã xóa liên hệ thành công!", "success");
-    //         await fetchContacts();
-    //     } catch (err) {
-    //         console.error(err);
-    //         showToast("Lỗi xóa dữ liệu", "error");
-    //     } finally {
-    //         setIsDeleting(false);
-    //         setIsConfirmOpen(false);
-    //         setDeleteId(null);
-    //     }
-    // };
+    const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+    };
+    const handleConfirmDelete = async () => {
+        try {
+            setIsDeleting(true);
+            await axios.delete(`https://localhost:7012/api/Contact/${deleteId}`);
+            showToast("Đã xóa liên hệ thành công!", "success");
+            await fetchContacts();
+            window.dispatchEvent(new CustomEvent('contactUpdated'));
+        } catch (err) {
+            console.error(err);
+            showToast("Lỗi xóa dữ liệu", "error");
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
+        }
+    };
+
+    const handleViewClick = async (contact) => {
+        setSelectedContact(contact);
+        setIsViewModalOpen(true);
+
+        // Nếu liên hệ chưa đọc (message !== "đã đọc")
+        if (contact.message?.toLowerCase() !== "đã đọc") {
+            try {
+                // Đảm bảo URL API đúng với Backend của bạn
+                await axios.put(`https://localhost:7012/api/Contact/read/${contact.maLienHe}`);
+                
+                // 1. Tải lại DataTable tại trang này
+                await fetchContacts(); 
+
+                // 2. Phát sự kiện để NavNotification trên Header cập nhật theo
+                window.dispatchEvent(new CustomEvent('contactUpdated'));
+                
+            } catch (error) {
+                console.error("Không thể cập nhật trạng thái:", error);
+            }
+        }
+    };
+
     return (
         <>
             <div className="space-y-6">
@@ -80,16 +107,12 @@ const Contact = () => {
                         <option value="unread">Chưa đọc</option>
                         <option value="read">Đã đọc</option>
                     </select>
-
-                    {/* Hiển thị số lượng hiện tại */}
-                    <span className="text-sm text-gray-500 ml-auto">
-                        Hiển thị: <strong>{contacts.length}</strong> kết quả
-                    </span>
                 </div>
                 <ContactTable 
                     data={contacts} 
                     loading={loading}
-                    //onDelete={handleDeleteClick}
+                    onDelete={handleDeleteClick}
+                    onView={handleViewClick}
                 />
             </div>
             
@@ -101,13 +124,18 @@ const Contact = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
-            {/* <ConfirmModal 
+            <ConfirmModal 
                 isOpen={isConfirmOpen}
                 message="Bạn có muốn xóa liên hệ này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
-            /> */}
+            />
+            <ContactModal
+                isOpen={isViewModalOpen}
+                contact={selectedContact}
+                onClose={() => setIsViewModalOpen(false)}
+            />
         </div>
         </>
     )
