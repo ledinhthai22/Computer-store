@@ -36,23 +36,37 @@ namespace Backend.Controllers.Auth
             if (!result.Success)
                 return Unauthorized(new { message = result.Message });
 
+            var accessToken = _jwtHelper.GenerateToken(
+                result.MaNguoiDung,
+                result.VaiTro ?? "NguoiDung"
+            );
+
             var refreshToken = _jwtHelper.GenerateRefreshToken(result.MaNguoiDung);
+
+            Response.Cookies.Append("access_token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,              // localhost
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(60)
+            });
 
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, 
-                SameSite = SameSiteMode.Strict,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
             return Ok(new
             {
-                message = result.Message,
+                message = "Login success",
                 hoTen = result.HoTen,
                 vaiTro = result.VaiTro
             });
         }
+
 
 
         [HttpPost("register")]
@@ -88,7 +102,7 @@ namespace Backend.Controllers.Auth
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized(new { message = "Missing refresh token" });
+                return Unauthorized();
 
             try
             {
@@ -100,25 +114,36 @@ namespace Backend.Controllers.Auth
                     .FirstOrDefaultAsync(u => u.MaNguoiDung == userId);
 
                 if (user == null || user.TrangThai == false)
-                    return Unauthorized(new { message = "User not found or locked" });
+                    return Unauthorized();
 
                 var role = user.VaiTro?.TenVaiTro ?? "NguoiDung";
-                var accessToken = _jwtHelper.GenerateToken(userId, role);
+                var newAccessToken = _jwtHelper.GenerateToken(userId, role);
 
-                return Ok(new { accessToken });
+                Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false, // true khi deploy HTTPS
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddMinutes(60)
+                });
+
+                return Ok(new { message = "Token refreshed" });
             }
             catch
             {
-                return Unauthorized(new { message = "Invalid refresh token" });
+                return Unauthorized();
             }
         }
+
 
         [HttpPost("logout")]
         public IActionResult Logout()
         {
+            Response.Cookies.Delete("access_token");
             Response.Cookies.Delete("refreshToken");
 
             return Ok(new { message = "Logged out" });
         }
+
     }
 }
