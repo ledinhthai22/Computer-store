@@ -8,7 +8,7 @@ namespace Backend.Models
         [Key]
         public int MaDanhMuc { get; set; }
         
-        [Required]
+        [Required,MaxLength(100)]
         public string TenDanhMuc { get; set; } = null!;
         
         [Required]
