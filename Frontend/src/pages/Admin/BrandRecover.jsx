@@ -21,7 +21,7 @@ const BrandRecover = () => {
     const fetchDataRecover = async () => {
         try {
             setLoading(false);
-            const res = await axios.get('https://localhost:7012/api/Brand');
+            const res = await axios.get('https://localhost:7012/api/Brand/deleted');
             const data = Array.isArray(res.data) ? res.data : [];
             setBrands(data);
         } catch (error) {
@@ -41,7 +41,7 @@ const BrandRecover = () => {
     const handleConfirmRecover = async () => {
     try {
         setIsRecover(true);
-        await axios.post(`https://localhost:7012/api/Brand/recover/${recoverId}`);
+        await axios.put(`https://localhost:7012/api/Brand/recover/${recoverId}`);
         
         showToast("Khôi phục thành công!", "success");
         await fetchDataRecover();

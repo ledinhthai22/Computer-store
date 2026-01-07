@@ -8,12 +8,12 @@ namespace Backend.Models
         [Key]
         public int MaDanhMuc { get; set; }
         
-        [Required]
+        [Required,MaxLength(100)]
         public string TenDanhMuc { get; set; } = null!;
         
         [Required]
         public string Slug { get; set; } = null!;
-        
+        public DateTime? Delete_At {get;set;}
         public bool TrangThai {get;set;} = true;
         
         public ICollection<SanPham> SanPham { get; set; } = new List<SanPham>();

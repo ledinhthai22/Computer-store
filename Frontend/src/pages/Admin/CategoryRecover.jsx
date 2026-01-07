@@ -41,13 +41,13 @@ const CategoryRecover = () => {
     const handleConfirmRecover = async () => {
     try {
         setIsRecover(true);
-        await axios.post(`https://localhost:7012/api/Category/recover/${recoverId}`);
+        await axios.put(`https://localhost:7012/api/Category/recover/${recoverId}`);
         
         showToast("Khôi phục thành công!", "success");
         await fetchCategoriesRecover();
     } catch (err) {
         console.error(err);
-        showToast("Lỗi khi khôi phục dữ liệu!", "error");
+        showToast("Lỗi khôi phục dữ liệu!", "error");
     } finally {
         setIsRecover(false);
         setIsConfirmOpen(false);

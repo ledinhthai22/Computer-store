@@ -16,26 +16,28 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllAsync()
         {
             return await _DbContext.LienHe
-                .Where(x => x.TrangThai == 1  || x.TrangThai == 2)
+                .Where(x => x.Delete_At == null )
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
                     TrangThai = l.TrangThai,
+                    NgayGui = l.NgayGui,
+                    Message = l.TrangThai ? "Đã đọc" : "Chưa đọc"
                 })
                 .ToListAsync();
         }
         public async Task<IEnumerable<ContactResult>> GetAllUnreadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == 1)
+            .Where(x => x.TrangThai == false && x.Delete_At == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
-                    TrangThai = l.TrangThai,
+                    TrangThai = l.TrangThai ,
                     Message = "Chưa đọc"
                 })
                 .ToListAsync();
@@ -43,7 +45,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllReadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == 2)
+            .Where(x => x.TrangThai == true && x.Delete_At == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -61,7 +63,8 @@ namespace Backend.Services.Contact
 
                 Email = req.Email,
                 NoiDung = req.NoiDung,
-                TrangThai = 1,
+                TrangThai = false,
+                Delete_At = null,
                 NgayGui = DateTime.Now
             };
 
@@ -74,7 +77,9 @@ namespace Backend.Services.Contact
                 Email = sendContact.Email,
                 NoiDung = sendContact.NoiDung,
                 TrangThai = sendContact.TrangThai,
-                NgayGui = sendContact.NgayGui
+                NgayGui = sendContact.NgayGui,
+                Message = "Gửi thành công"
+                
             };
         }
         public async Task<bool> DeleteSendcontactAsync(int id)
@@ -87,7 +92,8 @@ namespace Backend.Services.Contact
                 return false;
             }
 
-            Contact.TrangThai = 0;
+            Contact.TrangThai = true;
+            Contact.Delete_At = DateTime.Now;
 
             await _DbContext.SaveChangesAsync();
 
@@ -102,7 +108,7 @@ namespace Backend.Services.Contact
                 throw new KeyNotFoundException($"Contact with id {id} not found.");
             }
 
-            contact.TrangThai = 2;
+            contact.TrangThai = true;
             await _DbContext.SaveChangesAsync();
 
             return new ContactResult
@@ -110,7 +116,7 @@ namespace Backend.Services.Contact
                 MaLienHe = contact.MaLienHe,
                 Email = contact.Email,
                 NoiDung = contact.NoiDung,
-                TrangThai = 2,
+                TrangThai = true,
                 NgayGui = contact.NgayGui,
                 Message = "Đã đánh dấu là đã đọc"
             };

@@ -7,7 +7,8 @@ namespace Backend.Models
     public class BienThe
     {
         [Key]
-        public int MaBTSP { get; set; } 
+        public int MaBTSP { get; set; }
+        public string TenBienThe { get; set; } = null!;
         [Column(TypeName = "decimal(18,2)")]
         public decimal GiaBan { get; set; }
         [Column(TypeName = "decimal(18,2)")]
@@ -20,12 +21,13 @@ namespace Backend.Models
         public string BoXuLyTrungTam { get; set; } = null!;
         public int SoLuongTon { get; set; }
         public bool TrangThai { get; set; } = true;
+        public DateTime Deleted_At { get; set; } 
         public int MaSanPham { get; set; }
         [ForeignKey(nameof(MaSanPham))]
         public SanPham SanPham { get; set; } = null!;
         public ICollection<HinhAnhSanPham> HinhAnhSanPham { get; set; } = new List<HinhAnhSanPham>();
         public ICollection<ChiTietGioHang> ChiTietGioHang { get; set; } = new List<ChiTietGioHang>();
         public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
-        public ICollection<DonHang> DonHang { get; set; } = new List<DonHang>(); 
+        public ICollection<DonHang> DonHang { get; set; } = new List<DonHang>();
     }
 }

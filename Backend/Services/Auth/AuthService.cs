@@ -5,7 +5,6 @@ using Backend.Helper;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 using Backend.DTO.Auth;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Backend.Services.Auth
 {
@@ -22,27 +21,21 @@ namespace Backend.Services.Auth
 
         public async Task<AuthResult> LoginAsync(LoginRequest req)
         {
-
             var user = await _Dbcontext.NguoiDung
-          .AsNoTracking()
-          .Where(u => u.Email == req.Email)
-          .Select(u => new
-          {
-
-              u.MaNguoiDung,
-              u.MatKhauMaHoa,
-              u.HoTen,
-              u.TrangThai,
-
-              TenVaiTro = u.VaiTro.TenVaiTro
-          })
-          .FirstOrDefaultAsync();
-
+                .AsNoTracking()
+                .Where(u => u.Email == req.Email)
+                .Select(u => new
+                {
+                    u.MaNguoiDung,
+                    u.MatKhauMaHoa,
+                    u.HoTen,
+                    u.TrangThai,
+                    TenVaiTro = u.VaiTro.TenVaiTro
+                })
+                .FirstOrDefaultAsync();
 
             if (user == null)
-            {
                 return new AuthResult { Success = false, Message = "Tài khoản không tồn tại." };
-            }
 
             bool isPasswordValid = false;
             try
@@ -55,19 +48,12 @@ namespace Backend.Services.Auth
             }
 
             if (!isPasswordValid)
-            {
                 return new AuthResult { Success = false, Message = "Mật khẩu không chính xác." };
-            }
-
 
             if (user.TrangThai == 2)
-            {
                 return new AuthResult { Success = false, Message = "Tài khoản đã bị khóa." };
-            }
-
 
             var token = _jwtHelper.GenerateToken(user.MaNguoiDung, user.TenVaiTro);
-
 
             return new AuthResult
             {
@@ -78,25 +64,17 @@ namespace Backend.Services.Auth
                 VaiTro = user.TenVaiTro
             };
         }
+
         public async Task<AuthResult> RegisterAsync(RegisterRequest req)
         {
-            
             var existed = await _Dbcontext.NguoiDung
                 .FirstOrDefaultAsync(x => x.Email == req.Email);
 
             if (existed != null)
-            {
-                return new AuthResult
-                {
-                    Success = false,
-                    Message = "Email đã tồn tại"
-                };
-            }
+                return new AuthResult { Success = false, Message = "Email đã tồn tại" };
 
-            
             string hashPassWord = BCrypt.Net.BCrypt.HashPassword(req.MatKhau);
 
-            
             var user = new NguoiDung
             {
                 HoTen = req.HoTen,
@@ -104,25 +82,21 @@ namespace Backend.Services.Auth
                 SoDienThoai = req.SoDienThoai,
                 MatKhauMaHoa = hashPassWord,
                 TrangThai = 1,
-                MaVaiTro = 2, 
+                MaVaiTro = 2,
                 NgayTao = DateTime.Now,
                 NgayCapNhat = DateTime.Now
             };
 
-            
             _Dbcontext.NguoiDung.Add(user);
-            await _Dbcontext.SaveChangesAsync();  
+            await _Dbcontext.SaveChangesAsync();
 
-            
             var vaiTro = await _Dbcontext.VaiTro
                 .FirstOrDefaultAsync(r => r.MaVaiTro == user.MaVaiTro);
 
             string tenVaiTro = vaiTro?.TenVaiTro ?? "NguoiDung";
 
-            
             var token = _jwtHelper.GenerateToken(user.MaNguoiDung, tenVaiTro);
 
-            
             return new AuthResult
             {
                 Success = true,
@@ -133,5 +107,9 @@ namespace Backend.Services.Auth
             };
         }
 
+        public string GenerateRefreshToken(int userId)
+        {
+            return _jwtHelper.GenerateRefreshToken(userId);
+        }
     }
 }
