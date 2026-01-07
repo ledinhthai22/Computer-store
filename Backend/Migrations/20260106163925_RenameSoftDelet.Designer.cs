@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106163925_RenameSoftDelet")]
+    partial class RenameSoftDelet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -328,9 +331,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$D.XS3zH9nvhK6f3AQpap7e.M.UcdPfTYINjiY6KF250s32IXuDYj6",
-                            NgayCapNhat = new DateTime(2026, 1, 6, 23, 42, 4, 210, DateTimeKind.Local).AddTicks(5173),
-                            NgayTao = new DateTime(2026, 1, 6, 23, 42, 4, 210, DateTimeKind.Local).AddTicks(5155),
+                            MatKhauMaHoa = "$2a$11$Y.aqB4IHwoW5dYld/EtNw.yhxT6i.fkDc74ZKYsS6kEJ4KO0GNgXK",
+                            NgayCapNhat = new DateTime(2026, 1, 6, 23, 39, 24, 829, DateTimeKind.Local).AddTicks(9258),
+                            NgayTao = new DateTime(2026, 1, 6, 23, 39, 24, 829, DateTimeKind.Local).AddTicks(9240),
                             SoDienThoai = "0999988884",
                             TrangThai = 1
                         });

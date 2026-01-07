@@ -20,7 +20,7 @@ namespace Backend.Services.Category
         public async Task<IEnumerable<CategoryResult>> GetAllAsync()
         {
             return await _dbContext.DanhMuc
-                .Where(x => x.TrangThai == true && x.Is_Delete == null)
+                .Where(x => x.TrangThai == true && x.Delete_At == null)
                 .Select(d => new CategoryResult
                 {
                     MaDanhMuc = d.MaDanhMuc,
@@ -35,7 +35,7 @@ namespace Backend.Services.Category
         {
             var category = await _dbContext.DanhMuc.FindAsync(id);
 
-            if (category == null || category.TrangThai == false || category.Is_Delete != null)
+            if (category == null || category.TrangThai == false || category.Delete_At != null)
                 return null;
 
             return new CategoryResult
@@ -50,7 +50,7 @@ namespace Backend.Services.Category
         public async Task<IEnumerable<CategoryResult>> GetDeleteListAsync()
         {
             return await _dbContext.DanhMuc
-                .Where(x => x.Is_Delete != null)
+                .Where(x => x.Delete_At != null)
                 .Select(d => new CategoryResult
                 {
                     MaDanhMuc = d.MaDanhMuc,
@@ -66,7 +66,7 @@ namespace Backend.Services.Category
             string ten = request.TenDanhMuc.Trim();
 
             bool isDuplicate = await _dbContext.DanhMuc
-                .AnyAsync(x => x.TenDanhMuc == ten && x.TrangThai == true && x.Is_Delete == null);
+                .AnyAsync(x => x.TenDanhMuc == ten && x.TrangThai == true && x.Delete_At == null);
 
             if (isDuplicate)
                 throw new InvalidOperationException($"Danh mục '{ten}' đã tồn tại.");
@@ -79,7 +79,7 @@ namespace Backend.Services.Category
                 TenDanhMuc = ten,
                 Slug = uniqueSlug,
                 TrangThai = true,
-                Is_Delete = null
+                Delete_At = null
             };
 
             _dbContext.DanhMuc.Add(category);
@@ -98,7 +98,7 @@ namespace Backend.Services.Category
         {
             var category = await _dbContext.DanhMuc.FindAsync(id);
 
-            if (category == null || category.Is_Delete != null)
+            if (category == null || category.Delete_At != null)
                 throw new InvalidOperationException("Danh mục không tồn tại hoặc đã bị xóa.");
 
             string tenMoi = request.TenDanhMuc.Trim();
@@ -109,7 +109,7 @@ namespace Backend.Services.Category
                     .AnyAsync(x => x.MaDanhMuc != id
                                 && x.TenDanhMuc == tenMoi
                                 && x.TrangThai == true
-                                && x.Is_Delete == null);
+                                && x.Delete_At == null);
 
                 if (isDuplicate)
                     throw new InvalidOperationException($"Tên danh mục '{tenMoi}' đã tồn tại.");
@@ -143,7 +143,7 @@ namespace Backend.Services.Category
                 throw new InvalidOperationException("Danh mục đang được sử dụng bởi sản phẩm, không thể xóa.");
 
             category.TrangThai = false;
-            category.Is_Delete = DateTime.Now;
+            category.Delete_At = DateTime.Now;
 
             await _dbContext.SaveChangesAsync();
             return true;
@@ -152,18 +152,18 @@ namespace Backend.Services.Category
         public async Task<bool> RecoverAsync(int id)
         {
             var category = await _dbContext.DanhMuc.FindAsync(id);
-            if (category == null || category.Is_Delete == null) return false;
+            if (category == null || category.Delete_At == null) return false;
 
             bool isDuplicate = await _dbContext.DanhMuc
                 .AnyAsync(x => x.MaDanhMuc != id
                             && x.TenDanhMuc == category.TenDanhMuc
                             && x.TrangThai == true
-                            && x.Is_Delete == null);
+                            && x.Delete_At == null);
 
             if (isDuplicate)
                 throw new InvalidOperationException("Tên danh mục bị trùng, không thể khôi phục.");
 
-            category.Is_Delete = null;
+            category.Delete_At = null;
             category.TrangThai = true;
 
             await _dbContext.SaveChangesAsync();

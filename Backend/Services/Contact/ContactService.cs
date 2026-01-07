@@ -16,7 +16,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllAsync()
         {
             return await _DbContext.LienHe
-                .Where(x => x.Is_Delete == null )
+                .Where(x => x.Delete_At == null )
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -64,7 +64,7 @@ namespace Backend.Services.Contact
                 Email = req.Email,
                 NoiDung = req.NoiDung,
                 TrangThai = false,
-                Is_Delete = null,
+                Delete_At = null,
                 NgayGui = DateTime.Now
             };
 
@@ -77,7 +77,9 @@ namespace Backend.Services.Contact
                 Email = sendContact.Email,
                 NoiDung = sendContact.NoiDung,
                 TrangThai = sendContact.TrangThai,
-                NgayGui = sendContact.NgayGui
+                NgayGui = sendContact.NgayGui,
+                Message = "Gửi thành công"
+                
             };
         }
         public async Task<bool> DeleteSendcontactAsync(int id)
