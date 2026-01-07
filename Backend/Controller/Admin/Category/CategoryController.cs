@@ -102,7 +102,7 @@ namespace Backend.Controller.Category
         }
         [HttpPut("recover/{id:int}")]
         [Authorize(Roles = "QuanTriVien")]
-        public async Task<IActionResult> Recover(int id)
+        public async Task<IActionResult> Restore(int id)
         {
             try
             {

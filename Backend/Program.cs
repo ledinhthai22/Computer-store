@@ -10,6 +10,7 @@ using Backend.Services.Brand;
 using Backend.Services.WishList;
 using Backend.Services.Contact;
 using Backend.Services.Product;
+using Backend.Services.User;
 
 namespace Backend
 {
@@ -26,6 +27,7 @@ namespace Backend
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];

@@ -51,7 +51,7 @@ namespace Backend.Services.Product
                 var productSpecification = new ThongSoKyThuat
                 {
                     KichThuocManHinh = request.ThongSoKyThuat.KichThuocManHinh,
-                    SoKheRam = request.ThongSoKyThuat.KichThuocManHinh,
+                    SoKheRam = request.ThongSoKyThuat.SoKheRam,
                     OCung = request.ThongSoKyThuat.OCung,
                     Pin = request.ThongSoKyThuat.Pin,
                     HeDieuHanh = request.ThongSoKyThuat.HeDieuHanh,
@@ -86,7 +86,6 @@ namespace Backend.Services.Product
                         MauSac = v.MauSac,
                         Ram = v.Ram,
                         OCung = v.OCung,
-                        ManHinh = v.ManHinh,
                         BoXuLyDoHoa = v.BoXuLyDoHoa,
                         BoXuLyTrungTam = v.BoXuLyTrungTam,
                         SoLuongTon = v.SoLuongTon,
@@ -185,7 +184,6 @@ namespace Backend.Services.Product
                     MauSac = v.MauSac,
                     Ram = v.Ram,
                     OCung = v.OCung,
-                    ManHinh = v.ManHinh,
                     BoXuLyDoHoa = v.BoXuLyDoHoa,
                     BoXuLyTrungTam = v.BoXuLyTrungTam,
                     SoLuongTon = v.SoLuongTon,
