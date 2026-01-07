@@ -306,6 +306,13 @@ const ProductDetail = () => {
                 <InputField label="Giá bán" type="number" value={v.giaBan} onChange={(val) => updateVariant(v.maBienThe || v.id, 'giaBan', Number(val))} />
                 <InputField label="Tồn kho" type="number" value={v.soLuongTon} onChange={(val) => updateVariant(v.maBienThe || v.id, 'soLuongTon', Number(val))} />
                 <InputField label="Màu sắc" value={v.mauSac} onChange={(val) => updateVariant(v.maBienThe || v.id, 'mauSac', val)} />
+                
+                <InputField label="Giá khuyến mãi" value={v.giaKhuyenMai} onChange={(val) => updateVariant(v.maBienThe || v.id, 'giaKhuyenMai', val)} />
+                <InputField label="RAM" value={v.ram} onChange={(val) => updateVariant(v.maBienThe || v.id, 'ram', val)} />
+                <InputField label="Ổ cứng" value={v.oCung} onChange={(val) => updateVariant(v.maBienThe || v.id, 'oCung', val)} />
+                <InputField label="Màn hình" value={v.manHinh} onChange={(val) => updateVariant(v.maBienThe || v.id, 'manHinh', val)} />
+                <InputField label="GPU" value={v.boXuLyDoHoa} onChange={(val) => updateVariant(v.maBienThe || v.id, 'boXuLyDoHoa', val)} />
+                <InputField label="CPU" value={v.boXuLyTrungTam} onChange={(val) => updateVariant(v.maBienThe || v.id, 'boXuLyTrungTam', val)} />
               </div>
             </div>
           ))}
