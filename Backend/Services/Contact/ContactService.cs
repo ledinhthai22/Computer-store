@@ -31,7 +31,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllUnreadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai ==true)
+            .Where(x => x.TrangThai == false && x.Delete_At == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -45,7 +45,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllReadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == true)
+            .Where(x => x.TrangThai == true && x.Delete_At == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -92,7 +92,8 @@ namespace Backend.Services.Contact
                 return false;
             }
 
-            Contact.TrangThai = false;
+            Contact.TrangThai = true;
+            Contact.Delete_At = DateTime.Now;
 
             await _DbContext.SaveChangesAsync();
 
