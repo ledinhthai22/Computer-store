@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthProvider";
+import { useToast } from "../../contexts/ToastContext";
 import { FaUser } from "react-icons/fa6";
 
 export default function UserDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function UserDropdown() {
   const handleLogout = () => {
     logout();
     navigate("/");
+    showToast("Đăng xuất thành công", "success");
   };
 
   return (

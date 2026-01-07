@@ -2,25 +2,19 @@ import { Link } from "react-router-dom";
 import { FaFacebook,FaYoutube,FaInstagramSquare,FaTiktok } from "react-icons/fa";
 import { SiZalo } from "react-icons/si";
 import { useState } from "react";
-import UserToast from "./UserToast";
+import { useToast } from "../../contexts/ToastContext";
 export default function Footer(){
     const [email, setEmail] = useState("");
     const [noiDung, setNoiDung] = useState("");
-    const [toast, setToast] = useState(null);
+    const { showToast } = useToast();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const handleSubmit = async () => {
         if (!email || !noiDung) {
-            setToast({
-                message: "Vui lòng nhập đầy đủ thông tin",
-                type: "info"
-            });
+            showToast("Vui lòng nhập đầy đủ thông tin", "info");
             return;
         }
         if (!emailRegex.test(email)) {
-            setToast({
-                message: "Email không đúng định dang",
-                type: "error"
-            });
+            showToast("Email không đúng định dạng", "error");
             return;
         }
 
@@ -35,19 +29,13 @@ export default function Footer(){
 
             if (!res.ok) throw new Error("Gửi liên hệ thất bại");
 
-            setToast({
-                message: "Gửi liên hệ thành công ",
-                type: "success"
-            });
+            showToast("Gửi liên hệ thành công", "success");
 
             setEmail("");
             setNoiDung("");
         } catch (err) {
             console.error(err);
-            setToast({
-                message: "Có lỗi xảy ra, vui lòng thử lại ",
-                type: "error"
-            });
+            showToast("Có lỗi xảy ra vui lòng thử lại", "error");
         }
     };
     return(
@@ -82,14 +70,6 @@ export default function Footer(){
                             Gửi liên hệ
                         </button>
                     </div>
-
-                    {toast && (
-                        <UserToast
-                            message={toast.message}
-                            type={toast.type}
-                            onClose={() => setToast(null)}
-                        />
-                    )}
                 </div>
                     {/* <div className="m-2">   
                         <h3 className="font-bold">Đăng ký nhận khuyến mãi</h3>

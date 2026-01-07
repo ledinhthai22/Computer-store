@@ -1,12 +1,14 @@
 import {Link, useNavigate} from "react-router-dom"
 import { useAuth } from "../../../contexts/AuthProvider";
+import { useToast } from "../../../contexts/ToastContext";
 import { useState } from "react";
 
 export default function Login(){
     const { login } = useAuth();  
-  const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState('');
-  const handleSubmit = async (event) => {
+    const { showToast } = useToast();
+    const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState('');
+    const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const email = formData.get("email");
@@ -22,6 +24,7 @@ export default function Login(){
 
       if (result.success) {
         navigate("/");
+        showToast("Đăng nhập thành công", "success");
       }else {
         setErrorMessage(result.message || "Đăng nhập thất bại. Vui lòng thử lại.");
       } 

@@ -30,7 +30,7 @@ export default function UserProduct() {
                 </h1>
             </div>
 
-            <div className="grid border-t-2 border-[#2f9ea0] lg:grid-cols-5 gap-4">
+            <div className="grid border-t-2 border-[#2f9ea0] lg:grid-cols-5">
                 {currentProducts.map(product => (
                     <ProductCard key={product.id} product={product} />
                 ))}

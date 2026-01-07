@@ -1,12 +1,12 @@
 import { FaHeart } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthProvider";
-import UserToast from "./UserToast";
+import { useToast } from "../../contexts/ToastContext";
 
 export default function Wishlist({ productId }) {
     const { user } = useAuth();
     const [liked, setLiked] = useState(false);
-    const [toast, setToast] = useState(null);
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (!user) return;
@@ -22,10 +22,7 @@ export default function Wishlist({ productId }) {
         e.stopPropagation();
 
         if (!user) {
-            setToast({
-                message: "Vui lòng đăng nhập để sử dụng yêu thích",
-                type: "info",
-            });
+            showToast("Vui lòng đăng nhập để sử dụng yêu thích", "info");
             return;
         }
 
@@ -35,18 +32,12 @@ export default function Wishlist({ productId }) {
         if (list.includes(productId)) {
             list = list.filter((id) => id !== productId);
 
-            setToast({
-                message: "Đã xóa khỏi danh sách yêu thích",
-                type: "info",
-            });
+            showToast("Đã xóa khỏi danh sách yêu thích", "info");
         }
         else {
             list.push(productId);
 
-            setToast({
-                message: "Đã thêm vào danh sách yêu thích",
-                type: "success",
-            });
+            showToast("Đã thêm vào danh sách yêu thích", "success");
         }
 
         localStorage.setItem(
@@ -65,14 +56,6 @@ export default function Wishlist({ productId }) {
                 ${liked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}>
                 <FaHeart />
             </button>
-
-            {toast && (
-                <UserToast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
         </>
     );
 }

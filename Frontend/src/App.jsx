@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
 import {Product, Category, CategoryRecover, Brand, BrandRecover} from './pages/Admin'
-import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,WishList,CategoryProduct,BrandProduct} from './pages/User'
+import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,
+  WishList,CategoryProduct,BrandProduct} from './pages/User'
 function App() {
   return (
     <BrowserRouter>

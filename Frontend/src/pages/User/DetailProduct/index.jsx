@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import {useCart} from "../../../contexts/CartContext"
 import {useAuth} from "../../../contexts/AuthProvider";
+import { useToast } from "../../../contexts/ToastContext";
 import { useNavigate } from "react-router-dom";
 export default function Details() {
   const [product, setProduct] = useState(null);
+  const { showToast } = useToast();
   const [ram, setRam] = useState("8GB");
   const [rom, setRom] = useState("128GB");  
   const { addToCart } = useCart();
@@ -13,13 +15,13 @@ export default function Details() {
   const navigate = useNavigate(); 
   const handleAddToCart = () => {
     if (!user) {
-      alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      showToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng", "info");
       navigate("/login");
       return;
     }
 
     addToCart(product);
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+    showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
   };
   useEffect(() => {
     fetch(`https://dummyjson.com/products/${id}`)
