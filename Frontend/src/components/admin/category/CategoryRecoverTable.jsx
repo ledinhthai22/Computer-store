@@ -1,57 +1,103 @@
-import {History } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DataTable from 'react-data-table-component';
+import { History, ArrowUpIcon, ArrowLeft } from "lucide-react";
+import TableSearch from '../../admin/TableSearch';
+import Pagination from '../Pagination';
 
-const CategoryRecoverTable = ({ data, loading, onRecover }) => {
-    if (loading) {
-        return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
-    }
+const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
+    const [filterText, setFilterText] = useState('');
+    const navigate = useNavigate();
+
+    // Logic tìm kiếm: Lọc theo Tên danh mục hoặc Slug
+    const filteredItems = data.filter(
+        item => 
+            (item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()))
+    );
+
+    const columns = [
+        {
+            name: 'STT',
+            selector: (row, index) => index + 1,
+            width: '80px',
+            sortable: false,
+        },
+        {
+            name: 'DANH MỤC',
+            selector: row => row.tenDanhMuc,
+            sortable: true,
+            grow: 1.5,
+            cell: row => (
+                <span className="font-semibold text-gray-700 capitalize">
+                    {row.tenDanhMuc}
+                </span>
+            ),
+        },
+        {
+            name: 'SLUG',
+            selector: row => row.slug,
+            sortable: true,
+            cell: row => (
+                <span className="text-gray-500">
+                    {row.slug}
+                </span>
+            ),
+        },
+        {
+            name: 'HÀNH ĐỘNG',
+            minWidth: '150px',
+            cell: row => (
+                <div className="flex justify-start w-full"> 
+                    <button 
+                        onClick={() => onRecover(row.maDanhMuc)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer whitespace-nowrap"
+                    >
+                        <History size={18} />
+                        <span>Khôi phục</span>
+                    </button>
+                </div>
+            ),
+        },
+    ];
 
     return (
-        <div className="bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">STT</th>
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Danh mục</th>
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Slug</th>
-                            <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {data.length > 0 ? (
-                            data.map((c, index) => (
-                                <tr key={c.maDanhMuc} className="hover:bg-gray-50 transition-colors">
-                                    <td className="p-4">
-                                        <span className="font-medium text-gray-800 capitalize">{index + 1}</span>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="font-medium text-gray-800 capitalize">{c.tenDanhMuc}</span>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="font-medium text-gray-800 capitalize">{c.slug}</span>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <div className="flex items-center justify-center gap-2">
-                                            {/* Nút Khôi phục */}
-                                            <button 
-                                                onClick={() => onRecover(c.maDanhMuc)}
-                                                className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors"
-                                            >
-                                                <History size={20} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="p-8 text-center text-gray-500">
-                                    Không tìm thấy dữ liệu.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+        <div className="w-full p-4 space-y-4">
+            <div className="flex items-center w-full gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-[#2962ff] hover:bg-[#0039cb] text-white rounded-lg transition-colors text-sm font-medium shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                    <ArrowLeft size={16} />
+                    Quay lại
+                </button>
+
+                <TableSearch 
+                    filterText={filterText} 
+                    onFilter={e => setFilterText(e.target.value)} 
+                    placeholder="Tìm kiếm..."
+                />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
+                <DataTable
+                    columns={columns}
+                    data={filteredItems}
+                    progressPending={loading}
+                    pagination
+                    paginationComponent={Pagination}
+                    paginationPerPage={5}
+                    persistTableHead
+                    className="custom-datatable"
+                    sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
+                    highlightOnHover
+                    responsive
+                    noDataComponent={
+                        <div className="p-12 text-center text-gray-400 font-medium">
+                            Không tìm thấy danh mục nào trong danh sách xóa.
+                        </div>
+                    }
+                />
             </div>
         </div>
     );

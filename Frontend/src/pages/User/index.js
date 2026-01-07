@@ -10,3 +10,5 @@ export {default as UserProduct} from './Product';
 export {default as NotFound} from './NotFound';
 export {default as Checkout} from './Checkout';
 export {default as WishList} from './WishList';
+export {default as CategoryProduct} from './CategoryProduct';
+export {default as BrandProduct} from './BrandProduct';

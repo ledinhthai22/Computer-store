@@ -1,94 +1,142 @@
-import { Edit, Trash2, Star } from "lucide-react";
+import { useState } from "react";
+import DataTable from "react-data-table-component";
+import { Plus, History, ArrowUpIcon, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import TableSearch from "../../admin/TableSearch";
+import Pagination from "../Pagination";
 
-const ProductTable = ({data, loading}) => {
-    if(loading){
-        return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
-    }
+const ProductTable = ({ data, loading}) => {
+    const navigate = useNavigate();
+    const [filterText, setFilterText] = useState('');
+
+    const filteredItems = data.filter(
+        item => (item.tenSanPham && item.tenSanPham?.toLowerCase().includes(filterText.toLowerCase())) ||
+                (item.tenDanhMuc && item.tenDanhMuc?.toLowerCase().includes(filterText.toLowerCase())) || 
+                (item.tenThuongHieu && item.tenThuongHieu?.toLowerCase().includes(filterText.toLowerCase())) ||
+                (item.soLuongTon && item.soLuongTon?.toString().includes(filterText))
+    );
+
+    const columns = [
+        {
+            name: 'STT',
+            selector: (row, index) => index + 1,
+            width: '60px',
+            sortable: false,
+            center: true,
+        },
+        {
+            name: 'TÊN SẢN PHẨM',
+            selector: row => row.tenSanPham,
+            sortable: true,
+            grow: 2,
+            width: '150px',
+            cell: row => (
+                <span className="font-semibold text-gray-600">
+                    {row.tenSanPham || 'N/A'}
+                </span>
+            ),
+        },
+        {
+            name: 'DANH MỤC',
+            selector: row => row.tenDanhMuc,
+            sortable: true,
+            width: '150px',
+            cell: row => (
+                <span className="text-gray-600">
+                    {row.tenDanhMuc || 'N/A'}
+                </span>
+            ),
+        },
+        {
+            name: 'THƯƠNG HIỆU',
+            selector: row => row.tenThuongHieu,
+            sortable: true,
+            width: 'auto',
+            cell: row => (
+                <span className="text-gray-600">
+                    {row.tenThuongHieu || 'N/A'}
+                </span>
+            ),
+        },
+        {
+            name: 'SỐ LƯỢNG',
+            selector: row => row.soLuongTon,
+            sortable: true,
+            width: 'auto',
+            center: true,
+            cell: row => (
+                <span className="text-gray-600">
+                    {row.soLuongTon || 0}
+                </span>
+            ),
+        },
+        {
+            name: 'HÀNH ĐỘNG',
+            center: true,
+            width: '250px',
+            cell: row => (
+                <div className="flex items-center gap-1">
+                    <button 
+                        onClick={() => navigate(`/quan-ly/san-pham/${row.maSanPham}`)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer whitespace-nowrap"
+                        title="Xem chi tiết"
+                    >
+                        <Eye size={18} /> Xem chi tiết
+                    </button>
+                </div>
+            ),
+        },
+    ];
 
     return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">STT</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Sản phẩm</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Danh mục</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Thương hiệu</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Giá</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Tồn kho</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Khuyến mãi</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Lượt xem</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">Lượt mua</th>
-              <th className="p-4 text-xs font-semibold tracking-wide text-gray-500 uppercase text-center">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {data.length > 0 ? (
-              data.map((p, index) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors"> 
-                  
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{index+1}</span>
-                  </td>
-                  
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{p.title}</span>
-                  </td>
-                  
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{p.category}</span>
-                  </td>
+        <div className="w-full space-y-4">
+            <div className="flex items-center justify-end w-full gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <TableSearch 
+                    filterText={filterText} 
+                    onFilter={e => setFilterText(e.target.value)} 
+                    placeholder="Tìm kiếm sản phẩm..."
+                />
+                <button 
+                    onClick={() => navigate('/quan-ly/san-pham/them-moi')}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer whitespace-nowrap"
+                >
+                    <Plus size={16} />
+                    <span>Thêm mới</span>
+                </button>
+                
+                <button 
+                    onClick={() => navigate('/quan-ly/san-pham/khoi-phuc')}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer whitespace-nowrap"
+                >
+                    <History size={16} />
+                    <span>Danh sách đã xóa</span>
+                </button>
+            </div>
 
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{p.brand || 'N/A'}</span>
-                  </td>
-
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">
-                        {p.price?.toLocaleString('en-US', {style: 'currency', currency: 'USD'})}
-                    </span>
-                  </td>
-                  
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">{p.stock}</span>
-                  </td>
-                  
-                  <td className="p-4">
-                    <span className="font-medium text-green-600 capitalize">
-                        {p.discountPercentage ? `-${p.discountPercentage}%` : 'Không'}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">0</span>
-                  </td>
-                  <td className="p-4">
-                    <span className="font-medium text-gray-800 capitalize">0</span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit size={16} />
-                      </button>
-                      <button className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="p-8 text-center text-gray-500">
-                  Không tìm thấy dữ liệu phù hợp.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+            {/* BẢNG DỮ LIỆU */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
+                <DataTable
+                    columns={columns}
+                    data={filteredItems}
+                    progressPending={loading}
+                    progressComponent={<div className="p-8 text-gray-500">Đang tải dữ liệu...</div>}
+                    pagination
+                    paginationComponent={Pagination}
+                    paginationPerPage={5}
+                    persistTableHead
+                    className="custom-datatable"
+                    sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
+                    highlightOnHover
+                    responsive
+                    noDataComponent={
+                        <div className="p-12 text-center text-gray-400 font-medium">
+                            Không tìm thấy sản phẩm nào.
+                        </div>
+                    }
+                />
+            </div>
+        </div>
+    );
 };
 
 export default ProductTable;

@@ -10,6 +10,5 @@ namespace Backend.DTO.Category
     {
         [Required]
         public string TenDanhMuc {get;set;} =null!;
-
     }
 }
