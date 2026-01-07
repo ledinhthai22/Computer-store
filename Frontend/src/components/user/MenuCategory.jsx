@@ -1,32 +1,51 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 export default function MenuCategory({ onClose }) {
-    return (
-      <div
-        className="absolute top-full left-0 w-250 bg-white text-black rounded-md shadow-lg mt-1 z-[1000] grid grid-cols-5 p-6"
-        onMouseLeave={onClose}>
-        <div className="col-span-1 border-r pr-4">
-        <h4 className="font-semibold mb-2 text-[#2f9ea0]">Laptop theo chức năng</h4>
-          <ul className="space-y-1 text-sm">
-            <li><Link to={`/`}>Máy tính xách tay</Link></li>
-            <li><Link to={`/`}>Laptop Gaming</Link></li>
-            <li><Link to={`/`}>Laptop Văn phòng</Link></li>
-            <li><Link to={`/`}>Laptop Lập trình</Link></li>
-            <li><Link to={`/`}>Laptop cao cấp</Link></li>
-            <li><Link to={`/`}>Apple Macbook</Link></li>
-          </ul>
-        </div>
-        <div className="ml-2">
-          <h4 className="font-semibold mb-2 text-[#2f9ea0]">Laptop theo hãng</h4>
-          <ul className="space-y-1 text-sm">
-            <li><Link to={`/`}>ACER</Link></li>
-            <li><Link to={`/`}>Gigabyte</Link></li>
-            <li><Link to={`/`}>APPLE</Link></li>
-            <li><Link to={`/`}>DELL</Link></li>
-            <li><Link to={`/`}>HP</Link></li>
-            <li><Link to={`/`}>LENOVO</Link></li>
-          </ul>
-        </div>
+  const [brands, setBrand] = useState([]);
+  const [categories, setCategory] = useState([]);
+
+  useEffect(() => {
+    fetch("https://localhost:7012/api/Brand/")
+      .then(res => res.json())
+      .then(data => setBrand(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    fetch("https://localhost:7012/api/Category/")
+      .then(res => res.json())
+      .then(data => setCategory(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  return (
+    <div className="absolute top-full left-0 mt-2 z-[1000] inline-flex bg-white text-black rounded-md shadow-lg p-6" onMouseLeave={onClose}>
+      <div className="pr-8 border-r">
+        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Laptop theo chức năng</h4>
+        <ul className="space-y-1 text-sm whitespace-nowrap">
+          {categories.map(c => (
+            <li key={c.maDanhMuc}>
+              <Link to={`/products/category/${c.maDanhMuc}`} className="hover:text-blue-600 transition">
+                {c.tenDanhMuc}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
-    );
-  }
-  
+
+      <div className="pl-8">
+        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Laptop theo hãng</h4>
+        <ul className="space-y-1 text-sm whitespace-nowrap">
+          {brands.map(b => (
+            <li key={b.brandID}>
+              <Link to={`/products/brand/${b.brandID}`} className="hover:text-blue-600 transition">
+                {b.brandName}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

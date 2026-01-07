@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../contexts/AuthProvider";
 import ProductCard from "../../../components/user/ProductCard";
-
+import TopNew from "../../../components/user/TopNew"
 export default function WishList() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
@@ -25,7 +25,7 @@ export default function WishList() {
                     .catch(() => null)
             )
         ).then(data => {
-            setProducts(data.filter(Boolean)); // 🔑 FIX CARD TRỐNG
+            setProducts(data.filter(Boolean)); 
         });
     }, [user]);
 
@@ -35,7 +35,7 @@ export default function WishList() {
 
     return (
         <div className="max-w-6xl mx-auto px-4">
-            <h1 className="text-2xl font-bold mb-6">❤️ Sản phẩm yêu thích</h1>
+            <h1 className="text-2xl font-bold mb-6">Sản phẩm yêu thích</h1>
 
             {products.length === 0 ? (
                 <p className="text-gray-500">
@@ -48,6 +48,7 @@ export default function WishList() {
                     ))}
                 </div>
             )}
+            <TopNew/>
         </div>
     );
 }

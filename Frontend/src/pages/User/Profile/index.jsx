@@ -9,11 +9,15 @@ export default function Profile(){
                 <h1 className="text-3xl font-bold mb-6">Thông tin cá nhân</h1>
                 <div className="mb-4">
                     <span className="font-semibold">Họ và tên: </span>
-                    <span>{user?.firstName} {user?.lastName}</span>
+                    <span>{user?.hoTen}</span>
                 </div>
                 <div className="mb-4">
                     <span className="font-semibold">Email: </span>
-                    <span>{user?.email}</span>
+                    <span>{user?.Email || "Chưa cập nhật"}</span>
+                </div>
+                <div className="mb-4">
+                    <span className="font-semibold">Chức vụ: </span>
+                    <span>{user?.role || user?.vaiTro ||"Chưa cập nhật"}</span>
                 </div>
                 <div className="mb-4">
                     <span className="font-semibold">Số điện thoại: </span>

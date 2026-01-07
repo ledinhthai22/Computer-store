@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import {useCart} from "../../../contexts/CartContext"
 import {useAuth} from "../../../contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import ProductCard from "../../../components/user/ProductCard";
 export default function Details() {
   const [product, setProduct] = useState(null);
   const [ram, setRam] = useState("8GB");
@@ -35,8 +34,14 @@ export default function Details() {
   return (
     <div className="p-6 max-w-[80%] mx-auto">
       <div className="flex gap-6">
-        <div className="h-full p-10 relative m-2">
-            <ProductCard key={product.id} product={product} />
+        <div className="h-full p-10 w-auto relative m-2">
+            <img className="border w-100" src={product.thumbnail} alt={product.title} />
+            <div className="flex">
+              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
+              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
+              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
+              <img className="w-25 border" src={product.thumbnail} alt={product.title} />
+            </div>
         </div>
         <div className="w-1/2">
           <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
@@ -45,7 +50,7 @@ export default function Details() {
             <p className="font-semibold mb-2">RAM</p>
             <div className="flex gap-2">
                 {["8GB", "12GB", "16GB"].map(item => (
-                <button key={item} onClick={() => setRam(item)} className={`px-3 py-1 border rounded 
+                <button key={item} onClick={() => setRam(item)} className={`px-3 py-1 border rounded transition-colors
                     ${ram === item ? "bg-[#2f9ea0] text-white" : ""}`}>{item}
                 </button>
               ))}
@@ -55,15 +60,15 @@ export default function Details() {
             <p className="font-semibold mb-2">ROM</p>
             <div className="flex gap-2">
               {["128GB", "256GB", "512GB"].map(item => (
-                <button key={item} onClick={() => setRom(item)} className={`px-3 py-1 border rounded
+                <button key={item} onClick={() => setRom(item)} className={`px-3 py-1 border rounded transition-colors
                     ${rom === item ? "bg-[#2f9ea0] text-white" : ""}`}> {item}
                 </button>
               ))}
             </div>
           </div>
           <div className="flex text-center">
-          <button onClick={handleAddToCart} className="bg-[#2f9ea0] p-2 w-40 rounded mt-4 text-white hover:bg-blue-600">Thêm vào giỏ hàng</button>
-          <Link to={`/checkout`} className="bg-[#2f9ea0] p-2 hover:bg-blue-600 text-white rounded w-40 mt-4 ml-2">Mua ngay</Link>
+          <button onClick={handleAddToCart} className="bg-[#2f9ea0] p-2 w-40 rounded mt-4 text-white hover:bg-blue-600 transition-colors">Thêm vào giỏ hàng</button>
+          <Link to={`/checkout`} className="bg-[#2f9ea0] p-2 hover:bg-blue-600 text-white rounded w-40 mt-4 ml-2 transition-colors">Mua ngay</Link>
           </div>
         </div>
       </div>
