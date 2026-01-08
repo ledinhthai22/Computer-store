@@ -15,7 +15,7 @@ const NavUserMenu = ({ isOpen, onToggle, onClose }) => {
       >
         <div className="text-right hidden md:block">
           <p className="text-sm font-medium text-white">Admin User</p>
-          <p className="text-xs text-blue-300">Manager</p>
+          <p className="text-xs text-blue-600">Manager</p>
         </div>
         <div className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all ${isOpen ? 'border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'border-cyan-500/50 hover:border-cyan-400'}`}>
           <User2 className="w-full h-full object-cover bg-slate-700 p-1" />

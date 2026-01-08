@@ -26,7 +26,7 @@ const BrandRecover = () => {
             setBrands(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
-            showToast("Không thể tải danh sách thương hiệu!", "error");
+            showToast("Tải dữ liệu thương hiệu thất bại", "error");
         }finally{
             setLoading(false);}
     };
@@ -43,11 +43,11 @@ const BrandRecover = () => {
         setIsRecover(true);
         await axios.put(`https://localhost:7012/api/Brand/recover/${recoverId}`);
         
-        showToast("Khôi phục thành công!", "success");
+        showToast("Khôi phục thương hiệu thành công", "success");
         await fetchDataRecover();
     } catch (err) {
         console.error(err);
-        showToast("Lỗi khi khôi phục dữ liệu!", "error");
+        showToast("Khôi phục thương hiệu thất bại", "error");
     } finally {
         setIsRecover(false);
         setIsConfirmOpen(false);

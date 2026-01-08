@@ -26,7 +26,7 @@ const CategoryRecover = () => {
             setCategories(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
-            showToast("Không thể tải danh sách danh mục!", "error");
+            showToast("Tải danh sách danh mục thất bại", "error");
         }finally{
             setLoading(false);}
     };
@@ -43,11 +43,11 @@ const CategoryRecover = () => {
         setIsRecover(true);
         await axios.put(`https://localhost:7012/api/Category/recover/${recoverId}`);
         
-        showToast("Khôi phục thành công!", "success");
+        showToast("Khôi phục danh mục thành công", "success");
         await fetchCategoriesRecover();
     } catch (err) {
         console.error(err);
-        showToast("Lỗi khôi phục dữ liệu!", "error");
+        showToast("Khôi phục danh mục thất bại", "error");
     } finally {
         setIsRecover(false);
         setIsConfirmOpen(false);

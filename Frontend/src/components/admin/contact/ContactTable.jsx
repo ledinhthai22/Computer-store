@@ -1,10 +1,10 @@
 import { useState } from "react";
 import DataTable from "react-data-table-component";
-import { Eye, Trash2, ArrowUpIcon } from "lucide-react";
+import { Eye, Trash2, ArrowUpIcon, Filter } from "lucide-react";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const ContactTable = ({ data, loading, onDelete, onView }) => { 
+const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeChange }) => { 
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
@@ -19,6 +19,23 @@ const ContactTable = ({ data, loading, onDelete, onView }) => {
         }
         return text;
     };
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        
+        // Định dạng Ngày/Tháng/Năm
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        // Định dạng Giờ:Phút
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${hours}:${minutes} - ${day}/${month}/${year}`;
+    };
+
     const columns = [
         {
             name: 'STT',
@@ -27,7 +44,7 @@ const ContactTable = ({ data, loading, onDelete, onView }) => {
             sortable: false,
         },
         {
-            name: 'EMAIL LIÊN HỆ',
+            name: 'EMAIL',
             selector: row => row.email,
             sortable: true,
             grow: 2,
@@ -49,12 +66,22 @@ const ContactTable = ({ data, loading, onDelete, onView }) => {
             ),
         },
         {
+            name: 'NGÀY',
+            selector: row => row.ngayGui,
+            sortable: true,
+            grow: 2,
+            cell: row => (
+                <span className="text-gray-700" title={row.ngayGui}>
+                    {formatDateTime(row.ngayGui)}
+                </span>
+            ),
+        },
+        {
             name: 'TRẠNG THÁI',
             selector: row => row.message,
             sortable: true,
-            width: '160px', // Tăng nhẹ độ rộng để nhãn không bị gò bó
+            width: '160px',
             cell: row => {
-                // Kiểm tra chính xác giá trị text trả về từ API
                 const isRead = row.message?.toLowerCase() === "đã đọc";
                 
                 return (
@@ -76,14 +103,14 @@ const ContactTable = ({ data, loading, onDelete, onView }) => {
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => onView(row)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                        className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xem"
                     >
                         <Eye size={18} /> Xem
                     </button>
                     <button 
                         onClick={() => onDelete(row.maLienHe)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xóa"
                     >
                         <Trash2 size={18} /> Xóa
@@ -101,6 +128,25 @@ const ContactTable = ({ data, loading, onDelete, onView }) => {
                     onFilter={e => setFilterText(e.target.value)} 
                     placeholder="Tìm kiếm..."
                 />
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <Filter size={18} className="text-gray-400" />Lọc theo
+                    <div className="relative inline-block w-full sm:w-64">
+                    <select 
+                        className="w-full appearance-none bg-white border border-gray-300 text-gray-700 py-2.5 px-4 pr-10 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer transition-all duration-200 ease-in-out font-medium text-sm"
+                        value={filterType}
+                        onChange={(e) => onFilterTypeChange(e.target.value)}
+                    >
+                        <option value="all">Tất cả liên hệ</option>
+                        <option value="unread">Chưa đọc</option>
+                        <option value="read">Đã đọc</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    </div>
+                </div>
             </div>
 
             {/* DATATABLE */}

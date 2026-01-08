@@ -26,19 +26,19 @@ const Sidebar = () => {
               to={item.path}
               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
                 isActive
-                  ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-[#2F9EA0]/10 text-[#2F9EA0] font-semibold shadow-sm'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#2F9EA0]'
               }`}
             >
               <item.icon
                 size={20}
                 className={`${
-                  isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                  isActive ? 'text-[#2F9EA0]' : 'text-gray-400 group-hover:text-[#2F9EA0]'
                 }`}
               />
               <span className="text-sm">{item.name}</span>
               {isActive && (
-                <div className="absolute left-0 w-1 h-6 bg-blue-600 rounded-r-full" />
+                <div className="absolute left-0 w-1 h-6 bg-[#2F9EA0] rounded-r-full" />
               )}
             </Link>
           );

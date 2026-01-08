@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Toast from '../../../components/admin/Toast';
 import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus } from 'lucide-react';
+import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 
 const ProductDetail = () => {
   const { maSanPham } = useParams();
   const navigate = useNavigate();
 
-  // States dữ liệu chính
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [images, setImages] = useState([]);
-  
-  // States cho danh sách Select box
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+    
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
 
@@ -24,14 +29,12 @@ const ProductDetail = () => {
     doPhanGiaiManHinh: '', loaiXuLyTrungTam: '', loaiXuLyDoHoa: '', congGiaoTiep: ''
   });
   const [variants, setVariants] = useState([]);
-
-  // 1. Fetch Dữ liệu sản phẩm, Danh mục và Thương hiệu
   useEffect(() => {
   const fetchData = async () => {
     try {
       setLoading(true);
       const [prodRes, catRes, brandRes] = await Promise.all([
-        axios.get(`https://localhost:7012/${maSanPham}`),
+        axios.get(`https://localhost:7012/api/Product/${maSanPham}`),
         axios.get(`https://localhost:7012/api/Category`),
         axios.get(`https://localhost:7012/api/Brand`)
       ]);
@@ -57,7 +60,6 @@ const ProductDetail = () => {
         maDanhMuc: String(maDanhMucFound), 
         maThuongHieu: String(maThuongHieuFound)
       });
-      // ---------------------------------------
 
       setSpecs(data.thongSoKyThuat || {});
       setVariants(data.bienThe || []);
@@ -72,6 +74,10 @@ const ProductDetail = () => {
   };
   fetchData();
 }, [maSanPham]);
+  
+  const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+  };
 
   //UPLOAD ẢNH
   const handleImageUpload = (e) => {
@@ -115,28 +121,35 @@ const ProductDetail = () => {
 
     try {
       await axios.put(`https://localhost:7012/api/Product/${maSanPham}`, payload);
-      alert("Cập nhật thành công!");
+      showToast("Chỉnh sửa sản phẩm thành công!", "success");
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
-      alert("Không thể lưu thay đổi.");
+      showToast("Chỉnh sửa sản phẩm thất bại.", "error");
     }
   };
 
   //XOA SAN PHAM
-  const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+  const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
       try {
+        setIsDeleting(true);
         await axios.delete(`https://localhost:7012/api/Product/${maSanPham}`);
-        alert("Xóa thành công!");
+        showToast("Xóa sản phẩm thành công", "success");
         navigate('/quan-ly/san-pham');
       } catch (err) {
         console.error(err)
-        console.error
-        alert("Lỗi khi xóa sản phẩm");
-      }
-    }
-  };
+        showToast("Xóa sản phẩm thất bại", "error");
+      } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
+        }
+    };
 
   const InputField = ({ label, value, onChange, type = "text", disabled = !isEditing }) => (
     <div className="flex flex-col gap-1.5 w-full text-left">
@@ -163,18 +176,18 @@ const ProductDetail = () => {
         <div className="flex gap-3">
           {!isEditing ? (
             <>
-              <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-md">
+              <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-md cursor-pointer">
                 <Edit3 size={18} /> Chỉnh sửa
               </button>
-              <button onClick={handleDelete} className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-md">
+              <button onClick={handleDeleteClick} className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-md cursor-pointer">
                 <Trash2 size={18} /> Xóa
               </button>
             </>
           ) : (
             <>
-                <button onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300">Hủy</button>
-                <button onClick={handleUpdate} className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md">
-                <Save size={18} /> Lưu thay đổi
+                <button onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 cursor-pointer">Hủy</button>
+                <button onClick={handleUpdate} className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md cursor-pointer">
+                <Save size={18} /> Lưu chỉnh sửa
                 </button>
             </>
           )}
@@ -190,7 +203,7 @@ const ProductDetail = () => {
                 <>
                   <img src={images[0]} className="w-full h-full object-cover" alt="Main" />
                   {isEditing && (
-                    <button type="button" onClick={() => removeImage(0)} className="absolute top-4 right-4 p-2 bg-white/80 text-red-500 rounded-full shadow-md">
+                    <button type="button" onClick={() => removeImage(0)} className="absolute top-4 right-4 p-2 bg-white/80 text-red-500 rounded-full shadow-md cursor-pointer">
                         <Trash2 size={20} />
                     </button>
                   )}
@@ -203,7 +216,7 @@ const ProductDetail = () => {
                 <div key={idx} className="relative w-20 h-20 rounded-xl border border-gray-200 overflow-hidden group shadow-sm">
                   <img src={img} className="w-full h-full object-cover" alt="Sub" />
                   {isEditing && (
-                    <button type="button" onClick={() => removeImage(idx + 1)} className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button type="button" onClick={() => removeImage(idx + 1)} className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                       <X size={16} />
                     </button>
                   )}
@@ -227,7 +240,9 @@ const ProductDetail = () => {
               <InputField label="Giá gốc (VNĐ)" type="number" value={basicInfo.giaCoBan} onChange={(v) => setBasicInfo({...basicInfo, giaCoBan: v})} />
               <InputField label="Khuyến mãi (%)" type="number" value={basicInfo.khuyenMai} onChange={(v) => setBasicInfo({...basicInfo, khuyenMai: v})} />
             </div>
-            
+            <div className="grid grid gap-4">
+              <InputField label="Số lượng tồn" type="number" value={basicInfo.soLuongTon} onChange={(v) => setBasicInfo({...basicInfo, soLuongTon: v})} />
+            </div>
             <div className="grid grid-cols-2 gap-4 text-left">
               {/* SELECT BOX DANH MỤC */}
               <div className="flex flex-col gap-1.5 w-full">
@@ -288,16 +303,16 @@ const ProductDetail = () => {
         <div className="flex justify-between items-center mb-8 border-b pb-4">
           <h2 className="text-xl font-black text-gray-800 uppercase tracking-wider">Biến Thể Sản Phẩm</h2>
           {isEditing && (
-            <button type="button" onClick={addVariant} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700">
+            <button type="button" onClick={addVariant} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700  cursor-pointer">
               <Plus size={18} /> Thêm biến thể
             </button>
           )}
         </div>
-        <div className="space-y-6">
+        <div className="max-h-[650px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {variants.map((v) => (
             <div key={v.maBienThe || v.id} className="p-6 rounded-3xl border border-gray-200 bg-gray-50 relative group">
               {isEditing && (
-                <button type="button" onClick={() => removeVariant(v.maBienThe || v.id)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+                <button type="button" onClick={() => removeVariant(v.maBienThe || v.id)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
                   <Trash2 size={20} />
                 </button>
               )}
@@ -318,6 +333,21 @@ const ProductDetail = () => {
           ))}
         </div>
       </section>
+      {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
+            )}
+            
+            <ConfirmModal 
+                isOpen={isConfirmOpen}
+                message="Bạn có muốn xóa sản phẩm này không?"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setIsConfirmOpen(false)}
+                isLoading={isDeleting}
+            />
     </div>
   );
 };

@@ -9,7 +9,6 @@ const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
     const [filterText, setFilterText] = useState('');
     const navigate = useNavigate();
 
-    // Logic tìm kiếm: Lọc theo Tên danh mục hoặc Slug
     const filteredItems = data.filter(
         item => 
             (item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase())) ||
