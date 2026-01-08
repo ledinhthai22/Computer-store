@@ -21,11 +21,11 @@ namespace Backend.Services.WishList
                 .Where(w => w.MaNguoiDung == UserId && w.Deleted_At == null)
                 .Select(w => new WishlistResult
                 {
-                    WishlistId = w.MaYeuThich,
-                    UserId = w.MaNguoiDung,
-                    ProductVariantID = w.MaBienThe,
-                    ProductName = w.BienThe.SanPham.TenSanPham,
-                    Price = w.BienThe.GiaBan,
+                    MaYeuThich = w.MaYeuThich,
+                    MaNguoiDung = w.MaNguoiDung,
+                    MaBienThe = w.MaBienThe,
+                    TenSanPham = w.BienThe.SanPham.TenSanPham,
+                    GiaBan = w.BienThe.GiaBan,
                     HinhAnhChinh= w.BienThe.HinhAnhSanPham
                     .Where(i => i.AnhChinh)
                     .Select(img => img.URL)
@@ -40,10 +40,10 @@ namespace Backend.Services.WishList
             var productInfo = await _dbContext.BienThe
                 .Include(bt => bt.SanPham)
                 .Include(bt => bt.HinhAnhSanPham)
-                .FirstOrDefaultAsync(bt => bt.MaBTSP == request.ProductVariantID);
+                .FirstOrDefaultAsync(bt => bt.MaBTSP == request.MaBienThe);
             if (productInfo == null) throw new Exception("Sản phẩm không tồn tại");
-            int UserId = request.UserID;
-            int ProductVariantId = request.ProductVariantID;
+            int UserId = request.MaNguoiDung;
+            int ProductVariantId = request.MaBienThe;
             var existingItem = await _dbContext.YeuThich
                 .FirstOrDefaultAsync(w => w.MaBienThe == ProductVariantId && w.MaNguoiDung == UserId);
             int wishlistId = 0;
@@ -70,13 +70,13 @@ namespace Backend.Services.WishList
             }
             return new WishlistResult
             {
-                WishlistId = wishlistId,
-                UserId = UserId,
-                ProductVariantID = productInfo.MaBTSP,
+                MaYeuThich = wishlistId,
+                MaNguoiDung = UserId,
+                MaBienThe = productInfo.MaBTSP,
 
                 // Lấy từ biến productInfo đã query chắc chắn ở trên
-                ProductName = productInfo.SanPham.TenSanPham,
-                Price = productInfo.GiaBan,
+                TenSanPham = productInfo.SanPham.TenSanPham,
+                GiaBan = productInfo.GiaBan,
                 HinhAnhChinh = productInfo.HinhAnhSanPham
                                 .Where(i => i.AnhChinh)
                                 .Select(i => i.URL)

@@ -10,7 +10,7 @@ namespace Backend.DTO.WishList
     public class UpdateWishListRequest 
     {
         [Required]
-        public int WishListId { get; set; }
+        public int MaYeuThich { get; set; }
        
     }
 }

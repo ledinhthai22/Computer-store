@@ -10,7 +10,7 @@ namespace Backend.DTO.WishList
     public class CreateWishListRequest 
     {
         [Required]
-        public int UserID { get; set; }
-        public int ProductVariantID { get; set; }
+        public int MaNguoiDung { get; set; }
+        public int MaBienThe { get; set; }
     }
 }
