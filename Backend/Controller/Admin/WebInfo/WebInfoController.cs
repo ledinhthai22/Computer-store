@@ -18,38 +18,49 @@ namespace Ecommerce.Controller.Admin.WebInfo
             _webInfoService = webInfoService;
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
             var result = await _webInfoService.GetAsync();
             return Ok(result);
         }
+        
         [HttpGet("deleted")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetHidenAsync()
         {
             var result = await _webInfoService.GetAllHidenAsync();
             return Ok(result);
         }
+        
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateWebInfo(WebInfoItemRequest request)
         {
             var result = await _webInfoService.CreateWebInfo(request);
             return Ok(result);
         }
+        
         [HttpPut]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateWebInfo(int id, WebInfoItemRequest request)
         {
             var result = await _webInfoService.UpdateWebInfo(id, request);
             if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
             return Ok(result);
         }
+
         [HttpPut("restore/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> ReStoreWebInfo(int id)
         {
             var result = await _webInfoService.RestoreWebInfo(id);
             if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
             return Ok(result);
         } 
+        
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             try
