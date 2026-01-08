@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
-import {Product, Category, CategoryRecover, Brand} from './pages/Admin'
-import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,WishList} from './pages/User'
+import {Product, Category, CategoryRecover, Brand, BrandRecover, Contact, AddProduct, ProductDetail} from './pages/Admin'
+import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,
+  WishList,CategoryProduct,BrandProduct} from './pages/User'
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +23,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<WishList />} />          
+          <Route path="/wishlist" element={<WishList />} />
+          <Route path="/products/category/:id" element={<CategoryProduct />} />
+          <Route path="/products/brand/:id" element={<BrandProduct />} />    
         </Route>
 
         {/* --- Quản lý ROUTES --- */}
@@ -30,9 +33,13 @@ function App() {
           <Route element={<AdminLayout />}>
             <Route path="/quan-ly"/>
             <Route path="/quan-ly/san-pham" element={<Product />} />
+            <Route path="/quan-ly/san-pham/:maSanPham" element={<ProductDetail />} />
+            <Route path="/quan-ly/san-pham/them-san-pham" element={<AddProduct />} />
             <Route path="/quan-ly/danh-muc" element={<Category />} />
             <Route path="/quan-ly/danh-muc/khoi-phuc" element={<CategoryRecover />} />
             <Route path="/quan-ly/thuong-hieu" element={<Brand />} />
+            <Route path="/quan-ly/thuong-hieu/khoi-phuc" element={<BrandRecover />} />
+            <Route path="/quan-ly/lien-he" element={<Contact />} />
           </Route>
         {/* </Route> */}
 

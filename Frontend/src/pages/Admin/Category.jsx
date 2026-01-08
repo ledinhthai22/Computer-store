@@ -1,8 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import CategoryTable from '../../components/admin/category/CategoryTable';
-import CategoryToolbar from '../../components/admin/category/CategoryToolbar';
-import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/admin/Toast';
 import ConfirmModal from '../../components/admin/DeleteConfirmModal';
 
@@ -10,20 +8,11 @@ const Category = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [filtered, setFiltered] = useState([]);
-    const [search, setSearch] = useState('');
-    const [sortOrder, setSortOrder] = useState('tenDanhMuc-asc');
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newCategoryName, setNewCategoryName] = useState('');
-    
-
-    const [editingCategory, setEditingCategory] = useState(null);
+    const [newName, setNewName] = useState('');
+    const [editing, setEditing] = useState(null);
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -38,35 +27,17 @@ const Category = () => {
     const fetchCategories = async () => {
         try {
             const res = await axios.get('https://localhost:7012/api/Category');
-            setCategories(res.data);
-            setFiltered(res.data);
-            setLoading(false);
+            const data = Array.isArray(res.data) ? res.data : [];
+            setCategories(data);
         } catch (error) {
-            console.error("Lỗi khi fetch:", error);
-            showToast("Không thể tải danh sách danh mục!", "error");
+            console.error("Lỗi fetch:", error);
+            showToast("Không thể tải danh sách danh mục", "error");
+        }finally{
             setLoading(false);
         }
     };
 
     useEffect(() => { fetchCategories(); }, []);
-
-    useEffect(() => {
-        let result = [...categories];
-        if (search) {
-            result = result.filter(c => c.tenDanhMuc?.toLowerCase().includes(search.toLowerCase()));
-        }
-        result.sort((a, b) => {
-            if (sortOrder === 'tenDanhMuc-asc') return a.tenDanhMuc?.localeCompare(b.tenDanhMuc);
-            if (sortOrder === 'tenDanhMuc-desc') return b.tenDanhMuc?.localeCompare(a.tenDanhMuc);
-            return 0;
-        });
-        setFiltered(result);
-        setCurrentPage(1);
-    }, [search, categories, sortOrder]);
-
-    // Phân trang
-    const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
     // --- CHỨC NĂNG XÓA ---
     const handleDeleteClick = (id) => {
@@ -81,7 +52,7 @@ const Category = () => {
             await fetchCategories();
         } catch (err) {
             console.error(err);
-            showToast("Lỗi khi xóa dữ liệu!", "error");
+            showToast("Lỗi xóa dữ liệu", "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -89,24 +60,24 @@ const Category = () => {
         }
     };
 
-    // --- MODAL SỬA ---
+    // MODAL SỬA
     const handleEditClick = (category) => {
-        setEditingCategory(category);
-        setNewCategoryName(category.tenDanhMuc);
+        setEditing(category);
+        setNewName(category.tenDanhMuc);
         setError('');
         setIsModalOpen(true);
     };
 
-    // --- CHỨC NĂNG THÊM VÀ SỬA ---
+    // CHỨC NĂNG THÊM VÀ SỬA 
     const handleSave = async (e) => {
         e.preventDefault();
-        const nameTrimmed = newCategoryName.trim();
+        const nameTrimmed = newName.trim();
         if (!nameTrimmed) return setError('Tên danh mục không được để trống.');
 
         try {
             setIsSubmitting(true);
-            if (editingCategory) {
-                await axios.put(`https://localhost:7012/api/Category/${editingCategory.maDanhMuc}`, {
+            if (editing) {
+                await axios.put(`https://localhost:7012/api/Category/${editing.maDanhMuc}`, {
                     tenDanhMuc: nameTrimmed
                 });
                 showToast("Cập nhật thành công!", "success");
@@ -119,8 +90,8 @@ const Category = () => {
             
             await fetchCategories();
             setIsModalOpen(false);
-            setEditingCategory(null);
-            setNewCategoryName('');
+            setEditing(null);
+            setNewName('');
         } catch (err) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra.');
         } finally {
@@ -130,49 +101,37 @@ const Category = () => {
 
     return (
         <div className="space-y-6">
-            <CategoryToolbar 
-                search={search}
-                onSearchChange={setSearch}
-                sortOrder={sortOrder}
-                onSortChange={setSortOrder}
-                onOpenAddModal={() => {
-                    setEditingCategory(null);
-                    setNewCategoryName('');
-                    setError('');
-                    setIsModalOpen(true);
-                }}
-            />
-
             <div className="flex flex-col gap-4">
                 <CategoryTable 
-                    data={currentItems} 
+                    data={categories} 
                     loading={loading} 
                     onEdit={handleEditClick}
                     onDelete={handleDeleteClick}
-                />
-                <Pagination 
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
+                    onOpenAddModal={() => {
+                        setEditing(null);
+                        setNewName('');
+                        setError('');
+                        setIsModalOpen(true);
+                    }}
                 />
             </div>
 
-            {/* POPUP MODAL */}
+            {/* MODAL THÊM/SỬA */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
                         <form onSubmit={handleSave} className="p-6">
                             <h2 className="text-xl font-bold mb-5 text-gray-800">
-                                {editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
+                                {editing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
                             </h2>
                             
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Tên danh mục</label>
                                 <input
                                     type="text"
-                                    value={newCategoryName}
+                                    value={newName}
                                     onChange={(e) => {
-                                        setNewCategoryName(e.target.value);
+                                        setNewName(e.target.value);
                                         if(error) setError('');
                                     }}
                                     className={`w-full px-4 py-2 border rounded-lg outline-none ${
@@ -184,7 +143,7 @@ const Category = () => {
                                 {error && <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>}
                             </div>
 
-                            <div className="flex justify-end gap-3 mt-6">
+                            <div className="flex justify-center gap-3 mt-6">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
@@ -215,8 +174,7 @@ const Category = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xóa danh mục"
-                message="Bạn có chắc chắn muốn xóa danh mục này khỏi hệ thống không?"
+                message="Bạn có muốn xóa danh mục này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}

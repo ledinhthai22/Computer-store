@@ -20,6 +20,7 @@ namespace Ecommerce.Controller.Admin.Brand
             var result = await _brandService.GetAllAsync();
             return Ok(result);
         }
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -28,7 +29,7 @@ namespace Ecommerce.Controller.Admin.Brand
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateBrandRequest request)
         {
             try
@@ -46,7 +47,7 @@ namespace Ecommerce.Controller.Admin.Brand
             }
         }
         [HttpPut("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(int id, UpdateBrandRequest request)
         {
             try
@@ -65,7 +66,7 @@ namespace Ecommerce.Controller.Admin.Brand
             }
         }
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SolfDelete(int id)
         {
             try
@@ -73,6 +74,28 @@ namespace Ecommerce.Controller.Admin.Brand
                 var success = await _brandService.DeleteAsync(id);
                 if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu" });
                 return Ok(new { message = "Xóa thương hiệu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        [HttpGet("deleted")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetHidenAll()
+        {
+            var result = await _brandService.GetAllHidenAsync();
+            return Ok(result);
+        }
+        [HttpPut("recover/{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Restore(int id)
+        {
+            try
+            {
+                var success = await _brandService.RestoreAsync(id);
+                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu" });
+                return Ok(new { message = "Khôi phục thương hiệu thành công" });
             }
             catch (Exception ex)
             {

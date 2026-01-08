@@ -15,7 +15,7 @@ namespace Backend.Controller.Admin.Contact
             _IContactService = IContactService;
         }
         [HttpGet]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _IContactService.GetAllAsync();
@@ -29,7 +29,7 @@ namespace Backend.Controller.Admin.Contact
             return Ok(result);
         }
         [HttpGet("AllRead")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllead ()
         {
             var result = await _IContactService.GetAllReadAsync();
@@ -42,7 +42,7 @@ namespace Backend.Controller.Admin.Contact
             return Ok(result);
         }
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _IContactService.DeleteSendcontactAsync(id);
@@ -55,7 +55,7 @@ namespace Backend.Controller.Admin.Contact
             return Ok(new { message = "Xóa liên hệ thành công." });
         }
         [HttpPut("read/{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Read(int id)
         {
             var result = await _IContactService.ReadContactAsync(id);

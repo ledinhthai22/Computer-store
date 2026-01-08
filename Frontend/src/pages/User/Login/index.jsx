@@ -1,30 +1,33 @@
 import {Link, useNavigate} from "react-router-dom"
 import { useAuth } from "../../../contexts/AuthProvider";
+import { useToast } from "../../../contexts/ToastContext";
 import { useState } from "react";
 
 export default function Login(){
     const { login } = useAuth();  
-  const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState('');
-  const handleSubmit = async (event) => {
+    const { showToast } = useToast();
+    const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState('');
+    const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const username = formData.get("username");
-    const password = formData.get("password");
+    const email = formData.get("email");
+    const matKhau = formData.get("matKhau");
 
-    if (!username || !password || username.trim() === "") {
-      setErrorMessage("Vui lòng nhập Tên người dùng và Mật khẩu.");
+    if (!email || !matKhau || email.trim() === "") {
+      setErrorMessage("Vui lòng nhập Email và Mật khẩu.");
       return;
     }
 
     try {
-      const result = await login(username, password);
+      const result = await login(email, matKhau);
 
       if (result.success) {
         navigate("/");
+        showToast("Đăng nhập thành công", "success");
       }else {
         setErrorMessage(result.message || "Đăng nhập thất bại. Vui lòng thử lại.");
-      }
+      } 
     } catch (error) {
       setErrorMessage("Lỗi kết nối mạng. Vui lòng kiểm tra console.");
     }
@@ -43,10 +46,10 @@ export default function Login(){
                       )}
                       <form onSubmit={handleSubmit}>
                       <p className="mt-4">Nhập Email:</p>
-                      <input type="text" name="username" className="p-2 mt-2 border-2 rounded-xl w-140 border-stone-300" placeholder="Hãy nhập email"/>
+                      <input type="text" name="email" className="p-2 mt-2 border-2 rounded-xl w-140 border-stone-300" placeholder="Hãy nhập email"/>
                       <p className="mt-4">Mật Khẩu:</p>
-                      <input type="password" name="password" className="p-2 mt-2 border-2 w-140 rounded-xl border-stone-300" placeholder="Hãy nhập mật khẩu"/><br/>
-                      <Link className="text-stone-400" to={`/forgetpassword`}>Quên mật khẩu?</Link><br/>
+                      <input type="password" name="matKhau" className="p-2 mt-2 border-2 w-140 rounded-xl border-stone-300" placeholder="Hãy nhập mật khẩu"/><br/>
+                      <Link className="text-stone-400" to={`/forgetmatKhau`}>Quên mật khẩu?</Link><br/>
                       <button type="submit" className="btn mt-8 p-3 w-40 text-stone-50 rounded-xl bg-[#2f9ea0] hover:bg-blue-600">ĐĂNG NHẬP</button>
                       </form>
                       <p className="mt-2 text-stone-400">Bạn là người mới ?<Link className="text-[#2f9ea0]" to={`/register`}> ĐĂNG KÝ NGAY</Link></p>

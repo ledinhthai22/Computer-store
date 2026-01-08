@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination = ({ rowsPerPage, rowCount, onChangePage, currentPage }) => {
   const [jumpPage, setJumpPage] = useState('');
 
-  if (totalPages <= 1) return null;
+  const totalPages = Math.ceil(rowCount / rowsPerPage);
 
   // Logic tạo danh sách trang hiển thị
   const getVisiblePages = () => {
-    const delta = 1; // Số trang hiển thị quanh trang hiện tại
+    const around = 1; // Số trang hiển thị quanh trang hiện tại
     const range = [];
     const rangeWithDots = [];
     let l;
 
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+      if (i === 1 || i === totalPages || (i >= currentPage - around && i <= currentPage + around)) {
         range.push(i);
       }
     }
@@ -38,7 +38,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     if (e.key === 'Enter') {
       const pageNum = parseInt(jumpPage);
       if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-        onPageChange(pageNum);
+        onChangePage(pageNum);
         setJumpPage('');
       }
     }
@@ -48,18 +48,18 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     <div className="flex justify-center items-center gap-2 mt-6 select-none">
       {/* Nút Về đầu trang */}
       <button
-        onClick={() => onPageChange(1)}
+        onClick={() => onChangePage(1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronsLeft size={18} />
       </button>
 
       {/* Nút Previous */}
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => onChangePage(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronLeft size={18} />
       </button>
@@ -70,7 +70,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           if (page === '...') {
             return (
               <div key={`dots-${index}`} className="relative group flex items-center">
-                <span className="w-9 h-9 flex items-center justify-center text-gray-400 group-hover:hidden">
+                <span className="w-9 h-9 flex items-center justify-center text-gray-400 group-hover:hidden cursor-pointer whitespace-nowrap">
                   ...
                 </span>
                 <input
@@ -88,8 +88,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           return (
             <button
               key={index}
-              onClick={() => onPageChange(page)}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
+              onClick={() => onChangePage(page)}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                 currentPage === page
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
@@ -103,18 +103,18 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
       {/* Nút Next */}
       <button
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => onChangePage(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronRight size={18} />
       </button>
 
       {/* Nút Đến cuối trang */}
       <button
-        onClick={() => onPageChange(totalPages)}
+        onClick={() => onChangePage(totalPages)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer whitespace-nowrap"
       >
         <ChevronsRight size={18} />
       </button>

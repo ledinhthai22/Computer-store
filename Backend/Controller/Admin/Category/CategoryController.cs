@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Category;
 using Backend.DTO.Category;
-using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controller.Category
 {
@@ -16,6 +16,16 @@ namespace Backend.Controller.Category
             _categoryService = categoryService;
         }
 
+        [HttpGet("{slug}/products")]
+        public async Task<IActionResult> GetProductsByCategory(string slug)
+        {
+            var result = await _categoryService.GetProductByCategoryAsync(slug);
+
+            if (result.Count == 0)
+                return NotFound(new { message = "Không có sản phẩm cho danh mục này" });
+
+            return Ok(result);
+        }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -31,14 +41,14 @@ namespace Backend.Controller.Category
             return Ok(result);
         }
         [HttpGet("deleted")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetDeteleListAll()
         {
             var result = await _categoryService.GetDeleteListAsync();
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateCategoryRequest request)
         {
             try
@@ -59,7 +69,7 @@ namespace Backend.Controller.Category
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update(int id, UpdateCategoryRequest request)
         {
             try
@@ -77,7 +87,7 @@ namespace Backend.Controller.Category
 
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "QuanTriVien")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -101,8 +111,8 @@ namespace Backend.Controller.Category
             }
         }
         [HttpPut("recover/{id:int}")]
-        [Authorize(Roles = "QuanTriVien")]
-        public async Task<IActionResult> Recover(int id)
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Restore(int id)
         {
             try
             {

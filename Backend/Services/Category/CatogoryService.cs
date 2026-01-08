@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.DTO.Category;
+using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,20 +9,19 @@ namespace Backend.Services.Category
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _DbContext;
         private readonly SlugHelper _slugHelper;
 
         public CategoryService(ApplicationDbContext dbContext, SlugHelper slugHelper)
         {
-            _dbContext = dbContext;
+            _DbContext = dbContext;
             _slugHelper = slugHelper;
         }
 
-
         public async Task<IEnumerable<CategoryResult>> GetAllAsync()
         {
-            return await _dbContext.DanhMuc
-                .Where(x => x.TrangThai == true)
+            return await _DbContext.DanhMuc
+                .Where(x => x.TrangThai == true && x.Delete_At == null)
                 .Select(d => new CategoryResult
                 {
                     MaDanhMuc = d.MaDanhMuc,
@@ -32,11 +32,12 @@ namespace Backend.Services.Category
                 .ToListAsync();
         }
 
-
         public async Task<CategoryResult?> GetByIdAsync(int id)
         {
-            var category = await _dbContext.DanhMuc.FindAsync(id);
-            if (category == null || !category.TrangThai) return null;
+            var category = await _DbContext.DanhMuc.FindAsync(id);
+
+            if (category == null || category.TrangThai == false || category.Delete_At != null)
+                return null;
 
             return new CategoryResult
             {
@@ -49,25 +50,24 @@ namespace Backend.Services.Category
 
         public async Task<IEnumerable<CategoryResult>> GetDeleteListAsync()
         {
-            return await _dbContext.DanhMuc
-                .Where(x => x.TrangThai == false)
+            return await _DbContext.DanhMuc
+                .Where(x => x.Delete_At != null)
                 .Select(d => new CategoryResult
                 {
                     MaDanhMuc = d.MaDanhMuc,
                     TenDanhMuc = d.TenDanhMuc,
                     Slug = d.Slug,
-                    TrangThai  = d.TrangThai
+                    TrangThai = d.TrangThai
                 })
                 .ToListAsync();
         }
-
 
         public async Task<CategoryResult> CreateAsync(CreateCategoryRequest request)
         {
             string ten = request.TenDanhMuc.Trim();
 
-            bool isDuplicate = await _dbContext.DanhMuc
-                .AnyAsync(x => x.TenDanhMuc == ten && x.TrangThai == true);
+            bool isDuplicate = await _DbContext.DanhMuc
+                .AnyAsync(x => x.TenDanhMuc == ten && x.TrangThai == true && x.Delete_At == null);
 
             if (isDuplicate)
                 throw new InvalidOperationException($"Danh mục '{ten}' đã tồn tại.");
@@ -79,11 +79,12 @@ namespace Backend.Services.Category
             {
                 TenDanhMuc = ten,
                 Slug = uniqueSlug,
-                TrangThai = true
+                TrangThai = true,
+                Delete_At = null
             };
 
-            _dbContext.DanhMuc.Add(category);
-            await _dbContext.SaveChangesAsync();
+            _DbContext.DanhMuc.Add(category);
+            await _DbContext.SaveChangesAsync();
 
             return new CategoryResult
             {
@@ -96,15 +97,20 @@ namespace Backend.Services.Category
 
         public async Task<CategoryResult?> UpdateAsync(int id, UpdateCategoryRequest request)
         {
-            var category = await _dbContext.DanhMuc.FindAsync(id);
-            if (category == null) return null;
+            var category = await _DbContext.DanhMuc.FindAsync(id);
+
+            if (category == null || category.Delete_At != null)
+                throw new InvalidOperationException("Danh mục không tồn tại hoặc đã bị xóa.");
 
             string tenMoi = request.TenDanhMuc.Trim();
 
             if (tenMoi != category.TenDanhMuc)
             {
-                bool isDuplicate = await _dbContext.DanhMuc
-                    .AnyAsync(x => x.MaDanhMuc != id && x.TenDanhMuc == tenMoi && x.TrangThai == true);
+                bool isDuplicate = await _DbContext.DanhMuc
+                    .AnyAsync(x => x.MaDanhMuc != id
+                                && x.TenDanhMuc == tenMoi
+                                && x.TrangThai == true
+                                && x.Delete_At == null);
 
                 if (isDuplicate)
                     throw new InvalidOperationException($"Tên danh mục '{tenMoi}' đã tồn tại.");
@@ -115,7 +121,7 @@ namespace Backend.Services.Category
                 category.TenDanhMuc = tenMoi;
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _DbContext.SaveChangesAsync();
 
             return new CategoryResult
             {
@@ -126,50 +132,79 @@ namespace Backend.Services.Category
             };
         }
 
-       
         public async Task<bool> DeleteAsync(int id)
         {
-            var category = await _dbContext.DanhMuc.FindAsync(id);
+            var category = await _DbContext.DanhMuc.FindAsync(id);
             if (category == null) return false;
 
-            bool isUsed = await _dbContext.SanPham
+            bool isUsed = await _DbContext.SanPham
                 .AnyAsync(p => p.MaDanhMuc == id && p.TrangThai == true);
 
             if (isUsed)
                 throw new InvalidOperationException("Danh mục đang được sử dụng bởi sản phẩm, không thể xóa.");
 
             category.TrangThai = false;
+            category.Delete_At = DateTime.Now;
 
-            await _dbContext.SaveChangesAsync();
+            await _DbContext.SaveChangesAsync();
             return true;
         }
 
-
         public async Task<bool> RecoverAsync(int id)
         {
-            var category = await _dbContext.DanhMuc.FindAsync(id);
-            if (category == null) return false;
+            var category = await _DbContext.DanhMuc.FindAsync(id);
+            if (category == null || category.Delete_At == null) return false;
 
-            bool isDuplicate = await _dbContext.DanhMuc
+            bool isDuplicate = await _DbContext.DanhMuc
                 .AnyAsync(x => x.MaDanhMuc != id
+                            && x.TenDanhMuc == category.TenDanhMuc
                             && x.TrangThai == true
-                            && x.TenDanhMuc == category.TenDanhMuc);
+                            && x.Delete_At == null);
 
             if (isDuplicate)
                 throw new InvalidOperationException("Tên danh mục bị trùng, không thể khôi phục.");
 
+            category.Delete_At = null;
             category.TrangThai = true;
-            await _dbContext.SaveChangesAsync();
+
+            await _DbContext.SaveChangesAsync();
             return true;
         }
+        public async Task<List<ProductResult>> GetProductByCategoryAsync(string slug)
+        {
+            var category = await _DbContext.DanhMuc
+                .FirstOrDefaultAsync(x =>
+                    x.Slug == slug &&
+                    x.TrangThai == true &&
+                    x.Delete_At == null);
 
+            if (category == null)
+                return new List<ProductResult>();
+
+            var products = await _DbContext.SanPham
+                .Where(p =>
+                    p.MaDanhMuc == category.MaDanhMuc &&
+                    p.TrangThai == true)
+                .Select(p => new ProductResult
+                {
+                    MaSanPham = p.MaSanPham,
+                    TenSanPham = p.TenSanPham,
+                    GiaCoBan = p.GiaCoBan,
+                    Slug = p.Slug,
+                    MaDanhMuc = category.MaDanhMuc,
+                    TenDanhMuc = category.TenDanhMuc
+                })
+                .ToListAsync();
+
+            return products;
+        }
 
         private async Task<string> GenerateUniqueSlugAsync(string baseSlug, int? ignoreId = null)
         {
             string finalSlug = baseSlug;
             int count = 1;
 
-            while (await _dbContext.DanhMuc
+            while (await _DbContext.DanhMuc
                 .AnyAsync(x => x.Slug == finalSlug && x.MaDanhMuc != ignoreId))
             {
                 finalSlug = $"{baseSlug}-{count}";
