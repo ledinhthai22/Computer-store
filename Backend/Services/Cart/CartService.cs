@@ -20,30 +20,30 @@ namespace Backend.Services.Cart
         {
             return await _dbContext.ChiTietGioHang
                 .Where(c => c.MaNguoiDung == UserId)
-                .Select(c => new CartReuslt { 
-                    UserId = c.MaNguoiDung,
-                    VariantId = c.MaBienThe,
-                    VariantName = c.BienThe.SanPham.TenSanPham,
-                    Price = c.BienThe.GiaBan.ToString(),
-                    ImageUrl = c.BienThe.HinhAnhSanPham
+                .Select(c => new CartReuslt {
+                    MaNguoiDung = c.MaNguoiDung,
+                    MaBienThe = c.MaBienThe,
+                    TenSanPham = c.BienThe.SanPham.TenSanPham,
+                    GiaBan = c.BienThe.GiaBan.ToString(),
+                    DuongDanAnh = c.BienThe.HinhAnhSanPham
                         .Where(i => i.AnhChinh)
                         .Select(img => img.URL)
                         .FirstOrDefault(),
-                    DiscountPrice = c.BienThe.GiaKhuyenMai.ToString(),
-                    Quantity = c.SoLuong
+                    GiaKhuyenMai = c.BienThe.GiaKhuyenMai.ToString(),
+                    SoLuong = c.SoLuong
                 })
                 .ToListAsync();
         }
         public async Task<CartReuslt> CreateAsync(CartItemRequest request)
         {
             bool userExists = await _dbContext.NguoiDung
-                .AnyAsync(u => u.MaNguoiDung == request.UserId);
+                .AnyAsync(u => u.MaNguoiDung == request.MaNguoiDung);
             if (!userExists)
             {
                 throw new KeyNotFoundException("Người dùng không tồn tại!");
             }
             var variantInfo = await _dbContext.BienThe
-                .Where(bt => bt.MaBTSP == request.VariantId)
+                .Where(bt => bt.MaBTSP == request.MaBienThe)
                 .Select(bt => new
                 {
                     bt.MaBTSP,
@@ -61,7 +61,7 @@ namespace Backend.Services.Cart
                 throw new InvalidOperationException("Sản phẩm không tồn tại!");
             }
             bool existsInCart = await _dbContext.ChiTietGioHang
-                .AnyAsync(c => c.MaNguoiDung == request.UserId && c.MaBienThe == request.VariantId);
+                .AnyAsync(c => c.MaNguoiDung == request.MaNguoiDung && c.MaBienThe == request.MaBienThe);
 
             if (existsInCart)
             {
@@ -69,9 +69,9 @@ namespace Backend.Services.Cart
             }
             var cartItem = new ChiTietGioHang
             {
-                MaNguoiDung = request.UserId,
-                MaBienThe = request.VariantId,
-                SoLuong = request.Quantity
+                MaNguoiDung = request.MaNguoiDung,
+                MaBienThe = request.MaBienThe,
+                SoLuong = request.SoLuong
             };
 
             _dbContext.ChiTietGioHang.Add(cartItem);
@@ -80,25 +80,25 @@ namespace Backend.Services.Cart
             
             return new CartReuslt
             {
-                UserId = request.UserId,
-                VariantId = variantInfo.MaBTSP,
-                VariantName = variantInfo.TenSanPham,
-                Price = variantInfo.GiaBan.ToString(),         
-                DiscountPrice = variantInfo.GiaKhuyenMai.ToString(),
-                ImageUrl = variantInfo.HinhAnh,
-                Quantity = request.Quantity
+                MaNguoiDung = request.MaNguoiDung,
+                MaBienThe = variantInfo.MaBTSP,
+                TenSanPham = variantInfo.TenSanPham,
+                GiaBan = variantInfo.GiaBan.ToString(),         
+                GiaKhuyenMai = variantInfo.GiaKhuyenMai.ToString(),
+                DuongDanAnh = variantInfo.HinhAnh,
+                SoLuong = request.SoLuong
             };
         }
         public async Task<CartReuslt> UpdateAsync(CartItemRequest request)
         {
             bool userExists = await _dbContext.NguoiDung
-                .AnyAsync(u => u.MaNguoiDung == request.UserId);
+                .AnyAsync(u => u.MaNguoiDung == request.MaNguoiDung);
             if (!userExists)
             {
                 throw new KeyNotFoundException("Người dùng không tồn tại!");
             }
             var variantInfo = await _dbContext.BienThe
-                .Where(bt => bt.MaBTSP == request.VariantId)
+                .Where(bt => bt.MaBTSP == request.MaBienThe)
                 .Select(bt => new
                 {
                     bt.MaBTSP,
@@ -117,33 +117,33 @@ namespace Backend.Services.Cart
                 throw new KeyNotFoundException("Sản phẩm không tồn tại!");
             }
             var cartItem = await _dbContext.ChiTietGioHang
-                .FirstOrDefaultAsync(c => c.MaNguoiDung == request.UserId && c.MaBienThe == request.VariantId);
+                .FirstOrDefaultAsync(c => c.MaNguoiDung == request.MaNguoiDung && c.MaBienThe == request.MaBienThe);
 
             if (cartItem == null)
             {
                 throw new InvalidOperationException("Sản phẩm này chưa có trong giỏ hàng để cập nhật!");
             }
-            if (request.Quantity == 0)
+            if (request.SoLuong == 0)
             {
                 throw new InvalidOperationException("Số lượng sản phẩm phải > 0!");
             }
-            cartItem.SoLuong = request.Quantity; 
+            cartItem.SoLuong = request.SoLuong; 
             await _dbContext.SaveChangesAsync();
             return new CartReuslt
             {
-                UserId = request.UserId,
-                VariantId = request.VariantId,
-                Quantity = cartItem.SoLuong, 
-                VariantName = variantInfo.TenSanPham,
-                Price = variantInfo.GiaBan.ToString(),
-                DiscountPrice = variantInfo.GiaKhuyenMai.ToString(),
-                ImageUrl = variantInfo.HinhAnh
+                MaNguoiDung = request.MaNguoiDung,
+                MaBienThe = request.MaBienThe,
+                SoLuong = cartItem.SoLuong, 
+                TenSanPham = variantInfo.TenSanPham,
+                GiaBan = variantInfo.GiaBan.ToString(),
+                GiaKhuyenMai = variantInfo.GiaKhuyenMai.ToString(),
+                DuongDanAnh = variantInfo.HinhAnh
             };
         }
         public async Task<bool> DeleteAsync(DeleteCartRequest request)
         {
             return await _dbContext.ChiTietGioHang
-                .Where(c => c.MaNguoiDung == request.UserId && c.MaBienThe == request.VariantId)
+                .Where(c => c.MaNguoiDung == request.MaNguoiDung && c.MaBienThe == request.MaBienThe)
                 .ExecuteDeleteAsync() > 0;
         }
 
