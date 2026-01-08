@@ -9,6 +9,6 @@ namespace Backend.DTO.Brand
     public class CreateBrandRequest
     {
         [Required]
-        public string BrandName { get; set; } = null!;
+        public string TenThuongHieu { get; set; } = null!;
     }
 }
