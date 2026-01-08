@@ -1,11 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Toast from '../../components/admin/Toast';
-import ConfirmModal from '../../components/admin/RecoverConfirmModal';
-import BrandRecoverTable from '../../components/admin/brand/BrandRecoverTable';
+import CategoryRecoverTable from '../../../components/admin/category/CategoryRecoverTable';
+import Toast from '../../../components/admin/Toast';
+import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
 
-const BrandRecover = () => {
-    const [brands, setBrands] = useState([]);
+const CategoryRecover = () => {
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -18,20 +18,20 @@ const BrandRecover = () => {
         setToast({ show: true, message, type });
     };
 
-    const fetchDataRecover = async () => {
+    const fetchCategoriesRecover = async () => {
         try {
             setLoading(false);
-            const res = await axios.get('https://localhost:7012/api/Brand/deleted');
+            const res = await axios.get('https://localhost:7012/api/Category/deleted');
             const data = Array.isArray(res.data) ? res.data : [];
-            setBrands(data);
+            setCategories(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
-            showToast("Tải dữ liệu thương hiệu thất bại", "error");
+            showToast("Tải danh sách danh mục thất bại", "error");
         }finally{
             setLoading(false);}
     };
 
-    useEffect(() => { fetchDataRecover(); }, []);
+    useEffect(() => { fetchCategoriesRecover(); }, []);
 
     // MODAL Recover
     const handleRecover = (id) => {
@@ -41,13 +41,13 @@ const BrandRecover = () => {
     const handleConfirmRecover = async () => {
     try {
         setIsRecover(true);
-        await axios.put(`https://localhost:7012/api/Brand/recover/${recoverId}`);
+        await axios.put(`https://localhost:7012/api/Category/recover/${recoverId}`);
         
-        showToast("Khôi phục thương hiệu thành công", "success");
-        await fetchDataRecover();
+        showToast("Khôi phục danh mục thành công", "success");
+        await fetchCategoriesRecover();
     } catch (err) {
         console.error(err);
-        showToast("Khôi phục thương hiệu thất bại", "error");
+        showToast("Khôi phục danh mục thất bại", "error");
     } finally {
         setIsRecover(false);
         setIsConfirmOpen(false);
@@ -58,8 +58,8 @@ const BrandRecover = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-4">
-                <BrandRecoverTable 
-                    data={brands} 
+                <CategoryRecoverTable 
+                    data={categories} 
                     loading={loading}
                     onRecover={handleRecover}
                 />
@@ -75,8 +75,8 @@ const BrandRecover = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xác nhận khôi phục thương hiệu"
-                message="Bạn có muốn khôi phục thương hiệu này không?"
+                title="Xác nhận khôi phục danh mục"
+                message="Bạn có muốn khôi phục danh mục này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isRecover}
@@ -85,4 +85,4 @@ const BrandRecover = () => {
     );
 }
 
-export default BrandRecover;
+export default CategoryRecover;

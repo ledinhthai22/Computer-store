@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import AccountTable from '../../components/admin/account/AccountTable';
-import AccountToolbar from '../../components/admin/account/AccountToolbar';
-import Pagination from '../../components/admin/Pagination';
-import Toast from '../../components/admin/Toast';
+import AccountTable from '../../../components/admin/account/AccountTable';
+import AccountToolbar from '../../../components/admin/account/AccountToolbar';
+import Pagination from '../../../components/admin/Pagination';
+import Toast from '../../../components/admin/Toast';
 
 const Brand = () => {
     // const [accounts, setAccounts] = useState([]);
