@@ -9,7 +9,7 @@ const Contact = () => {
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [filterType, setFilterType] = useState('all');
+    const [filterType, setFilterType] = useState('unread');
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -77,15 +77,9 @@ const Contact = () => {
         // Nếu liên hệ chưa đọc (message !== "đã đọc")
         if (contact.message?.toLowerCase() !== "đã đọc") {
             try {
-                // Đảm bảo URL API đúng với Backend của bạn
                 await axios.put(`https://localhost:7012/api/Contact/read/${contact.maLienHe}`);
-                
-                // 1. Tải lại DataTable tại trang này
                 await fetchContacts(); 
-
-                // 2. Phát sự kiện để NavNotification trên Header cập nhật theo
                 window.dispatchEvent(new CustomEvent('contactUpdated'));
-                
             } catch (error) {
                 console.error("Không thể cập nhật trạng thái:", error);
             }
@@ -96,23 +90,13 @@ const Contact = () => {
         <>
             <div className="space-y-6">
             <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-                    <span className="font-semibold text-gray-700">Lọc theo:</span>
-                    <select 
-                        className="border rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                    >
-                        <option value="all">Tất cả liên hệ</option>
-                        <option value="unread">Chưa đọc</option>
-                        <option value="read">Đã đọc</option>
-                    </select>
-                </div>
                 <ContactTable 
                     data={contacts} 
                     loading={loading}
                     onDelete={handleDeleteClick}
                     onView={handleViewClick}
+                    filterType={filterType}
+                    onFilterTypeChange={setFilterType}
                 />
             </div>
             

@@ -31,7 +31,7 @@ const Category = () => {
             setCategories(data);
         } catch (error) {
             console.error("Lỗi fetch:", error);
-            showToast("Không thể tải danh sách danh mục", "error");
+            showToast("Tải danh sách danh mục thất bại", "error");
         }finally{
             setLoading(false);
         }
@@ -48,11 +48,11 @@ const Category = () => {
         try {
             setIsDeleting(true);
             await axios.delete(`https://localhost:7012/api/Category/${deleteId}`);
-            showToast("Đã xóa danh mục thành công!", "success");
+            showToast("Xóa danh mục thành công", "success");
             await fetchCategories();
         } catch (err) {
             console.error(err);
-            showToast("Lỗi xóa dữ liệu", "error");
+            showToast("Xóa danh mục thất bại", "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -80,12 +80,12 @@ const Category = () => {
                 await axios.put(`https://localhost:7012/api/Category/${editing.maDanhMuc}`, {
                     tenDanhMuc: nameTrimmed
                 });
-                showToast("Cập nhật thành công!", "success");
+                showToast("Cập nhật danh mục thành công", "success");
             } else {
                 await axios.post('https://localhost:7012/api/Category', {
                     tenDanhMuc: nameTrimmed
                 });
-                showToast("Thêm mới thành công!", "success");
+                showToast("Thêm danh mục thành công", "success");
             }
             
             await fetchCategories();

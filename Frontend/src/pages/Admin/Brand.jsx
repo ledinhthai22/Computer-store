@@ -31,7 +31,7 @@ const Brand = () => {
             setBrands(data);
         } catch (error) {
             console.error("Lỗi fetch:", error);
-            showToast("Không thể tải danh sách thương hiệu", "error");
+            showToast("Tải danh sách thương hiệu thất bại", "error");
             setBrands([]);
         } finally {
             setLoading(false);
@@ -48,11 +48,11 @@ const Brand = () => {
         try {
             setIsDeleting(true);
             await axios.delete(`https://localhost:7012/api/Brand/${deleteId}`);
-            showToast("Đã xóa thương hiệu thành công!", "success");
+            showToast("Xóa thương hiệu thành công", "success");
             await fetchBrands();
         } catch (err) {
             console.error(err);
-            showToast("Lỗi xóa dữ liệu", "error");
+            showToast("Xóa thương hiệu thất bại", "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -81,13 +81,13 @@ const Brand = () => {
                 await axios.put(`https://localhost:7012/api/Brand/${editingBrand.brandID}`,{
                     brandName: nameTrimmed
                 });
-                showToast("Cập nhật thành công!", "success");
+                showToast("Cập nhật thương hiệu thành công", "success");
             } else {
                 // Thêm thương hiệu
                 await axios.post(`https://localhost:7012/api/Brand`,{
                     brandName: nameTrimmed
                 });
-                showToast("Thêm mới thành công!", "success");
+                showToast("Thêm thương hiệu thành công", "success");
             }
             
             await fetchBrands();

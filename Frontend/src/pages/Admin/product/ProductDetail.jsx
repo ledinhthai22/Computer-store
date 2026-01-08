@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Toast from '../../../components/admin/Toast';
 import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus } from 'lucide-react';
+import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 
 const ProductDetail = () => {
   const { maSanPham } = useParams();
   const navigate = useNavigate();
 
-  // States dữ liệu chính
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [images, setImages] = useState([]);
-  
-  // States cho danh sách Select box
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+    
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
 
@@ -24,8 +29,6 @@ const ProductDetail = () => {
     doPhanGiaiManHinh: '', loaiXuLyTrungTam: '', loaiXuLyDoHoa: '', congGiaoTiep: ''
   });
   const [variants, setVariants] = useState([]);
-
-  // 1. Fetch Dữ liệu sản phẩm, Danh mục và Thương hiệu
   useEffect(() => {
   const fetchData = async () => {
     try {
@@ -57,7 +60,6 @@ const ProductDetail = () => {
         maDanhMuc: String(maDanhMucFound), 
         maThuongHieu: String(maThuongHieuFound)
       });
-      // ---------------------------------------
 
       setSpecs(data.thongSoKyThuat || {});
       setVariants(data.bienThe || []);
@@ -72,6 +74,10 @@ const ProductDetail = () => {
   };
   fetchData();
 }, [maSanPham]);
+  
+  const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+  };
 
   //UPLOAD ẢNH
   const handleImageUpload = (e) => {
@@ -115,28 +121,35 @@ const ProductDetail = () => {
 
     try {
       await axios.put(`https://localhost:7012/api/Product/${maSanPham}`, payload);
-      alert("Cập nhật thành công!");
+      showToast("Chỉnh sửa sản phẩm thành công!", "success");
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
-      alert("Không thể lưu thay đổi.");
+      showToast("Chỉnh sửa sản phẩm thất bại.", "error");
     }
   };
 
   //XOA SAN PHAM
-  const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+  const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
       try {
+        setIsDeleting(true);
         await axios.delete(`https://localhost:7012/api/Product/${maSanPham}`);
-        alert("Xóa thành công!");
+        showToast("Xóa sản phẩm thành công", "success");
         navigate('/quan-ly/san-pham');
       } catch (err) {
         console.error(err)
-        console.error
-        alert("Lỗi khi xóa sản phẩm");
-      }
-    }
-  };
+        showToast("Xóa sản phẩm thất bại", "error");
+      } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
+        }
+    };
 
   const InputField = ({ label, value, onChange, type = "text", disabled = !isEditing }) => (
     <div className="flex flex-col gap-1.5 w-full text-left">
@@ -166,7 +179,7 @@ const ProductDetail = () => {
               <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-md cursor-pointer">
                 <Edit3 size={18} /> Chỉnh sửa
               </button>
-              <button onClick={handleDelete} className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-md cursor-pointer">
+              <button onClick={handleDeleteClick} className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-md cursor-pointer">
                 <Trash2 size={18} /> Xóa
               </button>
             </>
@@ -174,7 +187,7 @@ const ProductDetail = () => {
             <>
                 <button onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 cursor-pointer">Hủy</button>
                 <button onClick={handleUpdate} className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md cursor-pointer">
-                <Save size={18} /> Lưu thay đổi
+                <Save size={18} /> Lưu chỉnh sửa
                 </button>
             </>
           )}
@@ -320,6 +333,21 @@ const ProductDetail = () => {
           ))}
         </div>
       </section>
+      {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
+            )}
+            
+            <ConfirmModal 
+                isOpen={isConfirmOpen}
+                message="Bạn có muốn xóa sản phẩm này không?"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setIsConfirmOpen(false)}
+                isLoading={isDeleting}
+            />
     </div>
   );
 };

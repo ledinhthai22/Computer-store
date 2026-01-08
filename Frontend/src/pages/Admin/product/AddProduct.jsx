@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trash2, Camera, X, Save, ArrowLeft, Plus } from 'lucide-react';
+import Toast from '../../../components/admin/Toast';
+import { Trash2, Camera, X, ArrowLeft, Plus } from 'lucide-react';
 
-// --- 1. ĐƯA COMPONENT NÀY RA NGOÀI ĐỂ TRÁNH MẤT FOCUS ---
 const InputField = ({ label, value, onChange, type = "text", disabled = false }) => (
     <div className="flex flex-col gap-2 w-full text-left">
         <label className="text-[14px] font-medium text-gray-700 ml-1">{label}</label>
@@ -28,6 +28,8 @@ const AddProduct = () => {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
 
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
     const [basicInfo, setBasicInfo] = useState({
         tenSanPham: '', giaCoBan: 0, khuyenMai: 0, maDanhMuc: '', maThuongHieu: ''
     });
@@ -43,7 +45,6 @@ const AddProduct = () => {
         manHinh: '', boXuLyDoHoa: '', boXuLyTrungTam: '', soLuongTon: 0, hinhAnh: []
     }]);
 
-    // Fetch Metadata (Categories, Brands)
     useEffect(() => {
         const fetchMetadata = async () => {
             try {
@@ -59,6 +60,10 @@ const AddProduct = () => {
         };
         fetchMetadata();
     }, []);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    };
 
     // Image Handlers
     const handleImageUpload = (e) => {
@@ -94,7 +99,7 @@ const AddProduct = () => {
         if (variants.length > 1) {
             setVariants(variants.filter(v => v.id !== id));
         } else {
-            alert("Sản phẩm phải có ít nhất một biến thể.");
+            showToast("Sản phẩm phải có ít nhất một biến thể.", "error");
         }
     };
 
@@ -114,11 +119,11 @@ const AddProduct = () => {
                 bienThe: variants.map(v => ({ ...v, hinhAnh: images }))
             };
             await axios.post(`https://localhost:7012/api/Product/`, payload);
-            alert("Thêm sản phẩm thành công!");
+            showToast("Thêm sản phẩm thành công", "success");
             navigate('/quan-ly/san-pham');
         } catch (error) {
             console.error("Lỗi API:", error);
-            alert("Lỗi: " + (error.response?.data?.message || "Không thể lưu"));
+            showToast("Thêm sản phẩm thất bại", "error");
         } finally {
             setLoading(false);
         }
@@ -282,6 +287,13 @@ const AddProduct = () => {
                     ))}
                 </div>
             </section>
+            {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
+            )}
         </div>
     );
 };

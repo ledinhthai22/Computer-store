@@ -4,12 +4,6 @@ const RestoreConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[2000] p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-center p-4 border-b">
-          <div className="flex items-center gap-2 text-gray-600">
-            <h3 className="font-bold text-lg">Xác nhận</h3>
-          </div>
-        </div>
 
         {/* Body */}
         <div className="p-6 text-center">

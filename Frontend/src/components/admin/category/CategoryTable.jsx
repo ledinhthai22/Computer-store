@@ -49,14 +49,14 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => onEdit(row)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                        className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Sửa"
                     >
                         <Edit size={18} /> Sửa
                     </button>
                     <button 
                         onClick={() => onDelete(row.maDanhMuc)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xóa"
                     >
                         <Trash2 size={18} /> Xóa
