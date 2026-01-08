@@ -10,7 +10,8 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()),
+        item => item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()),
     );
     const columns = [
         {

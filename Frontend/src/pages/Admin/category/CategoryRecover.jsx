@@ -75,7 +75,6 @@ const CategoryRecover = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xác nhận khôi phục danh mục"
                 message="Bạn có muốn khôi phục danh mục này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}
