@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../contexts/AuthProvider";
-import ProductCard from "../../../components/user/ProductCard";
-import TopNew from "../../../components/user/TopNew"
+import ProductCard from "../../../components/user/product/ProductCard";
+import TopNew from "../../../components/user/product/TopNew"
 export default function WishList() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);

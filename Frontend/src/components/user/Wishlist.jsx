@@ -52,8 +52,10 @@ export default function Wishlist({ productId }) {
         <>
             <button
                 onClick={toggleWishlist}
-                className={`absolute top-3 right-3 bg-white p-2 rounded-full shadow
-                ${liked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}>
+                className={`absolute top-3 right-3 bg-white p-2 rounded-full shadow transition-colors cursor-pointer
+                ${liked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+                title={liked ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
+                >
                 <FaHeart />
             </button>
         </>

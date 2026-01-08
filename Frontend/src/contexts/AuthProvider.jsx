@@ -1,4 +1,4 @@
-import { createContext, useState, useContext , useEffect} from "react";
+import { createContext, useState, useContext } from "react";
 
 const AuthContext = createContext();
 
@@ -10,38 +10,47 @@ export function AuthProvider({ children }) {
 
   const login = async (email, matKhau) => {
     try {
-      const response = await fetch("https://localhost:7012/api/Auth/login", {
+      const response = await fetch("https://localhost:7012/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          matKhau,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, matKhau }),
       });
-      if (!response.ok) {
-        const errorData = await response.json(); 
-        throw new Error(errorData.message || `Login failed with status ${response.status}`);
-    }
 
-      const userData = await response.json(); 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Đăng nhập thất bại");
+      }
+
+      const userData = {
+        hoTen: data.hoTen,
+        vaiTro: data.vaiTro,
+      };
+
       setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData)); 
+      localStorage.setItem("user", JSON.stringify(userData));
+
       return { success: true };
     } catch (error) {
       return { success: false, message: error.message };
     }
   };
+
   const register = async (hoTen, email, matKhau, soDienThoai, xacNhanMatKhau) => {
     try {
-      const response = await fetch("https://localhost:7012/api/Auth/register", {
+      const response = await fetch("https://localhost:7012/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          hoTen: hoTen,
-          email: email,
-          soDienThoai: soDienThoai,
-          matKhau: matKhau,
-          xacNhanMatKhau: xacNhanMatKhau
+          hoTen,
+          email,
+          soDienThoai,
+          matKhau,
+          xacNhanMatKhau,
         }),
       });
 
@@ -49,18 +58,19 @@ export function AuthProvider({ children }) {
 
       if (!response.ok) {
         if (data.errors) {
-            const firstErrorKey = Object.keys(data.errors)[0];
-            throw new Error(data.errors[firstErrorKey][0]);
+          const firstErrorKey = Object.keys(data.errors)[0];
+          throw new Error(data.errors[firstErrorKey][0]);
         }
         throw new Error(data.message || "Đăng ký thất bại");
       }
 
-      if (!data.success) {
-         throw new Error(data.message);
-      }
+      const userData = {
+        hoTen: data.hoTen,
+        vaiTro: data.vaiTro,
+      };
 
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
 
       return { success: true };
     } catch (error) {
@@ -68,19 +78,21 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await fetch("https://localhost:7012/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
     localStorage.removeItem("user");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login,register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
