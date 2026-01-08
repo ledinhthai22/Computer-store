@@ -16,7 +16,7 @@ namespace Ecommerce.Controller.Customer.WishList
             _wishListService = wishListService;
         }
         [HttpGet("{UserId}")]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> GetByUserId(int UserId)
         {
             var result = await _wishListService.GetByUserIdAsync(UserId);
@@ -24,7 +24,7 @@ namespace Ecommerce.Controller.Customer.WishList
             return Ok(result);
         }
         [HttpPost]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> Create(CreateWishListRequest request)
         {
             try
@@ -42,7 +42,7 @@ namespace Ecommerce.Controller.Customer.WishList
             }
         }
         [HttpDelete("{WishListId}")]
-        [Authorize(Roles = "NguoiDung")]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> Delete(int WishListId)
         {
             try

@@ -50,7 +50,7 @@ namespace Backend.Services.Auth
             if (!isPasswordValid)
                 return new AuthResult { Success = false, Message = "Mật khẩu không chính xác." };
 
-            if (user.TrangThai == 2)
+            if (user.TrangThai == false)
                 return new AuthResult { Success = false, Message = "Tài khoản đã bị khóa." };
 
             var token = _jwtHelper.GenerateToken(user.MaNguoiDung, user.TenVaiTro);
@@ -59,7 +59,7 @@ namespace Backend.Services.Auth
             {
                 Success = true,
                 Message = "Đăng nhập thành công",
-                Token = token,
+                MaNguoiDung = user.MaNguoiDung,
                 HoTen = user.HoTen,
                 VaiTro = user.TenVaiTro
             };
@@ -81,7 +81,7 @@ namespace Backend.Services.Auth
                 Email = req.Email,
                 SoDienThoai = req.SoDienThoai,
                 MatKhauMaHoa = hashPassWord,
-                TrangThai = 1,
+                TrangThai = true,
                 MaVaiTro = 2,
                 NgayTao = DateTime.Now,
                 NgayCapNhat = DateTime.Now
@@ -101,7 +101,6 @@ namespace Backend.Services.Auth
             {
                 Success = true,
                 Message = "Đăng ký thành công",
-                Token = token,
                 HoTen = user.HoTen,
                 VaiTro = tenVaiTro
             };

@@ -9,7 +9,10 @@ using Backend.Services.Category;
 using Backend.Services.Brand;
 using Backend.Services.WishList;
 using Backend.Services.Contact;
+using Backend.Services.WebInfo;
+using Backend.Services.Cart;
 using Backend.Services.Product;
+using Backend.Services.User;
 
 namespace Backend
 {
@@ -25,7 +28,10 @@ namespace Backend
             builder.Services.AddScoped<IBrandService, BrandService>();
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
+            builder.Services.AddScoped<IWebInfoService, WebInfoService>();
+            builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
@@ -52,6 +58,14 @@ namespace Backend
                     ValidAudience = jwtSettings["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -59,31 +73,31 @@ namespace Backend
             {
                 c.SwaggerDoc("v1", new() { Title = "Ecommerce API", Version = "v1" });
 
-                c.AddSecurityDefinition("Bearer", new()
-                {
-                    Name = "Authorization",
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Nhập: Bearer {token}"
-                });
+                // c.AddSecurityDefinition("Bearer", new()
+                // {
+                //     Name = "Authorization",
+                //     Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                //     Scheme = "Bearer",
+                //     BearerFormat = "JWT",
+                //     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                //     Description = "Nhập: Bearer {token}"
+                // });
 
-                c.AddSecurityRequirement(new()
-                {
-                    {
-                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                        {
-                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                            {
-                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-                        
+                // c.AddSecurityRequirement(new()
+                // {
+                //     {
+                //         new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                //         {
+                //             Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                //             {
+                //                 Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                //                 Id = "Bearer"
+                //             }
+                //         },
+                //         new string[] {}
+                //     }
+                // });
+
             });
             builder.Services.AddCors(options =>
             {
@@ -96,7 +110,7 @@ namespace Backend
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials(); 
+                        .AllowCredentials();
                 });
             });
 
@@ -105,9 +119,17 @@ namespace Backend
             {
                 options.UseSqlServer(conStr);
             });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly",
+                    policy => policy.RequireRole("QuanTriVien"));
+
+                options.AddPolicy("UserOnly",
+                    policy => policy.RequireRole("NguoiDung"));
+            });
             var app = builder.Build();
 
-          
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

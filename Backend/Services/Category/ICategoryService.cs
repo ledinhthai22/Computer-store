@@ -1,10 +1,12 @@
 using Backend.DTO.Category;
+using Backend.DTO.Product;
 namespace Backend.Services.Category
 {
     public interface ICategoryService
     {
         Task<IEnumerable<CategoryResult>> GetAllAsync();
         Task<IEnumerable<CategoryResult>> GetDeleteListAsync();
+        Task<List<ProductResult>> GetProductByCategoryAsync(string slug);
         Task<CategoryResult?> GetByIdAsync(int id);
         Task<CategoryResult> CreateAsync(CreateCategoryRequest request);
         Task<CategoryResult?> UpdateAsync(int id, UpdateCategoryRequest request);

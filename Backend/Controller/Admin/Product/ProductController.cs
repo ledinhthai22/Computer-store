@@ -17,8 +17,8 @@ namespace Backend.Controller.Admin.Product
         }
 
 
-        [HttpPost("create")]
-        [Authorize(Roles = "QuanTriVien")]
+        [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest request)
         {
             if (!ModelState.IsValid)
