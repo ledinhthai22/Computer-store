@@ -7,11 +7,11 @@ namespace Backend.DTO.WishList
 {
     public class WishlistResult 
     {
-        public int WishlistId { get; set; }
-        public int UserId { get; set; }
-        public int ProductVariantID { get; set; }
-        public string ProductName { get; set; } = string.Empty;
+        public int MaYeuThich { get; set; }
+        public int MaNguoiDung { get; set; }
+        public int MaBienThe { get; set; }
+        public string TenSanPham { get; set; } = string.Empty;
         public string HinhAnhChinh { get; set; } = string.Empty;
-        public decimal Price { get; set; }
+        public decimal GiaBan { get; set; }
     }
 }

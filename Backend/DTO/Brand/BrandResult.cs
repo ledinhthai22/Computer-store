@@ -7,8 +7,8 @@ namespace Backend.DTO.Brand
 {
     public class BrandResult
     {
-        public int BrandID { get; set; }
-        public string BrandName { get; set; } = null!;
-        public DateTime? IsDeleted { get; set; } 
+        public int MaThuongHieu { get; set; }
+        public string TenThuonHieu { get; set; } = null!;
+        public DateTime? NgayXoa { get; set; } 
     }
 }

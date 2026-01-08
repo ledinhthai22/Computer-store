@@ -18,7 +18,6 @@ namespace Ecommerce.Controller.Admin.WebInfo
             _webInfoService = webInfoService;
         }
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
             var result = await _webInfoService.GetAsync();

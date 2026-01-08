@@ -7,16 +7,16 @@ namespace Backend.DTO.WebInfo
 {
     public class WebInfoResult
     {
-        public int WebInfoId { get; set; }
-        public string WebName { get; set; }
-        public string Phone { get; set; }
-        public string Address { get; set; } 
-        public string LinkFacebook { get; set; }
-        public string LinkInstagram { get; set; } 
-        public string LinkYoutube { get; set; } 
-        public string PrivacyPolicy { get; set; }
-        public string ReturnPolicy { get; set; } 
-        public string Termsofuse { get; set; } 
-        public string LinkImage { get; set; } 
+        public int MaThongTinTrang { get; set; }
+        public string TenTrang { get; set; }
+        public string SoDienThoai { get; set; }
+        public string DiaChi { get; set; } 
+        public string DuongDanFacebook { get; set; }
+        public string DuongDanInstagram { get; set; } 
+        public string DuongDanYoutube { get; set; } 
+        public string ChinhSachBaoMat { get; set; }
+        public string ChinhSachDoiTra { get; set; } 
+        public string DieuKhoanSuDung { get; set; } 
+        public string DuongDanAnh { get; set; } 
     }
 }
