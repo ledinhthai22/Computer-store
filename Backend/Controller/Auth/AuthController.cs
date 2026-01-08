@@ -59,11 +59,12 @@ namespace Backend.Controllers.Auth
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new
+            return Ok(new AuthResult
             {
-                message = "Login success",
-                hoTen = result.HoTen,
-                vaiTro = result.VaiTro
+                Message = "Đăng nhập thành công",
+                MaNguoiDung = result.MaNguoiDung,
+                HoTen = result.HoTen,
+                VaiTro = result.VaiTro
             });
         }
 
@@ -89,11 +90,12 @@ namespace Backend.Controllers.Auth
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new
+            return Ok(new AuthResult
             {
-                message = result.Message,
-                hoTen = result.HoTen,
-                vaiTro = result.VaiTro
+                Message = "Đăng ký thành công",
+                MaNguoiDung = result.MaNguoiDung,
+                HoTen = result.HoTen,
+                VaiTro = result.VaiTro
             });
         }
 

@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.DTO.Category;
+using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -169,6 +170,35 @@ namespace Backend.Services.Category
             await _DbContext.SaveChangesAsync();
             return true;
         }
+        public async Task<List<ProductResult>> GetProductByCategoryAsync(string slug)
+        {
+            var category = await _DbContext.DanhMuc
+                .FirstOrDefaultAsync(x =>
+                    x.Slug == slug &&
+                    x.TrangThai == true &&
+                    x.Delete_At == null);
+
+            if (category == null)
+                return new List<ProductResult>();
+
+            var products = await _DbContext.SanPham
+                .Where(p =>
+                    p.MaDanhMuc == category.MaDanhMuc &&
+                    p.TrangThai == true)
+                .Select(p => new ProductResult
+                {
+                    MaSanPham = p.MaSanPham,
+                    TenSanPham = p.TenSanPham,
+                    GiaCoBan = p.GiaCoBan,
+                    Slug = p.Slug,
+                    MaDanhMuc = category.MaDanhMuc,
+                    TenDanhMuc = category.TenDanhMuc
+                })
+                .ToListAsync();
+
+            return products;
+        }
+
         private async Task<string> GenerateUniqueSlugAsync(string baseSlug, int? ignoreId = null)
         {
             string finalSlug = baseSlug;

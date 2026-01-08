@@ -61,7 +61,6 @@ namespace Backend.Services.Auth
                 Message = "Đăng nhập thành công",
                 MaNguoiDung = user.MaNguoiDung,
                 HoTen = user.HoTen,
-                
                 VaiTro = user.TenVaiTro
             };
         }
