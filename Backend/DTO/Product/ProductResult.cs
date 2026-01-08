@@ -13,6 +13,7 @@ namespace Backend.DTO.Product
         public decimal GiaCoBan { get; set; }
         public double KhuyenMai { get; set; }
         public int SoLuongTon { get; set; }
+         public int MaDanhMuc { get; set; } 
         public string TenDanhMuc { get; set; } = null!;
         public string TenThuongHieu { get; set; } = null!;
         public ProductSpecificationsResult ThongSoKyThuat { get; set; } = null!;

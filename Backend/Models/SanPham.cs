@@ -26,7 +26,6 @@ namespace Backend.Models
         [ForeignKey(nameof(MaDanhMuc))]
         public DanhMuc? DanhMuc { get; set; }
 
-
         public int MaThuongHieu { get; set; }
         [ForeignKey(nameof(MaThuongHieu))]
         public ThuongHieu? ThuongHieu { get; set; }
