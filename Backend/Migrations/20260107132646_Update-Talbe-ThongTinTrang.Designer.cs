@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260107132646_Update-Talbe-ThongTinTrang")]
+    partial class UpdateTalbeThongTinTrang
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,9 +41,6 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Deleted_At")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("GiaBan")
                         .HasColumnType("decimal(18,2)");
 
@@ -49,6 +49,10 @@ namespace Ecommerce.Migrations
 
                     b.Property<int>("MaSanPham")
                         .HasColumnType("int");
+
+                    b.Property<string>("ManHinh")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MauSac")
                         .IsRequired()
@@ -64,10 +68,6 @@ namespace Ecommerce.Migrations
 
                     b.Property<int>("SoLuongTon")
                         .HasColumnType("int");
-
-                    b.Property<string>("TenBienThe")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
@@ -105,17 +105,13 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
 
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenDanhMuc")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
@@ -254,9 +250,6 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaLienHe"));
 
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -268,8 +261,8 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
+                    b.Property<int>("TrangThai")
+                        .HasColumnType("int");
 
                     b.HasKey("MaLienHe");
 
@@ -283,9 +276,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNguoiDung"));
-
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -312,8 +302,8 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
+                    b.Property<int>("TrangThai")
+                        .HasColumnType("int");
 
                     b.HasKey("MaNguoiDung");
 
@@ -332,7 +322,7 @@ namespace Ecommerce.Migrations
                             NgayCapNhat = new DateTime(2026, 1, 7, 20, 26, 46, 192, DateTimeKind.Local).AddTicks(1037),
                             NgayTao = new DateTime(2026, 1, 7, 20, 26, 46, 192, DateTimeKind.Local).AddTicks(1016),
                             SoDienThoai = "0999988884",
-                            TrangThai = true
+                            TrangThai = 1
                         });
                 });
 
@@ -346,9 +336,6 @@ namespace Ecommerce.Migrations
 
                     b.Property<double>("DanhGiaTrungBinh")
                         .HasColumnType("float");
-
-                    b.Property<DateTime?>("Delete_At")
-                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("GiaCoBan")
                         .HasColumnType("decimal(18,2)");
@@ -408,10 +395,6 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThongSo"));
 
-                    b.Property<string>("CongGiaoTiep")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("DoPhanGiaiManHinh")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -421,14 +404,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KichThuocManHinh")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LoaiXuLyDoHoa")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LoaiXuLyTrungTam")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -513,12 +488,12 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThuongHieu"));
 
-                    b.Property<DateTime?>("IsDeleted")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("TenThuongHieu")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
 
                     b.HasKey("MaThuongHieu");
 
