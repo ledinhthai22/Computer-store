@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import CategoryTable from '../../components/admin/category/CategoryTable';
-import Toast from '../../components/admin/Toast';
-import ConfirmModal from '../../components/admin/DeleteConfirmModal';
+import CategoryTable from '../../../components/admin/category/CategoryTable';
+import Toast from '../../../components/admin/Toast';
+import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);

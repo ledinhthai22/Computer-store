@@ -1,9 +1,9 @@
 import axios from 'axios';
 import {useState, useEffect, useCallback} from 'react';
-import ContactTable from '../../components/admin/contact/ContactTable';
-import Toast from '../../components/admin/Toast';
-import ConfirmModal from '../../components/admin/DeleteConfirmModal';
-import ContactModal from '../../components/admin/contact/ContactModal';
+import ContactTable from '../../../components/admin/contact/ContactTable';
+import Toast from '../../../components/admin/Toast';
+import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import ContactModal from '../../../components/admin/contact/ContactModal';
 
 const Contact = () => {
     const [contacts, setContacts] = useState([]);

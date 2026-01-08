@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
+const WebInfoTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
         item => item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
-                item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()),
+                item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase())
     );
     const columns = [
         {
@@ -21,7 +22,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             sortable: false,
         },
         {
-            name: 'TÊN DANH MỤC',
+            name: 'TÊN TRANG',
             selector: row => row.tenDanhMuc,
             sortable: true,
             grow: 2,
@@ -32,7 +33,18 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             ),
         },
         {
-            name: 'SLUG',
+            name: 'SỐ ĐIỆN THOẠI',
+            selector: row => row.slug,
+            sortable: true,
+            grow: 2,
+            cell: row => (
+                <span className="font-semibold text-gray-700 capitalize">
+                    {row.slug}
+                </span>
+            ),
+        },
+        {
+            name: 'ĐỊA CHỈ',
             selector: row => row.slug,
             sortable: true,
             grow: 2,
@@ -53,7 +65,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                         className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Sửa"
                     >
-                        <Edit size={18} /> Sửa
+                        <Edit size={18} /> Xem chi tiết
                     </button>
                     <button 
                         onClick={() => onDelete(row.maDanhMuc)}
@@ -84,7 +96,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                 </button>
                 
                 <button 
-                    onClick={() => navigate('/quan-ly/danh-muc/khoi-phuc')}
+                    onClick={() => navigate('/quan-ly/thong-tin-trang/khoi-phuc')}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
                 >
                     <History size={16} />
@@ -109,7 +121,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     responsive
                     noDataComponent={
                         <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy danh mục nào.
+                            Không tìm thấy thông tin trang nào.
                         </div>
                     }
                 />
@@ -118,4 +130,4 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     );
 };
 
-export default CategoryTable;
+export default WebInfoTable;
