@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthProvider";
-import { useToast } from "../../contexts/ToastContext";
+import { useAuth } from "../../../contexts/AuthProvider";
+import { useToast } from "../../../contexts/ToastContext";
 import { FaUser } from "react-icons/fa6";
 
 export default function UserDropdown() {
@@ -31,7 +31,7 @@ export default function UserDropdown() {
     <div className="relative text-black" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 h-10 flex items-center text-white hover:bg-[#ffffff50] max-w-[160px]"
+        className="p-2 h-10 flex items-center text-white hover:bg-[#ffffff50] max-w-40 cursor-pointer rounded"
         title={user.hoTen}>
         <FaUser className="mr-1 shrink-0" />
         <span className=" text-sm truncate overflow-hidden whitespace-nowrap">{user.hoTen}</span>
@@ -48,7 +48,7 @@ export default function UserDropdown() {
           <Link to="/wishlist" className="block px-4 py-2 hover:text-blue-500">
             Sản phẩm yêu thích
           </Link>
-          <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:text-blue-500">
+          <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:text-blue-500 cursor-pointer">
             Đăng xuất
           </button>
         </div>

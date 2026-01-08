@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import ProductCard from "../../../components/user/ProductCard";
-import UserPagination from "../../../components/user/UserPagination";
+import ProductCard from "../../../components/user/product/ProductCard";
+import UserPagination from "../../../components/user/product/UserPagination";
 
 export default function UserProduct() {
     const [products, setProducts] = useState([]);

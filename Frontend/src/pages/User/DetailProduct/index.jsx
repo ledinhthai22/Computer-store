@@ -1,28 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { Link, useParams } from "react-router-dom";
-import {useCart} from "../../../contexts/CartContext"
-import {useAuth} from "../../../contexts/AuthProvider";
-import { useToast } from "../../../contexts/ToastContext";
-import { useNavigate } from "react-router-dom";
+import useAddToCart from "../../../hooks/useAddToCart";
 export default function Details() {
   const [product, setProduct] = useState(null);
-  const { showToast } = useToast();
+  const {handleAddToCart} = useAddToCart(product);
   const [ram, setRam] = useState("8GB");
-  const [rom, setRom] = useState("128GB");  
-  const { addToCart } = useCart();
+  const [rom, setRom] = useState("128GB");
   const { id } = useParams();
-  const {user} = useAuth();
-  const navigate = useNavigate(); 
-  const handleAddToCart = () => {
-    if (!user) {
-      showToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng", "info");
-      navigate("/login");
-      return;
-    }
-
-    addToCart(product);
-    showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
-  };
   useEffect(() => {
     fetch(`https://dummyjson.com/products/${id}`)
       .then(res => res.json())
@@ -34,7 +18,7 @@ export default function Details() {
   }
 
   return (
-    <div className="p-6 max-w-[80%] mx-auto shadow rounded-lg">
+    <div className="p-6 max-w-[80%] mx-auto shadow rounded-2xl bg-white scale-99">
       <div className="flex gap-6">
          <div>
               <div className="border rounded-lg p-4">
