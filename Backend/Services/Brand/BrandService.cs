@@ -68,7 +68,7 @@ namespace Backend.Services.Brand
             bool isDuplicate = await _dbContext.ThuongHieu
                 .AnyAsync(x => x.TenThuongHieu == BrandName && x.MaThuongHieu != id && x.TrangThai == true);
             if (isDuplicate)
-                {
+            {
                 throw new InvalidOperationException($"Thương hiệu '{BrandName}' đã tồn tại!");
             }
             brand.TenThuongHieu = BrandName;
