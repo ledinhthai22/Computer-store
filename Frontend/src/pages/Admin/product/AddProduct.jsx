@@ -113,7 +113,7 @@ const AddProduct = () => {
                 thongSoKyThuat: specs,
                 bienThe: variants.map(v => ({ ...v, hinhAnh: images }))
             };
-            await axios.post(`https://localhost:7012/create/`, payload);
+            await axios.post(`https://localhost:7012/api/Product/`, payload);
             alert("Thêm sản phẩm thành công!");
             navigate('/quan-ly/san-pham');
         } catch (error) {
@@ -134,7 +134,7 @@ const AddProduct = () => {
                 <button 
                     onClick={handleSave} 
                     disabled={loading}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md disabled:bg-gray-400 transition-all active:scale-95"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md disabled:bg-gray-400 transition-all active:scale-95 cursor-pointer"
                 >
                     <Plus size={20} />
                     {loading ? "Đang xử lý..." : "Thêm sản phẩm"}
@@ -150,7 +150,7 @@ const AddProduct = () => {
                             {images.length > 0 ? (
                                 <>
                                     <img src={images[0]} className="w-full h-full object-cover" alt="Main" />
-                                    <button type="button" onClick={() => removeImage(0)} className="absolute top-4 right-4 p-2 bg-white/90 text-red-500 rounded-full shadow-lg hover:bg-red-50 transition-all">
+                                    <button type="button" onClick={() => removeImage(0)} className="absolute top-4 right-4 p-2 bg-white/90 text-red-500 rounded-full shadow-lg hover:bg-red-50 transition-all cursor-pointer">
                                         <Trash2 size={20} />
                                     </button>
                                 </>
@@ -169,7 +169,7 @@ const AddProduct = () => {
                             {images.slice(1).map((img, idx) => (
                                 <div key={idx} className="relative w-20 h-20 rounded-xl border border-gray-100 overflow-hidden group shadow-sm">
                                     <img src={img} className="w-full h-full object-cover" alt="Sub" />
-                                    <button type="button" onClick={() => removeImage(idx + 1)} className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all">
+                                    <button type="button" onClick={() => removeImage(idx + 1)} className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
                                         <X size={18} />
                                     </button>
                                 </div>
@@ -244,9 +244,9 @@ const AddProduct = () => {
             {/* BIẾN THỂ */}
             <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-left">
                 <div className="flex justify-between items-center mb-8 border-b pb-4">
-                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-wider">Danh sách biến thể</h2>
-                    <button type="button" onClick={addVariant} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-md">
-                        <Plus size={18} /> Thêm cấu hình mới
+                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-wider">Biến Thể Sản Phẩm</h2>
+                    <button type="button" onClick={addVariant} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-md cursor-pointer">
+                        <Plus size={18} /> Thêm biến thể
                     </button>
                 </div>
                 <div className="max-h-[650px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
@@ -255,7 +255,7 @@ const AddProduct = () => {
                             <button 
                                 type="button" 
                                 onClick={() => removeVariant(v.id)} 
-                                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white p-1.5 rounded-full shadow-sm"
+                                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white p-1.5 rounded-full shadow-sm cursor-pointer"
                             >
                                 <Trash2 size={20} />
                             </button>
