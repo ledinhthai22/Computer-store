@@ -64,7 +64,8 @@ namespace Backend.Controllers.Auth
                 Message = "Đăng nhập thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
-                VaiTro = result.VaiTro
+                VaiTro = result.VaiTro,
+                Success = true
             });
         }
 
@@ -95,7 +96,8 @@ namespace Backend.Controllers.Auth
                 Message = "Đăng ký thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
-                VaiTro = result.VaiTro
+                VaiTro = result.VaiTro,
+                Success = true
             });
         }
 
@@ -129,7 +131,7 @@ namespace Backend.Controllers.Auth
                     Expires = DateTime.UtcNow.AddMinutes(60)
                 });
 
-                return Ok(new { message = "Token refreshed" });
+                return Ok(new { message = "Làm mới token" });
             }
             catch
             {
