@@ -20,7 +20,7 @@ const AddBrandModal = ({ isOpen, onClose, onSuccess }) => {
         try {
             setIsSubmitting(true);
             const response = await axios.post('https://localhost:7012/api/Brand', {
-                brandName: nameTrimmed
+                tenThuongHieu: nameTrimmed
             });
             
             // Lấy ID của thương hiệu vừa tạo

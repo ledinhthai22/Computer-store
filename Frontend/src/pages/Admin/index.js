@@ -6,3 +6,5 @@ export { default as CategoryRecover } from "./category/CategoryRecover";
 export { default as Brand } from "./brand/Brand";
 export { default as BrandRecover } from "./brand/BrandRecover";
 export { default as Contact } from "./contact/Contact";
+export { default as WebInfo } from "./webinfo/WebInfo";
+export { default as WebInfoRecover } from "./webinfo/WebInfoRecover";

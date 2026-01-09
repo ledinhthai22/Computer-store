@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingBag, Layers, User, LogOut, Hexagon, Mail } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Layers, User, LogOut, Hexagon, Mail, AppWindow } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -11,6 +11,7 @@ const Sidebar = () => {
     { name: 'Thương hiệu', icon: Hexagon, path: '/quan-ly/thuong-hieu' },
     { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
     { name: 'Tài khoản', icon: User, path: '/quan-ly/tai-khoan' },
+    { name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
   ];
 
   return (
