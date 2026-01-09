@@ -54,8 +54,8 @@ namespace Backend.Controllers.Auth
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
@@ -85,8 +85,8 @@ namespace Backend.Controllers.Auth
 
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
-                HttpOnly = true,
-                Secure = false,
+                HttpOnly = true,    
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
@@ -126,8 +126,8 @@ namespace Backend.Controllers.Auth
                 Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false, // true khi deploy HTTPS
-                    SameSite = SameSiteMode.Lax,
+                    Secure = true, // true khi deploy HTTPS
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddMinutes(60)
                 });
 
