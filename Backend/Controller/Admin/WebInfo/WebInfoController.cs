@@ -39,8 +39,8 @@ namespace Ecommerce.Controller.Admin.WebInfo
             var result = await _webInfoService.CreateWebInfo(request);
             return Ok(result);
         }
-        
-        [HttpPut]
+
+        [HttpPut("{id}")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateWebInfo(int id, WebInfoItemRequest request)
         {
