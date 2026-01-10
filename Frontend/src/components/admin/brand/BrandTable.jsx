@@ -9,7 +9,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.tenThuonHieu && item.tenThuonHieu.toLowerCase().includes(filterText.toLowerCase()),
+        item => item.tenThuongHieu && item.tenThuongHieu.toLowerCase().includes(filterText.toLowerCase()),
     );
     const columns = [
         {
@@ -20,12 +20,12 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         },
         {
             name: 'TÊN THƯƠNG HIỆU',
-            selector: row => row.tenThuonHieu,
+            selector: row => row.tenThuongHieu,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.tenThuonHieu}
+                    {row.tenThuongHieu}
                 </span>
             ),
         },

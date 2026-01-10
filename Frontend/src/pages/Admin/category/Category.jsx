@@ -7,12 +7,15 @@ import { categoryService, handleApiError } from '../../../services/api/categoryS
 const Category = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newName, setNewName] = useState('');
     const [editing, setEditing] = useState(null);
+
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+    
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -24,9 +27,9 @@ const Category = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const data = await categoryService.getAll();
-            const formattedData = Array.isArray(data) ? data : [];
-            setCategories(formattedData);
+            const res = await categoryService.getAll();
+            const data = Array.isArray(res) ? res : [];
+            setCategories(data);
         } catch (error) {
             const errorMessage = handleApiError(error, "Tải danh sách danh mục thất bại");
             showToast(errorMessage, "error");
@@ -35,11 +38,9 @@ const Category = () => {
         }
     };
 
-    useEffect(() => { 
-        fetchCategories(); 
-    }, []);
+    useEffect(() => { fetchCategories(); }, []);
 
-    // --- CHỨC NĂNG XÓA ---
+    // --- MODAL XÓA ---
     const handleDeleteClick = (id) => {
         setDeleteId(id);
         setIsConfirmOpen(true);
@@ -50,7 +51,7 @@ const Category = () => {
             setIsDeleting(true);
             await categoryService.delete(deleteId);
             showToast("Xóa danh mục thành công", "success");
-            await fetchCategories(); // Refresh danh sách
+            await fetchCategories();
         } catch (err) {
             const errorMessage = handleApiError(err, "Xóa danh mục thất bại");
             showToast(errorMessage, "error");
@@ -75,8 +76,7 @@ const Category = () => {
         const nameTrimmed = newName.trim();
         
         if (!nameTrimmed) {
-            setError('Tên danh mục không được để trống.');
-            return;
+            return setError('Tên danh mục không được để trống');
         }
 
         try {
