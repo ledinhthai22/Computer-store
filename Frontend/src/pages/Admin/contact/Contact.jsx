@@ -1,9 +1,9 @@
-import axios from 'axios';
 import {useState, useEffect, useCallback} from 'react';
 import ContactTable from '../../../components/admin/contact/ContactTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import ContactModal from '../../../components/admin/contact/ContactModal';
+import { contactService, handleApiError } from '../../../services/api/contactService';
 
 const Contact = () => {
     const [contacts, setContacts] = useState([]);
@@ -27,18 +27,19 @@ const Contact = () => {
     const fetchContacts = useCallback(async () => {
         try {
             setLoading(true);
-            let url = `https://localhost:7012/api/Contact`;         
+            let res = [];
             if (filterType === 'unread') {
-                url = `https://localhost:7012/api/Contact/AllUnread`;
+                res = await contactService.getAllUnread();
             } else if (filterType === 'read') {
-                url = `https://localhost:7012/api/Contact/AllRead`;
+                res = await contactService.getAllRead();
+            } else {
+                res = await contactService.getAll();
             }
-            const res = await axios.get(url);
-            const data = Array.isArray(res.data) ? res.data : [];
+            const data = Array.isArray(res) ? res : [];
             setContacts(data);
         } catch (error) {
-            console.error("Lỗi fetch:", error);
-            showToast("Không thể tải danh sách liên hệ", "error");
+            const errorMessage = handleApiError(error, "Tải danh sách liên hệ thất bại");
+            showToast(errorMessage, "error");
             setContacts([]);
         } finally {
             setLoading(false);
@@ -56,13 +57,13 @@ const Contact = () => {
     const handleConfirmDelete = async () => {
         try {
             setIsDeleting(true);
-            await axios.delete(`https://localhost:7012/api/Contact/${deleteId}`);
+            await contactService.delete(deleteId);
             showToast("Đã xóa liên hệ thành công!", "success");
             await fetchContacts();
             window.dispatchEvent(new CustomEvent('contactUpdated'));
         } catch (err) {
-            console.error(err);
-            showToast("Lỗi xóa dữ liệu", "error");
+            const errorMessage = handleApiError(err, "Xóa liên hệ thất bại");
+            showToast(errorMessage, "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -74,14 +75,14 @@ const Contact = () => {
         setSelectedContact(contact);
         setIsViewModalOpen(true);
 
-        // Nếu liên hệ chưa đọc (message !== "đã đọc")
         if (contact.message?.toLowerCase() !== "đã đọc") {
             try {
-                await axios.put(`https://localhost:7012/api/Contact/read/${contact.maLienHe}`);
+                await contactService.update(contact.maLienHe);
                 await fetchContacts(); 
                 window.dispatchEvent(new CustomEvent('contactUpdated'));
-            } catch (error) {
-                console.error("Không thể cập nhật trạng thái:", error);
+            } catch (err) {
+                const errorMessage = handleApiError(err, "Cập nhật trạng thái liên hệ thất bại");
+                showToast(errorMessage, "error");
             }
         }
     };

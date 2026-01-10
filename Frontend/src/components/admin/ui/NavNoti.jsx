@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { contactService } from '../../../services/api/contactService'
 import { Bell } from 'lucide-react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 import { Link } from 'react-router-dom';
@@ -15,8 +15,8 @@ const NavNotifications = ({ isOpen, onToggle, onClose }) => {
   // Fetch số lượng thông báo mới
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`https://localhost:7012/api/Contact/AllUnread`);
-      const data = Array.isArray(res.data) ? res.data : (res.data?.$values || []);
+      const res = await contactService.getAllUnread();
+      const data = Array.isArray(res) ? res : (res?.$values || []);
       setUnreadCount(data.length);
       const top5 = data.slice(0, 10); 
       setLatestContacts(top5);
