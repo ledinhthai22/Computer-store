@@ -23,7 +23,7 @@ namespace Backend.Services.Brand
                 .Select(b => new BrandResult
                 {
                     MaThuongHieu = b.MaThuongHieu,
-                    TenThuonHieu = b.TenThuongHieu,
+                    TenThuongHieu = b.TenThuongHieu,
                     NgayXoa = b.IsDeleted
                 })
                 .ToListAsync();
@@ -35,7 +35,7 @@ namespace Backend.Services.Brand
                 .Select(b => new BrandResult
                 {
                     MaThuongHieu = b.MaThuongHieu,
-                    TenThuonHieu = b.TenThuongHieu,
+                    TenThuongHieu = b.TenThuongHieu,
                     NgayXoa = b.IsDeleted
                 })
                 .ToListAsync();
@@ -47,7 +47,7 @@ namespace Backend.Services.Brand
                 .Select(b => new BrandResult
                 {
                     MaThuongHieu = b.MaThuongHieu,
-                    TenThuonHieu = b.TenThuongHieu,
+                    TenThuongHieu = b.TenThuongHieu,
                     NgayXoa = b.IsDeleted
                 })
                 .FirstOrDefaultAsync();
@@ -70,7 +70,7 @@ namespace Backend.Services.Brand
             return new BrandResult
             {
                 MaThuongHieu = BrandNew.MaThuongHieu,
-                TenThuonHieu = BrandNew.TenThuongHieu,
+                TenThuongHieu = BrandNew.TenThuongHieu,
                 NgayXoa = BrandNew.IsDeleted
             };
         }
@@ -90,7 +90,7 @@ namespace Backend.Services.Brand
             return new BrandResult
             {
                 MaThuongHieu = brand.MaThuongHieu,
-                TenThuonHieu = brand.TenThuongHieu,
+                TenThuongHieu = brand.TenThuongHieu,
                 NgayXoa = brand.IsDeleted
             };
         }
