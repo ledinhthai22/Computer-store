@@ -14,6 +14,14 @@ const WebInfoTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                 item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
                 item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase())
     );
+    const truncateText = (text, wordLimit) => {     
+        if (!text) return "";
+        const words = text.split(" ");
+        if (words.length > wordLimit) {
+            return words.slice(0, wordLimit).join(" ") + "...";
+        }
+        return text;
+    };
     const columns = [
         {
             name: 'STT',
@@ -23,34 +31,34 @@ const WebInfoTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         },
         {
             name: 'TÊN TRANG',
-            selector: row => row.tenDanhMuc,
+            selector: row => row.tenTrang,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.tenDanhMuc}
+                    {row.tenTrang}
                 </span>
             ),
         },
         {
             name: 'SỐ ĐIỆN THOẠI',
-            selector: row => row.slug,
+            selector: row => row.soDienThoai,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.slug}
+                    {row.soDienThoai}
                 </span>
             ),
         },
         {
             name: 'ĐỊA CHỈ',
-            selector: row => row.slug,
+            selector: row => row.diaChi,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.slug}
+                    {truncateText(row.diaChi, 6)}
                 </span>
             ),
         },
