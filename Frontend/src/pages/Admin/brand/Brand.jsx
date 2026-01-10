@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import BrandTable from '../../../components/admin/brand/BrandTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import { brandService, handleApiError } from '../../../services/api/brandService';
 
 const Brand = () => {
     const [brands, setBrands] = useState([]);
@@ -26,12 +26,12 @@ const Brand = () => {
     const fetchBrands = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`https://localhost:7012/api/Brand`);
-            const data = Array.isArray(res.data) ? res.data : [];
+            const res = await brandService.getAll();
+            const data = Array.isArray(res) ? res : [];
             setBrands(data);
         } catch (error) {
-            console.error("Lỗi fetch:", error);
-            showToast("Tải danh sách thương hiệu thất bại", "error");
+            const errorMessage = handleApiError(error, "Tải danh sách thương hiệu thất bại");
+            showToast(errorMessage, "error");
             setBrands([]);
         } finally {
             setLoading(false);
@@ -47,12 +47,12 @@ const Brand = () => {
     const handleConfirmDelete = async () => {
         try {
             setIsDeleting(true);
-            await axios.delete(`https://localhost:7012/api/Brand/${deleteId}`);
+            await brandService.delete(deleteId);
             showToast("Xóa thương hiệu thành công", "success");
             await fetchBrands();
         } catch (err) {
-            console.error(err);
-            showToast("Xóa thương hiệu thất bại", "error");
+            const errorMessage = handleApiError(err, "Xóa thương hiệu thất bại");
+            showToast(errorMessage, "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -63,7 +63,7 @@ const Brand = () => {
     // MODAL SỬA
     const handleEditClick = (brand) => {
         setEditingBrand(brand);
-        setBrandNameInput(brand.brandName || '');
+        setBrandNameInput(brand.tenThuongHieu || '');
         setError('');
         setIsModalOpen(true);
     };
@@ -71,22 +71,17 @@ const Brand = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         const nameTrimmed = brandNameInput.trim();
-        if (!nameTrimmed) return setError('Tên thương hiệu không được để trống.');
-
+        if (!nameTrimmed) {
+            return setError('Tên thương hiệu không được để trống');
+        }
         try {
             setIsSubmitting(true);
-
+            const data = { tenThuongHieu: nameTrimmed };
             if (editingBrand) {
-                // Sửa thương hiệu
-                await axios.put(`https://localhost:7012/api/Brand/${editingBrand.maThuongHieu}`,{
-                    brandName: nameTrimmed
-                });
+                await brandService.update(editingBrand.maThuongHieu, data)
                 showToast("Cập nhật thương hiệu thành công", "success");
             } else {
-                // Thêm thương hiệu
-                await axios.post(`https://localhost:7012/api/Brand`,{
-                    brandName: nameTrimmed
-                });
+                await brandService.create(data);
                 showToast("Thêm thương hiệu thành công", "success");
             }
             
@@ -95,7 +90,8 @@ const Brand = () => {
             setEditingBrand(null);
             setBrandNameInput('');
         } catch (err) {
-            showToast(err.response?.data?.message || "Có lỗi xảy ra");
+            const errorMessage = handleApiError(err, "Có lỗi xảy ra khi lưu thương hiệu]");
+            showToast(errorMessage, "error");
         } finally {
             setIsSubmitting(false);
         }

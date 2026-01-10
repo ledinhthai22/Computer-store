@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import CategoryTable from '../../../components/admin/category/CategoryTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import { categoryService, handleApiError } from '../../../services/api/categoryService';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -15,7 +15,7 @@ const Category = () => {
     const [editing, setEditing] = useState(null);
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
+    
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -26,33 +26,35 @@ const Category = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('https://localhost:7012/api/Category');
-            const data = Array.isArray(res.data) ? res.data : [];
+            setLoading(true);
+            const res = await categoryService.getAll();
+            const data = Array.isArray(res) ? res : [];
             setCategories(data);
         } catch (error) {
-            console.error("Lỗi fetch:", error);
-            showToast("Tải danh sách danh mục thất bại", "error");
-        }finally{
+            const errorMessage = handleApiError(error, "Tải danh sách danh mục thất bại");
+            showToast(errorMessage, "error");
+        } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => { fetchCategories(); }, []);
 
-    // --- CHỨC NĂNG XÓA ---
+    // --- MODAL XÓA ---
     const handleDeleteClick = (id) => {
         setDeleteId(id);
         setIsConfirmOpen(true);
     };
+
     const handleConfirmDelete = async () => {
         try {
             setIsDeleting(true);
-            await axios.delete(`https://localhost:7012/api/Category/${deleteId}`);
+            await categoryService.delete(deleteId);
             showToast("Xóa danh mục thành công", "success");
             await fetchCategories();
         } catch (err) {
-            console.error(err);
-            showToast("Xóa danh mục thất bại", "error");
+            const errorMessage = handleApiError(err, "Xóa danh mục thất bại");
+            showToast(errorMessage, "error");
         } finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
@@ -72,19 +74,20 @@ const Category = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         const nameTrimmed = newName.trim();
-        if (!nameTrimmed) return setError('Tên danh mục không được để trống.');
+        
+        if (!nameTrimmed) {
+            return setError('Tên danh mục không được để trống');
+        }
 
         try {
             setIsSubmitting(true);
+            const categoryData = { tenDanhMuc: nameTrimmed };
+
             if (editing) {
-                await axios.put(`https://localhost:7012/api/Category/${editing.maDanhMuc}`, {
-                    tenDanhMuc: nameTrimmed
-                });
+                await categoryService.update(editing.maDanhMuc, categoryData);
                 showToast("Cập nhật danh mục thành công", "success");
             } else {
-                await axios.post('https://localhost:7012/api/Category', {
-                    tenDanhMuc: nameTrimmed
-                });
+                await categoryService.create(categoryData);
                 showToast("Thêm danh mục thành công", "success");
             }
             
@@ -92,11 +95,20 @@ const Category = () => {
             setIsModalOpen(false);
             setEditing(null);
             setNewName('');
+            setError('');
         } catch (err) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra.');
+            const errorMessage = handleApiError(err, 'Có lỗi xảy ra khi lưu danh mục');
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const openAddModal = () => {
+        setEditing(null);
+        setNewName('');
+        setError('');
+        setIsModalOpen(true);
     };
 
     return (
@@ -107,12 +119,7 @@ const Category = () => {
                     loading={loading} 
                     onEdit={handleEditClick}
                     onDelete={handleDeleteClick}
-                    onOpenAddModal={() => {
-                        setEditing(null);
-                        setNewName('');
-                        setError('');
-                        setIsModalOpen(true);
-                    }}
+                    onOpenAddModal={openAddModal}
                 />
             </div>
 
@@ -126,7 +133,9 @@ const Category = () => {
                             </h2>
                             
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tên danh mục</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tên danh mục
+                                </label>
                                 <input
                                     type="text"
                                     value={newName}
@@ -139,6 +148,7 @@ const Category = () => {
                                     }`}
                                     placeholder="Nhập tên danh mục..."
                                     autoFocus
+                                    disabled={isSubmitting}
                                 />
                                 {error && <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>}
                             </div>
@@ -147,14 +157,15 @@ const Category = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+                                    disabled={isSubmitting}
                                 >
                                     Đóng
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300"
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {isSubmitting ? 'Đang lưu...' : 'Xác nhận'}
                                 </button>
@@ -164,7 +175,7 @@ const Category = () => {
                 </div>
             )}
 
-            {/* Hiển thị Toast */}
+            {/* Toast */}
             {toast.show && (
                 <Toast 
                     message={toast.message} 
@@ -172,9 +183,11 @@ const Category = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+            
+            {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có muốn xóa danh mục này không?"
+                message="Bạn có chắc chắn muốn xóa danh mục này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}

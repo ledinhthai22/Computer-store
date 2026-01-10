@@ -1,18 +1,17 @@
-import axios from "axios";
+// CategoryRecover.js
 import { useEffect, useState } from "react";
 import CategoryRecoverTable from '../../../components/admin/category/CategoryRecoverTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
+import { categoryService, handleApiError } from '../../../services/api/categoryService';
 
 const CategoryRecover = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [recoverId, setRecoverId] = useState(null);
-    const [isRecover, setIsRecover] = useState(false);
+    const [isRecovering, setIsRecovering] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -20,40 +19,43 @@ const CategoryRecover = () => {
 
     const fetchCategoriesRecover = async () => {
         try {
-            setLoading(false);
-            const res = await axios.get('https://localhost:7012/api/Category/deleted');
-            const data = Array.isArray(res.data) ? res.data : [];
-            setCategories(data);
+            setLoading(true);
+            const data = await categoryService.getDeleted();
+            const formattedData = Array.isArray(data) ? data : [];
+            setCategories(formattedData);
         } catch (error) {
-            console.error("Lỗi khi fetch:", error);
-            showToast("Tải danh sách danh mục thất bại", "error");
-        }finally{
-            setLoading(false);}
+            const errorMessage = handleApiError(error, "Tải danh sách danh mục đã xóa thất bại");
+            showToast(errorMessage, "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    useEffect(() => { fetchCategoriesRecover(); }, []);
+    useEffect(() => { 
+        fetchCategoriesRecover(); 
+    }, []);
 
     // MODAL Recover
-    const handleRecover = (id) => {
+    const handleRecoverClick = (id) => {
         setRecoverId(id);
         setIsConfirmOpen(true);
     };
+
     const handleConfirmRecover = async () => {
-    try {
-        setIsRecover(true);
-        await axios.put(`https://localhost:7012/api/Category/recover/${recoverId}`);
-        
-        showToast("Khôi phục danh mục thành công", "success");
-        await fetchCategoriesRecover();
-    } catch (err) {
-        console.error(err);
-        showToast("Khôi phục danh mục thất bại", "error");
-    } finally {
-        setIsRecover(false);
-        setIsConfirmOpen(false);
-        setRecoverId(null);
-    }
-};
+        try {
+            setIsRecovering(true);
+            await categoryService.recover(recoverId);
+            showToast("Khôi phục danh mục thành công", "success");
+            await fetchCategoriesRecover(); // Refresh danh sách
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Khôi phục danh mục thất bại");
+            showToast(errorMessage, "error");
+        } finally {
+            setIsRecovering(false);
+            setIsConfirmOpen(false);
+            setRecoverId(null);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -61,11 +63,11 @@ const CategoryRecover = () => {
                 <CategoryRecoverTable 
                     data={categories} 
                     loading={loading}
-                    onRecover={handleRecover}
+                    onRecover={handleRecoverClick}
                 />
             </div>
             
-            {/* Hiển thị Toast */}
+            {/* Toast */}
             {toast.show && (
                 <Toast 
                     message={toast.message} 
@@ -73,12 +75,14 @@ const CategoryRecover = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+            
+            {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có muốn khôi phục danh mục này không?"
+                message="Bạn có chắc chắn muốn khôi phục danh mục này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}
-                isLoading={isRecover}
+                isLoading={isRecovering}
             />
         </div>
     );
