@@ -78,7 +78,7 @@ const Brand = () => {
 
             if (editingBrand) {
                 // Sửa thương hiệu
-                await axios.put(`https://localhost:7012/api/Brand/${editingBrand.brandID}`,{
+                await axios.put(`https://localhost:7012/api/Brand/${editingBrand.maThuongHieu}`,{
                     brandName: nameTrimmed
                 });
                 showToast("Cập nhật thương hiệu thành công", "success");

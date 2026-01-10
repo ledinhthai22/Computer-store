@@ -88,7 +88,7 @@ const AddProduct = () => {
         giaCoBan: '',
         khuyenMai: '',
         maDanhMuc: '',
-        brandID: '',
+        maThuongHieu: '',
         kichThuocManHinh: '',
         soKheRam: '',
         oCung: '',
@@ -122,12 +122,14 @@ const AddProduct = () => {
         }, 0);
     }, [variants]);
 
-    const fetchProduct = async () => {
+    const fetchMetadata = async () => {
         try {
             const [catRes, brandRes] = await Promise.all([
                 axios.get(`https://localhost:7012/api/Category`),
                 axios.get(`https://localhost:7012/api/Brand`)
             ]);
+            console.log("Dữ liệu Brand từ API:", brandRes.data);
+            console.log("Dữ liệu Category từ API:", catRes.data);
             setCategories(catRes.data);
             setBrands(brandRes.data);
         } catch (error) {
@@ -137,7 +139,7 @@ const AddProduct = () => {
     };
 
     useEffect(() => {
-        fetchProduct();
+        fetchMetadata();
     }, []);
 
     const showToast = (message, type = 'success') => {
@@ -155,7 +157,7 @@ const AddProduct = () => {
                 return value && (value < 0 || value > 100) ? "Khuyến mãi phải từ 0-100%" : "";
             case 'maDanhMuc':
                 return !value ? "Vui lòng chọn danh mục" : "";
-            case 'brandID':
+            case 'maThuongHieu':
                 return !value ? "Vui lòng chọn thương hiệu" : "";
             default:
                 return "";
@@ -184,8 +186,8 @@ const AddProduct = () => {
         if (!formData.maDanhMuc) {
             newErrors.maDanhMuc = "Vui lòng chọn danh mục";
         }
-        if (!formData.brandID) {
-            newErrors.brandID = "Vui lòng chọn thương hiệu";
+        if (!formData.maThuongHieu) {
+            newErrors.maThuongHieu = "Vui lòng chọn thương hiệu";
         }
 
         variants.forEach((variant, index) => {
@@ -292,12 +294,12 @@ const AddProduct = () => {
             setLoading(true);
             
             const payload = {
-                tenSanPham: formData.tenSanPham,
+                tenSanPham: formData.tenSanPham.trim(),
                 giaCoBan: Number(formData.giaCoBan),
                 khuyenMai: Number(formData.khuyenMai) || 0,
                 soLuongTon: totalStock,
                 maDanhMuc: Number(formData.maDanhMuc),
-                brandID: Number(formData.brandID),
+                maThuongHieu: Number(formData.maThuongHieu),
                 thongSoKyThuat: {
                     kichThuocManHinh: formData.kichThuocManHinh || '',
                     soKheRam: formData.soKheRam || '',
@@ -310,7 +312,7 @@ const AddProduct = () => {
                     congGiaoTiep: formData.congGiaoTiep || ''
                 },
                 bienThe: variants.map(v => ({
-                    tenBienThe: v.tenBienThe,
+                    tenBienThe: v.tenBienThe.trim(),
                     giaBan: Number(v.giaBan),
                     giaKhuyenMai: Number(v.giaKhuyenMai) || 0,
                     mauSac: v.mauSac || '',
@@ -320,16 +322,21 @@ const AddProduct = () => {
                     boXuLyDoHoa: v.boXuLyDoHoa || '',
                     boXuLyTrungTam: v.boXuLyTrungTam || '',
                     soLuongTon: Number(v.soLuongTon),
-                    hinhAnh: v.hinhAnh
+                    hinhAnh: v.hinhAnh || []
                 }))
             };
             
-            console.log('=== PAYLOAD GỬI ĐI ===');
-            console.log(JSON.stringify(payload, null, 2));
-            console.log('=== KẾT THÚC PAYLOAD ===');
+            console.log('📦 Payload gửi đi:', JSON.stringify(payload, null, 2));
+            console.log('📊 Kiểm tra:');
+            console.log('- Tên sản phẩm:', payload.tenSanPham);
+            console.log('- Giá gốc:', payload.giaCoBan);
+            console.log('- Danh mục ID:', payload.maDanhMuc);
+            console.log('- Thương hiệu ID:', payload.maThuongHieu);
+            console.log('- Số biến thể:', payload.bienThe.length);
+            console.log('- Biến thể đầu tiên:', payload.bienThe[0]);
 
             const response = await axios.post(`https://localhost:7012/api/Product/`, payload);
-            console.log('Response:', response.data);
+            console.log('✅ Response từ API:', response.data);
             
             showToast("Thêm sản phẩm thành công!", "success");
             
@@ -337,36 +344,36 @@ const AddProduct = () => {
                 navigate('/quan-ly/san-pham');
             }, 1500);
         } catch (error) {
-            console.error("LỖI API:", error);
-            console.error("Response data:", error.response?.data);
-            console.error("Response status:", error.response?.status);
+            console.error("❌ Lỗi API:", error);
+            console.error("❌ Response data:", error.response?.data);
+            console.error("❌ Status:", error.response?.status);
             
             const errorMsg = error.response?.data?.message 
                 || error.response?.data?.title
-                || error.response?.data 
+                || error.response?.data?.errors 
                 || "Thêm sản phẩm thất bại. Vui lòng thử lại!";
             
-            setErrorMessage(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
-            showToast("Lỗi: " + (typeof errorMsg === 'string' ? errorMsg : 'Kiểm tra console'), "error");
+            setErrorMessage(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+            showToast("Lỗi: Kiểm tra Console để xem chi tiết", "error");
         } finally {
             setLoading(false);
         }
     };
 
     const handleCategoryAdded = async (newCategoryId) => {
-        await fetchProduct();
+        await fetchMetadata();
         if (newCategoryId) {
             setFormData({ ...formData, maDanhMuc: String(newCategoryId) });
         }
-        showToast("Thêm danh mục thành công", "success");
+        showToast("Thêm danh mục thành công!", "success");
     };
 
     const handleBrandAdded = async (newBrandId) => {
-        await fetchProduct();
+        await fetchMetadata();
         if (newBrandId) {
-            setFormData({ ...formData, brandID: String(newBrandId) });
+            setFormData({ ...formData, maThuongHieu: String(newBrandId) });
         }
-        showToast("Thêm thương hiệu thành công", "success");
+        showToast("Thêm thương hiệu thành công!", "success");
     };
 
     return (
@@ -444,13 +451,13 @@ const AddProduct = () => {
                         />
                         <SelectField
                             label="Thương hiệu"
-                            value={formData.brandID}
-                            onChange={(v) => handleChange('brandID', v)}
+                            value={formData.maThuongHieu}
+                            onChange={(v) => handleChange('maThuongHieu', v)}
                             options={brands}
-                            valueKey="brandID"
-                            labelKey="brandName"
+                            valueKey="maThuongHieu"
+                            labelKey="tenThuonHieu"
                             placeholder="Chọn thương hiệu"
-                            error={errors.brandID}
+                            error={errors.maThuongHieu}
                             onAdd={() => setIsBrandModalOpen(true)}
                         />
                     </div>
@@ -563,11 +570,6 @@ const AddProduct = () => {
                                     label="Ổ cứng" 
                                     value={v.oCung} 
                                     onChange={(val) => updateVariant(v.id, 'oCung', val)} 
-                                />
-                                <InputField 
-                                    label="Ổ cứng" 
-                                    value={v.manHinh} 
-                                    onChange={(val) => updateVariant(v.id, 'manHinh', val)} 
                                 />
                                 <InputField 
                                     label="CPU" 

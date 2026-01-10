@@ -3,23 +3,20 @@ import { useEffect, useState } from "react";
 import WebInfoTable from '../../../components/admin/WebInfo/WebInfoTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import WebInfoModal from "../../../components/admin/webinfo/WebInfoModal";
 
-const Category = () => {
+const WebInfoPage = () => {
     const [webinfo, setWebinfo] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newName, setNewName] = useState('');
     const [editing, setEditing] = useState(null);
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    
+
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
     };
@@ -27,94 +24,73 @@ const Category = () => {
     const fetchWebInfo = async () => {
         try {
             const res = await axios.get('https://localhost:7012/api/WebInfo');
-            const data = Array.isArray(res.data) ? res.data : [];
-            setWebinfo(data);
+            setWebinfo(Array.isArray(res.data) ? res.data : [res.data]);
         } catch (error) {
             console.error("Lỗi fetch:", error);
-            showToast("Tải danh sách thông tin trang thất bại", "error");
-        }finally{
+            showToast("Tải thông tin trang thất bại", "error");
+        } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => { fetchWebInfo(); }, []);
 
-    // --- CHỨC NĂNG XÓA ---
-    const handleDeleteClick = (id) => {
-        setDeleteId(id);
-        setIsConfirmOpen(true);
-    };
-    const handleConfirmDelete = async () => {
-        try {
-            setIsDeleting(true);
-            await axios.delete(`https://localhost:7012/api/WebInfo/${deleteId}`);
-            showToast("Xóa thông tin trang thành công", "success");
-            await fetchWebInfo();
-        } catch (err) {
-            console.error(err);
-            showToast("Xóa thông tin trang thất bại", "error");
-        } finally {
-            setIsDeleting(false);
-            setIsConfirmOpen(false);
-            setDeleteId(null);
-        }
-    };
-
-    // MODAL SỬA
-    const handleEditClick = (data) => {
-        setEditing(data);
-        setNewName(data.tenDanhMuc);
-        setError('');
-        setIsModalOpen(true);
-    };
-
-    // CHỨC NĂNG THÊM VÀ SỬA 
-    const handleSave = async (e) => {
-        e.preventDefault();
-        const nameTrimmed = newName.trim();
-        if (!nameTrimmed) return setError('??? Không được để trống.');
-
+    const handleSave = async (formData) => {
         try {
             setIsSubmitting(true);
             if (editing) {
-                await axios.put(`https://localhost:7012/api/WebInfo/${editing.maDanhMuc}`, {
-                    tenDanhMuc: nameTrimmed
-                });
-                showToast("Cập nhật thông tin trang thành công", "success");
+                await axios.put(`https://localhost:7012/api/WebInfo/${editing.maThongTinTrang}`, formData);
+                showToast("Cập nhật thành công!");
             } else {
-                await axios.post('https://localhost:7012/api/Webinfo', {
-                    tenDanhMuc: nameTrimmed
-                });
-                showToast("Thêm thông tin trang thành công", "success");
+                await axios.post('https://localhost:7012/api/WebInfo', formData);
+                showToast("Thêm mới thành công!");
             }
-            
             await fetchWebInfo();
             setIsModalOpen(false);
-            setEditing(null);
-            setNewName('');
         } catch (err) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra.');
+            showToast(err.response?.data?.message || 'Có lỗi xảy ra.', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            setIsDeleting(true);
+            await axios.delete(`https://localhost:7012/api/WebInfo/${deleteId}`);
+            showToast("Xóa thành công");
+            await fetchWebInfo();
+        } catch (err) {
+            console.error(err)
+            showToast("Xóa thất bại", "error");
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+        }
+    };
+
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-4">
-                <WebInfoTable 
-                    data={webinfo} 
-                    loading={loading} 
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                    onOpenAddModal={() => {
-                        setEditing(null);
-                        setNewName('');
-                        setError('');
-                        setIsModalOpen(true);
-                    }}
-                />
-            </div>
+        <div className="space-y-6 p-4">
+            <WebInfoTable 
+                data={webinfo} 
+                loading={loading} 
+                onEdit={(data) => { setEditing(data); setIsModalOpen(true); }}
+                onDelete={handleDeleteClick}
+                onOpenAddModal={() => { setEditing(null); setIsModalOpen(true); }}
+            />
+
+            <WebInfoModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+                editingData={editing}
+                isSubmitting={isSubmitting}
+            />
 
             {toast.show && (
                 <Toast 
@@ -123,6 +99,7 @@ const Category = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+
             <ConfirmModal 
                 isOpen={isConfirmOpen}
                 message="Bạn có muốn xóa thông tin trang này không?"
@@ -130,56 +107,8 @@ const Category = () => {
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
             />
-
-            {/* MODAL THÊM/SỬA */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-                        <form onSubmit={handleSave} className="p-6">
-                            <h2 className="text-xl font-bold mb-5 text-gray-800">
-                                {editing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
-                            </h2>
-                            
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tên danh mục</label>
-                                <input
-                                    type="text"
-                                    value={newName}
-                                    onChange={(e) => {
-                                        setNewName(e.target.value);
-                                        if(error) setError('');
-                                    }}
-                                    className={`w-full px-4 py-2 border rounded-lg outline-none ${
-                                        error ? 'border-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500'
-                                    }`}
-                                    placeholder="Nhập tên danh mục..."
-                                    autoFocus
-                                />
-                                {error && <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>}
-                            </div>
-
-                            <div className="flex justify-center gap-3 mt-6">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                >
-                                    Đóng
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300"
-                                >
-                                    {isSubmitting ? 'Đang lưu...' : 'Xác nhận'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
-}
+};
 
-export default Category;
+export default WebInfoPage;

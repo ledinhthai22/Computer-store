@@ -9,7 +9,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.brandName && item.brandName.toLowerCase().includes(filterText.toLowerCase()),
+        item => item.tenThuonHieu && item.tenThuonHieu.toLowerCase().includes(filterText.toLowerCase()),
     );
     const columns = [
         {
@@ -20,12 +20,12 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         },
         {
             name: 'TÊN THƯƠNG HIỆU',
-            selector: row => row.brandName,
+            selector: row => row.tenThuonHieu,
             sortable: true,
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
-                    {row.brandName}
+                    {row.tenThuonHieu}
                 </span>
             ),
         },
@@ -43,7 +43,7 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                         <Edit size={18} /> Sửa
                     </button>
                     <button 
-                        onClick={() => onDelete(row.brandID)}
+                        onClick={() => onDelete(row.maThuongHieu)}
                         className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xóa"
                     >
