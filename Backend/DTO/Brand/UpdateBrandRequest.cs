@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Backend.DTO.Brand
 {
-    public class UpdateBrandRequest 
+    public class UpdateBrandRequest
     {
-       [Required]
-       public string TenThuongHieu { get; set; } = null!;
-       public DateTime NgayXoa { get; set; }
+        [Required]
+        public string BrandName { get; set; } = null!;
     }
 }

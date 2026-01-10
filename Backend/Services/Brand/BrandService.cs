@@ -57,11 +57,12 @@ namespace Backend.Services.Brand
             string BrandName = request.TenThuongHieu.Trim();
 
             bool isDuplicate = await _dbContext.ThuongHieu.AnyAsync(x => x.TenThuongHieu == BrandName && x.IsDeleted == null);
-            if (isDuplicate){
+            if (isDuplicate)
+            {
                 throw new InvalidOperationException($"Thương hiệu '{BrandName}' đã tồn tại!");
             }
             var BrandNew = new ThuongHieu { TenThuongHieu = BrandName, IsDeleted = null };
-             _dbContext.ThuongHieu.Add(BrandNew);
+            _dbContext.ThuongHieu.Add(BrandNew);
             bool created = await _dbContext.SaveChangesAsync() > 0;
             if (!created)
             {
@@ -77,8 +78,9 @@ namespace Backend.Services.Brand
         public async Task<BrandResult?> UpdateAsync(int id, UpdateBrandRequest request)
         {
             var brand = await _dbContext.ThuongHieu.FindAsync(id);
-            if (brand == null || brand.IsDeleted == null) return null;
-            string BrandName = request.TenThuongHieu.Trim();
+            if (brand == null) return null;
+            string BrandName = request.BrandName.Trim();
+
             bool isDuplicate = await _dbContext.ThuongHieu
                 .AnyAsync(x => x.TenThuongHieu == BrandName && x.MaThuongHieu != id && x.IsDeleted == null);
             if (isDuplicate)
@@ -97,7 +99,7 @@ namespace Backend.Services.Brand
         public async Task<bool> DeleteAsync(int id)
         {
             var brand = await _dbContext.ThuongHieu.FindAsync(id);
-            if (brand == null || brand.IsDeleted == null) return false;
+            if (brand == null) return false;
             brand.IsDeleted = DateTime.Now;
             bool deleted = await _dbContext.SaveChangesAsync() > 0;
             if (!deleted)
@@ -109,9 +111,13 @@ namespace Backend.Services.Brand
         public async Task<bool> RestoreAsync(int id)
         {
             var brand = await _dbContext.ThuongHieu.FindAsync(id);
-            if (brand == null || brand.IsDeleted == null)
+            if (brand == null)
             {
                 return false;
+            }
+            if (brand.IsDeleted == null)
+            {
+                return true;
             }
             brand.IsDeleted = null;
             bool restored = await _dbContext.SaveChangesAsync() > 0;
