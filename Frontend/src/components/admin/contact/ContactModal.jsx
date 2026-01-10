@@ -1,4 +1,4 @@
-import { X, Mail, User, MessageSquare, Calendar, CheckCircle } from "lucide-react";
+import { X } from "lucide-react";
 
 const ContactDetailModal = ({ isOpen, onClose, contact }) => {
   if (!isOpen || !contact) return null;
