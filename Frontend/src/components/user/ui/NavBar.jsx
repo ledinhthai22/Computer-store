@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import { IoMenu, IoSearch } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";

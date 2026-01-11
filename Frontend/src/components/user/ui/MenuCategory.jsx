@@ -52,9 +52,9 @@ export default function MenuCategory({ onClose }) {
         <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Thương hiệu</h4>
         <ul className="space-y-3 text-sm whitespace-nowrap">
           {brands.map(b => (
-            <li key={b.brandID}>
-              <Link to={`/san-pham/thuong-hieu/${b.brandID}`} className="hover:text-blue-600 transition">
-                {b.brandName}
+            <li key={b.maThuongHieu}>
+              <Link to={`/san-pham/thuong-hieu/${b.maThuongHieu}`} className="hover:text-blue-600 transition">
+                {b.tenThuongHieu}
               </Link>
             </li>
           ))}

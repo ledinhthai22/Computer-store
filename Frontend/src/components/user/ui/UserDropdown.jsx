@@ -42,6 +42,9 @@ export default function UserDropdown() {
           <Link to="/profile" className="block px-4 py-2 hover:text-blue-500">
             Chỉnh sửa trang cá nhân
           </Link>
+          <Link to="/quan-ly" className="block px-4 py-2 hover:text-blue-500">
+            Trang quản trị
+          </Link>
           <Link to="/orders" className="block px-4 py-2 hover:text-blue-500">
             Quản lý đơn hàng
           </Link>
