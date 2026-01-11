@@ -3,41 +3,36 @@ import { FaFacebook,FaYoutube,FaInstagramSquare,FaTiktok } from "react-icons/fa"
 import { SiZalo } from "react-icons/si";
 import { useState } from "react";
 import { useToast } from "../../../contexts/ToastContext";
+import { contactService, handleApiError } from "../../../services/api/contactService";
 export default function Footer(){
     const [email, setEmail] = useState("");
     const [noiDung, setNoiDung] = useState("");
     const { showToast } = useToast();
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     const handleSubmit = async () => {
-        if (!email || !noiDung) {
-            showToast("Vui lòng nhập đầy đủ thông tin", "info");
-            return;
-        }
-        if (!emailRegex.test(email)) {
-            showToast("Email không đúng định dạng", "error");
-            return;
-        }
+    if (!email || !noiDung) {
+      showToast("Vui lòng nhập đầy đủ thông tin", "info");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      showToast("Email không đúng định dạng", "error");
+      return;
+    }
 
-        try {
-            const res = await fetch("https://localhost:7012/api/Contact/SendContact", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, noiDung })
-            });
+    try {
+      await contactService.create({ email, noiDung });
 
-            if (!res.ok) throw new Error("Gửi liên hệ thất bại");
+      showToast("Gửi liên hệ thành công", "success");
 
-            showToast("Gửi liên hệ thành công", "success");
-
-            setEmail("");
-            setNoiDung("");
-        } catch (err) {
-            console.error(err);
-            showToast("Có lỗi xảy ra vui lòng thử lại", "error");
-        }
-    };
+      setEmail("");
+      setNoiDung("");
+    } catch (err) {
+      const message = handleApiError(err, "Gửi liên hệ thất bại vui lòng thử lại");
+      showToast(message, "error");
+    }
+  };
     return(
         <footer className="bg-stone-100">
             <div className="max-w-[80%] mx-auto py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

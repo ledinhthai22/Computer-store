@@ -7,22 +7,12 @@ const axiosClient = axios.create({
   },
   withCredentials: true,
 });
-
-axiosClient.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 axiosClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {    if (error.response && error.response.status === 401) {
-        console.warn("Lỗi 401: Chưa đăng nhập hoặc Token hết hạn");
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+       localStorage.removeItem('user');
+       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
