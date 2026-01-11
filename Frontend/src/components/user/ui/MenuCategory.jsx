@@ -1,35 +1,36 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+import { brandService, handleApiError } from "../../../services/api/brandService";
+import { categoryService } from "../../../services/api/categoryService";
 export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
   useEffect(() => {
-    fetch("https://localhost:7012/api/Brand/")
-      .then(res => {
-        if (!res.ok) throw new Error("Brand API error");
-        return res.json();
-      })
-      .then(data => setBrand(data))
-      .catch(err => {
-        console.error(err);
+    const fetchBrands = async () => {
+      try{
+        const data = await brandService.getAll();
+        setBrand(data);
+      } catch(error){
+        handleApiError(error, "Lỗi khi tải thương hiệu");
         setBrand([]);
-      });
+      }
+    };
+    fetchBrands();
   }, []);
   
 
   useEffect(() => {
-    fetch("https://localhost:7012/api/Category/")
-      .then(res => {
-        if (!res.ok) throw new Error("Category API error");
-        return res.json();
-      })
-      .then(data => setCategory(data))
-      .catch(err => {
-        console.error(err);
+    const fetchCategories = async () => {
+      try{
+        const data = await categoryService.getAll();
+        setCategory(data);
+      } catch(error){
+        handleApiError(error, "Lỗi khi tải thương hiệu");
         setCategory([]);
-      });
+      }
+    };
+    fetchCategories();
   }, []);
   
 
@@ -52,9 +53,9 @@ export default function MenuCategory({ onClose }) {
         <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Thương hiệu</h4>
         <ul className="space-y-3 text-sm whitespace-nowrap">
           {brands.map(b => (
-            <li key={b.brandID}>
-              <Link to={`/san-pham/thuong-hieu/${b.brandID}`} className="hover:text-blue-600 transition">
-                {b.brandName}
+            <li key={b.maThuongHieu}>
+              <Link to={`/san-pham/thuong-hieu/${b.maThuongHieu}`} className="hover:text-blue-600 transition">
+                {b.tenThuongHieu}
               </Link>
             </li>
           ))}
