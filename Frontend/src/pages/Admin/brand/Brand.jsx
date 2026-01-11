@@ -29,8 +29,8 @@ const Brand = () => {
             const res = await brandService.getAll();
             const data = Array.isArray(res) ? res : [];
             setBrands(data);
-        } catch (error) {
-            const errorMessage = handleApiError(error, "Tải danh sách thương hiệu thất bại");
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách thương hiệu thất bại");
             showToast(errorMessage, "error");
             setBrands([]);
         } finally {

@@ -1,37 +1,101 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import {useState, useEffect, useCallback} from 'react';
 import AccountTable from '../../../components/admin/account/AccountTable';
-import AccountToolbar from '../../../components/admin/account/AccountToolbar';
-import Pagination from '../../../components/admin/Pagination';
 import Toast from '../../../components/admin/Toast';
+import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import { userService, handleApiError } from '../../../services/api/userService';
 
-const Brand = () => {
-    // const [accounts, setAccounts] = useState([]);
-    // const [loading, setLoading] = useState(true);
-    // const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-    // const [filtered, setFiltered] = useState([]);
-    // const [search, setSearch] = useState('');
-    // const [sortOrder, setSortOrder] = useState('brandName-asc');
+const Contact = () => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // const [currentPage, setCurrentPage] = useState(1);
-    // const itemsPerPage = 10;
+    const [filterType, setFilterType] = useState('all');
 
-    // const [error, setError] = useState('');
-    // const [isSubmitting, setIsSubmitting] = useState(false);
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [input, setInput] = useState('');
-    // const [editing, setEditing] = useState(null);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-    // const showToast = (message, type = 'success') => {
-    //     setToast({ show: true, message, type });
-    // };
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    // const fetch
-    return(
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    }
+
+    const fetchUsers = useCallback(async () => {
+        try {
+            setLoading(true);
+            let res = [];
+            if (filterType === 'lock') {
+                res = await userService.getAllLock();
+            } else if (filterType === 'read') {
+                res = await userService.getAllUnlock();
+            } else {
+                res = await userService.getAll();
+            }
+            const data = Array.isArray(res) ? res : [];
+            setUsers(data);
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách người dùng thất bại");
+            showToast(errorMessage, "error");
+            setUsers([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [filterType]);
+
+    useEffect(() => {fetchUsers();}, [fetchUsers]);
+
+    // MODAL XÓA
+    const handleDeleteClick = (id) => {
+        setDeleteId(id);
+        setIsConfirmOpen(true);
+    };
+    const handleConfirmDelete = async () => {
+        try {
+            setIsDeleting(true);
+            await userService.delete(deleteId);
+            showToast("Xóa người dùng thành công", "success");
+            await fetchUsers();
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Xóa người dùng thất bại");
+            showToast(errorMessage, "error");
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmOpen(false);
+            setDeleteId(null);
+        }
+    };
+
+    return (
         <>
-    
+            <div className="space-y-6">
+            <div className="flex flex-col gap-4">
+                <AccountTable 
+                    data={users} 
+                    loading={loading}
+                    onDelete={handleDeleteClick}
+                    filterType={filterType}
+                    onFilterTypeChange={setFilterType}
+                />
+            </div>
+            
+            {/* Hiển thị Toast */}
+            {toast.show && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ ...toast, show: false })} 
+                />
+            )}
+            <ConfirmModal 
+                isOpen={isConfirmOpen}
+                message="Bạn có muốn xóa người dùng này không?"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setIsConfirmOpen(false)}
+                isLoading={isDeleting}
+            />
+        </div>
         </>
     )
 }
 
-export default Brand;
+export default Contact;

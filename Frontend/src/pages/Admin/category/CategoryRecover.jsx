@@ -23,8 +23,8 @@ const CategoryRecover = () => {
             const data = await categoryService.getDeleted();
             const formattedData = Array.isArray(data) ? data : [];
             setCategories(formattedData);
-        } catch (error) {
-            const errorMessage = handleApiError(error, "Tải danh sách danh mục đã xóa thất bại");
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách danh mục đã xóa thất bại");
             showToast(errorMessage, "error");
         } finally {
             setLoading(false);
