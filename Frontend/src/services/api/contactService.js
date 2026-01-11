@@ -1,29 +1,19 @@
-import axios from "axios";
-
-const API_BASE_URL = "https://localhost:7012/api";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
+import axiosClient from "./axiosClient";
 
 export const contactService = {
-  getAll: () => api.get("/Contact").then((res) => res.data),
+  getAll: () => axiosClient.get("/Contact").then((res) => res.data),
 
-  getAllUnread: () => api.get("/Contact/AllUnread").then((res) => res.data),
+  getAllUnread: () => axiosClient.get("/Contact/AllUnread").then((res) => res.data),
 
-  getAllRead: () => api.get(`/Contact/AllRead`).then((res) => res.data),
+  getAllRead: () => axiosClient.get(`/Contact/AllRead`).then((res) => res.data),
 
   create: (data) =>
-    api.post("/Contact/SendContact", data).then((res) => res.data),
+    axiosClient.post("/Contact/SendContact", data).then((res) => res.data),
 
   update: (id, data) =>
-    api.put(`/Contact/read/${id}`, data).then((res) => res.data),
+    axiosClient.put(`/Contact/read/${id}`, data).then((res) => res.data),
 
-  delete: (id) => api.delete(`/Contact/${id}`).then((res) => res.data),
+  delete: (id) => axiosClient.delete(`/Contact/${id}`).then((res) => res.data),
 };
 
 // Xử lý bug

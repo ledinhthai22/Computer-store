@@ -1,4 +1,5 @@
 import { createContext, useState, useContext } from "react";
+import axiosClient from "../services/api/axiosClient"; 
 
 const AuthContext = createContext();
 
@@ -10,21 +11,13 @@ export function AuthProvider({ children }) {
 
   const login = async (email, matKhau) => {
     try {
-      const response = await fetch("https://localhost:7012/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, matKhau }),
+      const response = await axiosClient.post("/auth/login", { 
+        email, 
+        matKhau 
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Đăng nhập thất bại");
-      }
-
+      const data = response.data;
+      
       const userData = {
         hoTen: data.hoTen,
         vaiTro: data.vaiTro,
@@ -35,34 +28,22 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.message };
+      const message = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      return { success: false, message: message };
     }
   };
 
   const register = async (hoTen, email, matKhau, soDienThoai, xacNhanMatKhau) => {
     try {
-      const response = await fetch("https://localhost:7012/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          hoTen,
-          email,
-          soDienThoai,
-          matKhau,
-          xacNhanMatKhau,
-        }),
+      const response = await axiosClient.post("/auth/register", {
+        hoTen,
+        email,
+        soDienThoai,
+        matKhau,
+        xacNhanMatKhau,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.errors) {
-          const firstErrorKey = Object.keys(data.errors)[0];
-          throw new Error(data.errors[firstErrorKey][0]);
-        }
-        throw new Error(data.message || "Đăng ký thất bại");
-      }
+      const data = response.data;
 
       const userData = {
         hoTen: data.hoTen,
@@ -74,18 +55,27 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.message };
+      const errorData = error.response?.data;
+
+      if (errorData?.errors) {
+        const firstErrorKey = Object.keys(errorData.errors)[0];
+        const firstErrorMessage = errorData.errors[firstErrorKey][0];
+        return { success: false, message: firstErrorMessage };
+      }
+
+      return { success: false, message: errorData?.message || "Đăng ký thất bại" };
     }
   };
 
   const logout = async () => {
-    await fetch("https://localhost:7012/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    localStorage.removeItem("user");
-    setUser(null);
+    try {
+      await axiosClient.post("/auth/logout");
+    } catch (error) {
+      console.error("Lỗi khi gọi API logout:", error);
+    } finally {
+      localStorage.removeItem("user");
+      setUser(null);
+    }
   };
 
   return (
