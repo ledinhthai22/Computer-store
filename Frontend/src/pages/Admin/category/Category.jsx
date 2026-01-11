@@ -30,8 +30,8 @@ const Category = () => {
             const res = await categoryService.getAll();
             const data = Array.isArray(res) ? res : [];
             setCategories(data);
-        } catch (error) {
-            const errorMessage = handleApiError(error, "Tải danh sách danh mục thất bại");
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách danh mục thất bại");
             showToast(errorMessage, "error");
         } finally {
             setLoading(false);

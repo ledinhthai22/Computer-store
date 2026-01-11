@@ -3,7 +3,8 @@ import axiosClient from "./axiosClient";
 export const categoryService = {
   getAll: () => axiosClient.get("/Category").then((res) => res.data),
 
-  getDeleted: () => axiosClient.get("/Category/deleted").then((res) => res.data),
+  getDeleted: () =>
+    axiosClient.get("/Category/deleted").then((res) => res.data),
 
   getById: (id) => axiosClient.get(`/Category/${id}`).then((res) => res.data),
 
@@ -14,7 +15,8 @@ export const categoryService = {
 
   delete: (id) => axiosClient.delete(`/Category/${id}`).then((res) => res.data),
 
-  recover: (id) => axiosClient.put(`/Category/recover/${id}`).then((res) => res.data),
+  recover: (id) =>
+    axiosClient.put(`/Category/recover/${id}`).then((res) => res.data),
 };
 
 // Xử lý bug

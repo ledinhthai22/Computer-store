@@ -1,8 +1,9 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
 import BrandRecoverTable from '../../../components/admin/brand/BrandRecoverTable';
+import { brandService, handleApiError } from '../../../services/api/brandService';
+
 
 const BrandRecover = () => {
     const [brands, setBrands] = useState([]);
@@ -21,12 +22,12 @@ const BrandRecover = () => {
     const fetchDataRecover = async () => {
         try {
             setLoading(false);
-            const res = await axios.get('https://localhost:7012/api/Brand/deleted');
-            const data = Array.isArray(res.data) ? res.data : [];
+            const res = await brandService.getDeleted();
+            const data = Array.isArray(res) ? res : [];
             setBrands(data);
-        } catch (error) {
-            console.error("Lỗi khi fetch:", error);
-            showToast("Tải dữ liệu thương hiệu thất bại", "error");
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách đã xóa thương hiệu thất bại");
+            showToast(errorMessage, "error");
         }finally{
             setLoading(false);}
     };
@@ -41,13 +42,13 @@ const BrandRecover = () => {
     const handleConfirmRecover = async () => {
     try {
         setIsRecover(true);
-        await axios.put(`https://localhost:7012/api/Brand/recover/${recoverId}`);
+        await brandService.recover(recoverId);
         
         showToast("Khôi phục thương hiệu thành công", "success");
         await fetchDataRecover();
     } catch (err) {
-        console.error(err);
-        showToast("Khôi phục thương hiệu thất bại", "error");
+        const errorMessage = handleApiError(err, "Thôi phục thương hiệu thất bại");
+        showToast(errorMessage, "error");
     } finally {
         setIsRecover(false);
         setIsConfirmOpen(false);

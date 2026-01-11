@@ -9,11 +9,13 @@ export const brandService = {
 
   create: (data) => axiosClient.post("/Brand", data).then((res) => res.data),
 
-  update: (id, data) => axiosClient.put(`/Brand/${id}`, data).then((res) => res.data),
+  update: (id, data) =>
+    axiosClient.put(`/Brand/${id}`, data).then((res) => res.data),
 
   delete: (id) => axiosClient.delete(`/Brand/${id}`).then((res) => res.data),
 
-  recover: (id) => axiosClient.put(`/Brand/recover/${id}`).then((res) => res.data),
+  recover: (id) =>
+    axiosClient.put(`/Brand/recover/${id}`).then((res) => res.data),
 };
 
 // Xử lý bug

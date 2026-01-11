@@ -37,8 +37,8 @@ const Contact = () => {
             }
             const data = Array.isArray(res) ? res : [];
             setContacts(data);
-        } catch (error) {
-            const errorMessage = handleApiError(error, "Tải danh sách liên hệ thất bại");
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Tải danh sách liên hệ thất bại");
             showToast(errorMessage, "error");
             setContacts([]);
         } finally {
@@ -46,7 +46,6 @@ const Contact = () => {
         }
     }, [filterType]);
 
-    // 3. Theo dõi sự thay đổi của filterType
     useEffect(() => {fetchContacts();}, [fetchContacts]);
 
     // MODAL XÓA
