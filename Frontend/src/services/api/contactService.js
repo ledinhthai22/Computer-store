@@ -3,7 +3,8 @@ import axiosClient from "./axiosClient";
 export const contactService = {
   getAll: () => axiosClient.get("/Contact").then((res) => res.data),
 
-  getAllUnread: () => axiosClient.get("/Contact/AllUnread").then((res) => res.data),
+  getAllUnread: () =>
+    axiosClient.get("/Contact/AllUnread").then((res) => res.data),
 
   getAllRead: () => axiosClient.get(`/Contact/AllRead`).then((res) => res.data),
 
