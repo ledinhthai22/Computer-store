@@ -1,10 +1,10 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import axiosClient from "../services/api/axiosClient"; 
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState(() => {  
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await axiosClient.post("/auth/logout");
     } catch (error) {
@@ -75,8 +75,36 @@ export function AuthProvider({ children }) {
     } finally {
       localStorage.removeItem("user");
       setUser(null);
+      window.location.href = "/login";
     }
-  };
+  }, []);
+
+  // --- LOGIC TỰ ĐỘNG GIA HẠN TOKEN ---
+  useEffect(() => {
+    // Chỉ chạy nếu user đã đăng nhập
+    if (!user) return;
+
+    const verifySession = async () => {
+      try {
+        // Gọi API để gia hạn token (Refresh Token gửi qua Cookie)
+        await axiosClient.post("/auth/refresh-token");
+        console.log("Phiên đăng nhập hợp lệ. Đã gia hạn token.");
+      } catch (error) {
+        // Nếu lỗi (401/403) nghĩa là Refresh Token cũng đã hết hạn (do tắt máy quá lâu)
+        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...");
+        await logout(); // Tự động đăng xuất
+      }
+    };
+
+    // 1. Kiểm tra ngay lập tức khi vừa vào trang (Load/Reload)
+    verifySession();
+
+    // 2. Thiết lập timer: Gọi định kỳ mỗi 50 phút
+    const intervalId = setInterval(verifySession, 50 * 60 * 1000);
+
+    // Dọn dẹp timer khi unmount
+    return () => clearInterval(intervalId);
+  }, [user, logout]);
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>

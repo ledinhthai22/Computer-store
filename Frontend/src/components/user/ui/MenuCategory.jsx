@@ -1,35 +1,36 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+import { brandService, handleApiError } from "../../../services/api/brandService";
+import { categoryService } from "../../../services/api/categoryService";
 export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
   useEffect(() => {
-    fetch("https://localhost:7012/api/Brand/")
-      .then(res => {
-        if (!res.ok) throw new Error("Brand API error");
-        return res.json();
-      })
-      .then(data => setBrand(data))
-      .catch(err => {
-        console.error(err);
+    const fetchBrands = async () => {
+      try{
+        const data = await brandService.getAll();
+        setBrand(data);
+      } catch(error){
+        handleApiError(error, "Lỗi khi tải thương hiệu");
         setBrand([]);
-      });
+      }
+    };
+    fetchBrands();
   }, []);
   
 
   useEffect(() => {
-    fetch("https://localhost:7012/api/Category/")
-      .then(res => {
-        if (!res.ok) throw new Error("Category API error");
-        return res.json();
-      })
-      .then(data => setCategory(data))
-      .catch(err => {
-        console.error(err);
+    const fetchCategories = async () => {
+      try{
+        const data = await categoryService.getAll();
+        setCategory(data);
+      } catch(error){
+        handleApiError(error, "Lỗi khi tải thương hiệu");
         setCategory([]);
-      });
+      }
+    };
+    fetchCategories();
   }, []);
   
 
