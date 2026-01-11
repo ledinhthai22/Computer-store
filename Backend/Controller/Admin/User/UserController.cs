@@ -3,104 +3,94 @@ using Backend.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Controller.Admin.User
+namespace Backend.Controllers.Admin
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    [Route("api/admin/users")]
+    [Authorize(Policy = "AdminOnly")]
+    public class UserAdminController : ControllerBase
     {
-        private readonly IUserService _IUserService;
+        private readonly IUserService _userService;
 
-        public UserController(IUserService IUserService)
+        public UserAdminController(IUserService userService)
         {
-            _IUserService = IUserService;
+            _userService = userService;
         }
 
+        // GET /api/admin/users
         [HttpGet]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(await _IUserService.GetAllAsync());
-        }
-        [HttpGet("lock")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetLockListAsync()
-        {
-            return Ok(await _IUserService.GetLockListAsync());
-        }
-        [HttpGet("unlock")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetUnLockListAsync()
-        {
-            return Ok(await _IUserService.GetUnLockListAsync());
-        }
-        [HttpGet("deleted")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetDeleteListAsync()
-        {
-            return Ok(await _IUserService.GetDeleteListAsync());
-        }
-        [HttpGet("Userinfo/{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetUserInfoAsync(int id)
-        {
-            return Ok(await _IUserService.GetUserInfoAsync(id));
-        }
-        
-        [HttpPut("Userinfo/{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateUserAsync(int id ,UpdateUserRequest request)
-        {
-            return Ok(await _IUserService.UpdateUserAsync(id,request));
+            return Ok(await _userService.GetAllAsync());
         }
 
+        // GET /api/admin/users/locked
+        [HttpGet("locked")]
+        public async Task<IActionResult> GetLocked()
+        {
+            return Ok(await _userService.GetLockListAsync());
+        }
+
+        // GET /api/admin/users/unlocked
+        [HttpGet("unlocked")]
+        public async Task<IActionResult> GetUnlocked()
+        {
+            return Ok(await _userService.GetUnLockListAsync());
+        }
+
+        // GET /api/admin/users/deleted
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetDeleted()
+        {
+            return Ok(await _userService.GetDeleteListAsync());
+        }
+
+        // POST /api/admin/users
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
-        
         public async Task<IActionResult> Create(CreateUserRequest request)
         {
-            await _IUserService.CreateAsync(request);
-            return Ok("Tạo người dùng thành công");
+            await _userService.CreateAsync(request);
+            return Ok(new { message = "Tạo người dùng thành công" });
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        // PUT /api/admin/users/{id}
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, UpdateUserRequest request)
         {
-            await _IUserService.UpdateAdminAsync(id, request);
-            return Ok("Cập nhật thành công");
+            await _userService.UpdateAdminAsync(id, request);
+            return Ok(new { message = "Cập nhật thành công" });
         }
 
-        [HttpPut("{id}/lock")]
-        [Authorize(Policy = "AdminOnly")]
+        // PUT /api/admin/users/{id}/lock
+        [HttpPut("{id:int}/lock")]
         public async Task<IActionResult> Lock(int id)
         {
-            await _IUserService.LockAsync(id);
-            return Ok("Đã khóa tài khoản");
+            await _userService.LockAsync(id);
+            return Ok(new { message = "Đã khóa tài khoản" });
         }
 
-        [HttpPut("{id}/unlock")]
-        [Authorize(Policy = "AdminOnly")]
+        // PUT /api/admin/users/{id}/unlock
+        [HttpPut("{id:int}/unlock")]
         public async Task<IActionResult> Unlock(int id)
         {
-            await _IUserService.UnLockAsync(id);
-            return Ok("Đã mở khóa tài khoản");
+            await _userService.UnLockAsync(id);
+            return Ok(new { message = "Đã mở khóa tài khoản" });
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        // DELETE /api/admin/users/{id}
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> SoftDelete(int id)
         {
-            await _IUserService.DeleteAsync(id);
-            return Ok("Đã xóa mềm");
+            await _userService.DeleteAsync(id);
+            return Ok(new { message = "Đã xóa mềm" });
         }
 
-        [HttpPut("{id}/restore")]
-        [Authorize(Policy = "AdminOnly")]
+        // PUT /api/admin/users/{id}/restore
+        [HttpPut("{id:int}/restore")]
         public async Task<IActionResult> Restore(int id)
         {
-            await _IUserService.RestoreAsync(id);
-            return Ok("Đã khôi phục tài khoản");
+            await _userService.RestoreAsync(id);
+            return Ok(new { message = "Đã khôi phục tài khoản" });
         }
     }
 }

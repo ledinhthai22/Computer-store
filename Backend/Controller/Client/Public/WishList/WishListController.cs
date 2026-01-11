@@ -3,7 +3,7 @@ using Backend.Services.WishList;
 using Microsoft.AspNetCore.Authorization;
 using Backend.DTO.WishList;
 
-namespace Ecommerce.Controller.Customer.WishList
+namespace Ecommerce.Controller.Client.Public.WishList
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,22 +1,23 @@
-using Microsoft.AspNetCore.Mvc;
-using Backend.Services.Category;
 using Backend.DTO.Category;
+using Backend.Services.Category;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controller.Category
+namespace Backend.Controllers.Admin
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    [Route("api/admin/categories")]
+    [Authorize(Policy = "AdminOnly")]
+    public class CategoryAdminController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryAdminController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
-        
+        // GET /api/admin/categories
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -24,108 +25,74 @@ namespace Backend.Controller.Category
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _categoryService.GetByIdAsync(id);
-            if (result == null) return NotFound(new { message = "Không tìm thấy danh mục" });
-            return Ok(result);
-        }
+        // GET /api/admin/categories/deleted
         [HttpGet("deleted")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetDeteleListAll()
+        public async Task<IActionResult> GetDeleted()
         {
             var result = await _categoryService.GetDeleteListAsync();
             return Ok(result);
         }
+
+        // GET /api/admin/categories/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _categoryService.GetByIdAsync(id);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy danh mục" });
+
+            return Ok(result);
+        }
+
+        // POST /api/admin/categories
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Create(CreateCategoryRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
         {
-            try
+            var result = await _categoryService.CreateAsync(request);
+            return Ok(new
             {
-                var result = await _categoryService.CreateAsync(request);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+                message = "Thêm danh mục thành công",
+                data = result
+            });
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Update(int id, UpdateCategoryRequest request)
+        // PUT /api/admin/categories/{id}
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id,
+            [FromBody] UpdateCategoryRequest request)
         {
-            try
-            {
-                var result = await _categoryService.UpdateAsync(id, request);
-                if (result == null) return NotFound(new { message = "Không tìm thấy danh mục." });
+            var result = await _categoryService.UpdateAsync(id, request);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy danh mục" });
 
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
+            return Ok(new
             {
-                return BadRequest(new { message = ex.Message });
-            }
+                message = "Cập nhật danh mục thành công",
+                data = result
+            });
         }
 
-
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        // DELETE /api/admin/categories/{id}
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var success = await _categoryService.DeleteAsync(id);
+            var success = await _categoryService.DeleteAsync(id);
+            if (!success)
+                return NotFound(new { message = "Không tìm thấy danh mục" });
 
-                if (!success)
-                {
-                    return NotFound(new { message = "Không tìm thấy danh mục để xóa." });
-                }
-
-                return Ok(new { message = "Xóa danh mục thành công." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+            return Ok(new { message = "Xóa danh mục thành công" });
         }
+
+        // PUT /api/admin/categories/recover/{id}
         [HttpPut("recover/{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Restore(int id)
         {
-            try
-            {
-                bool result = await _categoryService.RecoverAsync(id);
+            var success = await _categoryService.RecoverAsync(id);
+            if (!success)
+                return NotFound(new { message = "Không tìm thấy danh mục" });
 
-                if (!result)
-                    return NotFound(new { message = "Không tìm thấy danh mục." });
-
-                return Ok(new
-                {
-                    success = true,
-                    message = "Khôi phục danh mục thành công."
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { success = false, message = "Lỗi server." });
-            }
+            return Ok(new { message = "Khôi phục danh mục thành công" });
         }
     }
 }

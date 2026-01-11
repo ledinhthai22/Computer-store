@@ -1,10 +1,8 @@
 ﻿using Backend.Services.WebInfo;
 using Microsoft.AspNetCore.Mvc;
-using Backend.DTO.WebInfo;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Ecommerce.DTO.WebInfo;
-using Microsoft.AspNetCore.HttpLogging;
+
 
 namespace Ecommerce.Controller.Admin.WebInfo
 {

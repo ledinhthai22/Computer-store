@@ -25,17 +25,12 @@ namespace Backend.Models
         public int MaDanhMuc { get; set; }
         [ForeignKey(nameof(MaDanhMuc))]
         public DanhMuc? DanhMuc { get; set; }
-
         public int MaThuongHieu { get; set; }
         [ForeignKey(nameof(MaThuongHieu))]
         public ThuongHieu? ThuongHieu { get; set; }
-
-
         public int MaThongSo { get; set; }
         [ForeignKey(nameof(MaThongSo))]
         public ThongSoKyThuat? ThongSoKyThuat { get; set; }
-
-
         public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>(); 
         public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();
     }

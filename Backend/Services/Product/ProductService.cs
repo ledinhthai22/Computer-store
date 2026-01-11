@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Backend.Data;
 using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
 using Ecommerce.DTO.Common;
+using Ecommerce.DTO.Product;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services.Product
@@ -15,103 +18,21 @@ namespace Backend.Services.Product
     {
         private readonly ApplicationDbContext _DbContext;
         private readonly SlugHelper _SlugHelper;
+
         public ProductService(ApplicationDbContext DbContext, SlugHelper SlugHelper)
         {
             _DbContext = DbContext;
             _SlugHelper = SlugHelper;
         }
-        public async Task<PagedResult<ProductResult>> GetProductByCategoryAsync(string slug,int page = 1,int pageSize = 12)
+
+        public async Task<PagedResult<ProductResult>> GetProductByCategoryAsync(string slug, int page = 1, int pageSize = 12)
         {
-            if (page <= 0) page = 1;
-            if (pageSize <= 0) pageSize = 12;
+            var query = _DbContext.SanPham.AsNoTracking()
+                .Where(p => p.DanhMuc.Slug == slug && p.TrangThai == true && p.NgayXoa == null);
 
-            var category = await _DbContext.DanhMuc
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x =>
-                    x.Slug == slug &&
-                    x.TrangThai == true &&
-                    x.NgayXoa == null);
-
-            if (category == null)
-            {
-                return new PagedResult<ProductResult>
-                {
-                    Page = page,
-                    PageSize = pageSize,
-                    TotalItems = 0,
-                    TotalPages = 0
-                };
-            }
-
-            var query = _DbContext.SanPham
-                .AsNoTracking()
-                .Where(p =>
-                    p.MaDanhMuc == category.MaDanhMuc &&
-                    p.TrangThai == true &&
-                    p.NgayXoa == null);
-
-            var totalItems = await query.CountAsync();
-
-            var products = await query
-                .OrderByDescending(p => p.NgayTao)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ProductResult
-                {
-                    MaSanPham = p.MaSanPham,
-                    TenSanPham = p.TenSanPham,
-                    Slug = p.Slug,
-                    GiaCoBan = p.GiaCoBan,
-                    KhuyenMai = p.KhuyenMai,
-                    SoLuongTon = p.SoLuongTon,
-                    NgayTao = p.NgayTao,
-
-                    MaDanhMuc = category.MaDanhMuc,
-                    TenDanhMuc = category.TenDanhMuc,
-
-                    TenThuongHieu = p.ThuongHieu != null
-                        ? p.ThuongHieu.TenThuongHieu
-                        : string.Empty,
-
-                    ThongSoKyThuat = p.ThongSoKyThuat == null
-                        ? null!
-                        : new ProductSpecificationsResult
-                        {
-                            KichThuocManHinh = p.ThongSoKyThuat.KichThuocManHinh,
-                            Pin = p.ThongSoKyThuat.Pin,
-                            HeDieuHanh = p.ThongSoKyThuat.HeDieuHanh,
-                            DoPhanGiaiManHinh = p.ThongSoKyThuat.DoPhanGiaiManHinh,
-                            OCung = p.ThongSoKyThuat.OCung,
-                            SoKheRam = p.ThongSoKyThuat.SoKheRam,
-                            LoaiXuLyDoHoa =p.ThongSoKyThuat.LoaiXuLyDoHoa,
-                            LoaiXuLyTrungTam = p.ThongSoKyThuat.LoaiXuLyTrungTam,
-                            CongGiaoTiep = p.ThongSoKyThuat.CongGiaoTiep
-                        },
-
-                         BienThe = p.BienThe
-                        .Where(bt => bt.TrangThai == true)
-                        .Select(bt => new ProductVariantResult
-                        {
-                            MaBTSP = bt.MaBTSP,
-                            TenBienThe = bt.TenBienThe,
-                            GiaBan = bt.GiaBan,
-                            GiaKhuyenMai = bt.GiaKhuyenMai,
-                            SoLuongTon = bt.SoLuongTon,
-
-                            MauSac = bt.MauSac,
-                            Ram = bt.Ram,
-                            OCung = bt.OCung,
-                            BoXuLyDoHoa = bt.BoXuLyDoHoa,
-                            BoXuLyTrungTam = bt.BoXuLyTrungTam,
-
-                            HinhAnh = bt.HinhAnhSanPham
-                                .OrderBy(h => h.ThuTuAnh)
-                                .Select(h => h.DuongDanAnh)
-                                .ToList()
-                        })
-                        .ToList()
-                })
-                .ToListAsync();
+            int totalItems = await query.CountAsync();
+            var items = await ApplyProductProjection(query.OrderByDescending(p => p.NgayTao))
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return new PagedResult<ProductResult>
             {
@@ -119,40 +40,72 @@ namespace Backend.Services.Product
                 PageSize = pageSize,
                 TotalItems = totalItems,
                 TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
-                Items = products
+                Items = items
             };
         }
+        public async Task<PagedResult<ProductResult>> GetProductByBrandAsync(string tenDanhHieu, int page = 1, int pageSize = 12)
+        {
+            var query = _DbContext.SanPham.AsNoTracking()
+                .Where(p => p.ThuongHieu.TenThuongHieu == tenDanhHieu && p.TrangThai == true && p.NgayXoa == null);
 
+            int totalItems = await query.CountAsync();
+            var items = await ApplyProductProjection(query.OrderByDescending(p => p.NgayTao))
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new PagedResult<ProductResult>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                Items = items
+            };
+        }
+        public async Task<PagedResult<ProductResult>> FilterBySpecificationAsync(ProductSpecificationFilterRequest request)
+        {
+            var query = _DbContext.SanPham.AsNoTracking().Where(p => p.TrangThai == true && p.NgayXoa == null);
+
+            // Filter logic
+            if (!string.IsNullOrWhiteSpace(request.DongChip))
+                query = query.Where(p => EF.Functions.Like(p.ThongSoKyThuat.LoaiXuLyTrungTam, $"%{request.DongChip}%"));
+
+            if (!string.IsNullOrWhiteSpace(request.DongCard))
+                query = query.Where(p => EF.Functions.Like(p.ThongSoKyThuat.LoaiXuLyDoHoa, $"%{request.DongCard}%"));
+
+            if (!string.IsNullOrWhiteSpace(request.KichThuocManHinh))
+                query = query.Where(p => EF.Functions.Like(p.ThongSoKyThuat.KichThuocManHinh, $"%{request.KichThuocManHinh}%"));
+
+            if (!string.IsNullOrWhiteSpace(request.Ram))
+                query = query.Where(p => p.BienThe.Any(bt => EF.Functions.Like(bt.Ram, $"%{request.Ram}%")));
+
+            if (request.GiaTu > 0)
+                query = query.Where(p => p.BienThe.Any(bt => bt.GiaBan >= request.GiaTu));
+
+            if (request.GiaDen > 0)
+                query = query.Where(p => p.BienThe.Any(bt => bt.GiaBan <= request.GiaDen));
+
+            int totalItems = await query.CountAsync();
+            var items = await ApplyProductProjection(query.OrderByDescending(p => p.NgayTao))
+                .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+
+            return new PagedResult<ProductResult>
+            {
+                Page = request.Page,
+                PageSize = request.PageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)request.PageSize),
+                Items = items
+            };
+        }
         public async Task<ProductResult?> CreateAsync(CreateProductRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.TenSanPham))
-            {
-                throw new Exception("Tên sản phẩm không được để trống");
-            }
-            if (request.GiaCoBan <= 0)
-            {
-                throw new Exception("Giá cơ bản phải lớn hơn 0");
-            }
-            if (request.KhuyenMai < 0 || request.KhuyenMai > 100)
-            {
-                throw new Exception("Khuyến mãi chỉ được từ 0% đển 100%");
-            }
-            if (request.BienThe.Count == 0)
-            {
-                throw new Exception("1 phẩm phải có ít nhất 1 biến thể");
-            }
-            if (!await _DbContext.DanhMuc.AnyAsync(x => x.MaDanhMuc == request.MaDanhMuc))
-            {
-                throw new Exception("Danh mục không tồn tại");
-            }
-            if (!await _DbContext.ThuongHieu.AnyAsync(x => x.MaThuongHieu == request.MaThuongHieu))
-            {
-                throw new Exception("Thương hiệu không tồn tại");
-            }
+
+            if (string.IsNullOrWhiteSpace(request.TenSanPham)) throw new Exception("Tên không được trống");
+
             using var transaction = await _DbContext.Database.BeginTransactionAsync();
             try
             {
-                var productSpecification = new ThongSoKyThuat
+                var spec = new ThongSoKyThuat
                 {
                     KichThuocManHinh = request.ThongSoKyThuat.KichThuocManHinh,
                     SoKheRam = request.ThongSoKyThuat.SoKheRam,
@@ -164,8 +117,9 @@ namespace Backend.Services.Product
                     LoaiXuLyDoHoa = request.ThongSoKyThuat.LoaiXuLyDoHoa,
                     CongGiaoTiep = request.ThongSoKyThuat.CongGiaoTiep
                 };
-                _DbContext.ThongSoKyThuat.Add(productSpecification);
+                _DbContext.ThongSoKyThuat.Add(spec);
                 await _DbContext.SaveChangesAsync();
+
                 var product = new SanPham
                 {
                     TenSanPham = request.TenSanPham,
@@ -175,11 +129,13 @@ namespace Backend.Services.Product
                     SoLuongTon = request.SoLuongTon,
                     MaDanhMuc = request.MaDanhMuc,
                     MaThuongHieu = request.MaThuongHieu,
-                    MaThongSo = productSpecification.MaThongSo
+                    MaThongSo = spec.MaThongSo,
+                    TrangThai = true,
+                    NgayTao = DateTime.Now
                 };
-
                 _DbContext.SanPham.Add(product);
                 await _DbContext.SaveChangesAsync();
+
                 foreach (var v in request.BienThe)
                 {
                     var variant = new BienThe
@@ -193,68 +149,76 @@ namespace Backend.Services.Product
                         BoXuLyDoHoa = v.BoXuLyDoHoa,
                         BoXuLyTrungTam = v.BoXuLyTrungTam,
                         SoLuongTon = v.SoLuongTon,
-                        MaSanPham = product.MaSanPham
+                        MaSanPham = product.MaSanPham,
+                        TrangThai = true
                     };
-
                     _DbContext.BienThe.Add(variant);
                     await _DbContext.SaveChangesAsync();
-                    int index = 0;
-                    foreach (var img in v.HinhAnh)
+
+                    for (int i = 0; i < v.HinhAnh.Count; i++)
                     {
                         _DbContext.HinhAnhSanPham.Add(new HinhAnhSanPham
                         {
-                            DuongDanAnh = img,
-                            AnhChinh = index == 1,
-                            ThuTuAnh = index,
+                            DuongDanAnh = v.HinhAnh[i],
+                            AnhChinh = (i == 0), 
+                            ThuTuAnh = i,
                             MaBienThe = variant.MaBTSP
                         });
-                        index++;
                     }
                 }
-
                 await _DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return await GetByIdAsync(product.MaSanPham);
             }
-            catch
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
                 throw;
             }
         }
+        public async Task<PagedResult<ProductResult>> GetPagedAsync(int page, int pageSize)
+        {
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
 
+            var query = _DbContext.SanPham
+                .AsNoTracking()
+                .Where(p => p.TrangThai == true && p.NgayXoa == null);
 
+            var totalItems = await query.CountAsync();
+
+            var items = await ApplyProductProjection(query)
+                .OrderByDescending(p => p.NgayTao)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ProductResult>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+                Items = items
+            };
+        }
         public async Task<IEnumerable<ProductResult>> GetAllAsync()
         {
-            var data = await _DbContext.SanPham
-                .Include(p => p.DanhMuc)
-                .Include(p => p.ThuongHieu)
-                .Include(p => p.ThongSoKyThuat)
-                .Include(p => p.BienThe).ThenInclude(v => v.HinhAnhSanPham)
-                .Where(p => p.TrangThai == true && p.NgayXoa == null)
-                .ToListAsync(); 
+            var query = _DbContext.SanPham
+                .AsNoTracking()
+                .Where(p => p.TrangThai == true && p.NgayXoa == null);
 
-            return data.Select(MapToResult).ToList();
-
+            return await ApplyProductProjection(query).ToListAsync();
         }
-
         public async Task<ProductResult?> GetByIdAsync(int id)
         {
-            var p = await _DbContext.SanPham
-                .Include(x => x.DanhMuc)
-                .Include(x => x.ThuongHieu)
-                .Include(x => x.ThongSoKyThuat)
-                .Include(x => x.BienThe).ThenInclude(b => b.HinhAnhSanPham)
-                .Where(p => p.TrangThai == true && p.NgayXoa == null)
-                .FirstOrDefaultAsync(x => x.MaSanPham == id);
-
-            return p == null ? null : MapToResult(p);
+            var query = _DbContext.SanPham.AsNoTracking().Where(p => p.MaSanPham == id && p.TrangThai == true && p.NgayXoa == null);
+            return await ApplyProductProjection(query).FirstOrDefaultAsync();
         }
-
-        private ProductResult MapToResult(SanPham p)
+        private IQueryable<ProductResult> ApplyProductProjection(IQueryable<SanPham> query)
         {
-            return new ProductResult
+            return query.Select(p => new ProductResult
             {
                 MaSanPham = p.MaSanPham,
                 TenSanPham = p.TenSanPham,
@@ -262,40 +226,36 @@ namespace Backend.Services.Product
                 GiaCoBan = p.GiaCoBan,
                 KhuyenMai = p.KhuyenMai,
                 SoLuongTon = p.SoLuongTon,
-                TenDanhMuc = p.DanhMuc?.TenDanhMuc ?? "",
-                TenThuongHieu = p.ThuongHieu?.TenThuongHieu ?? "",
                 NgayTao = p.NgayTao,
-                
-                ThongSoKyThuat = new ProductSpecificationsResult
+                TenDanhMuc = p.DanhMuc != null ? p.DanhMuc.TenDanhMuc : string.Empty,
+                TenThuongHieu = p.ThuongHieu != null ? p.ThuongHieu.TenThuongHieu : string.Empty,
+                ThongSoKyThuat = p.ThongSoKyThuat == null ? null : new ProductSpecificationsResult
                 {
-                    KichThuocManHinh = p.ThongSoKyThuat!.KichThuocManHinh,
-                    SoKheRam = p.ThongSoKyThuat.SoKheRam,
-                    OCung = p.ThongSoKyThuat.OCung,
+                    KichThuocManHinh = p.ThongSoKyThuat.KichThuocManHinh,
                     Pin = p.ThongSoKyThuat.Pin,
                     HeDieuHanh = p.ThongSoKyThuat.HeDieuHanh,
                     DoPhanGiaiManHinh = p.ThongSoKyThuat.DoPhanGiaiManHinh,
+                    OCung = p.ThongSoKyThuat.OCung,
+                    SoKheRam = p.ThongSoKyThuat.SoKheRam,
                     LoaiXuLyDoHoa = p.ThongSoKyThuat.LoaiXuLyDoHoa,
                     LoaiXuLyTrungTam = p.ThongSoKyThuat.LoaiXuLyTrungTam,
                     CongGiaoTiep = p.ThongSoKyThuat.CongGiaoTiep
                 },
-
-                BienThe = p.BienThe.Select(v => new ProductVariantResult
+                BienThe = p.BienThe.Where(bt => bt.TrangThai == true).Select(bt => new ProductVariantResult
                 {
-                    MaBTSP = v.MaBTSP,
-                    TenBienThe = v.TenBienThe,
-                    GiaBan = v.GiaBan,
-                    GiaKhuyenMai = v.GiaKhuyenMai,
-                    MauSac = v.MauSac,
-                    Ram = v.Ram,
-                    OCung = v.OCung,
-                    BoXuLyDoHoa = v.BoXuLyDoHoa,
-                    BoXuLyTrungTam = v.BoXuLyTrungTam,
-                    SoLuongTon = v.SoLuongTon,
-                    HinhAnh = v.HinhAnhSanPham.Select(x => x.DuongDanAnh).ToList()
-                }).ToList(),
-                message = "Thêm sản phẩm thành công"
-            };
+                    MaBTSP = bt.MaBTSP,
+                    TenBienThe = bt.TenBienThe,
+                    GiaBan = bt.GiaBan,
+                    GiaKhuyenMai = bt.GiaKhuyenMai,
+                    SoLuongTon = bt.SoLuongTon,
+                    MauSac = bt.MauSac,
+                    Ram = bt.Ram,
+                    OCung = bt.OCung,
+                    BoXuLyDoHoa = bt.BoXuLyDoHoa,
+                    BoXuLyTrungTam = bt.BoXuLyTrungTam,
+                    HinhAnh = bt.HinhAnhSanPham.OrderBy(h => h.ThuTuAnh).Select(h => h.DuongDanAnh).ToList()
+                }).ToList()
+            });
         }
-
     }
 }

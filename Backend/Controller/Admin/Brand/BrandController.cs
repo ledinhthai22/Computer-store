@@ -1,106 +1,98 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Backend.DTO.Brand;
 using Backend.Services.Brand;
 using Microsoft.AspNetCore.Authorization;
-using Backend.DTO.Brand;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Controller.Admin.Brand
+namespace Backend.Controllers.Admin
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class BrandController : ControllerBase
+    [Route("api/admin/brands")]
+    [Authorize(Policy = "AdminOnly")]
+    public class BrandAdminController : ControllerBase
     {
         private readonly IBrandService _brandService;
-        public BrandController(IBrandService brandService)
+
+        public BrandAdminController(IBrandService brandService)
         {
             _brandService = brandService;
         }
+
+        // GET /api/admin/brands
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var result = await _brandService.GetAllAsync();
             return Ok(result);
         }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _brandService.GetByIdAsync(id);
-            if (result == null) return NotFound(new { message = "Không tìm thấy thương hiệu" });
-            return Ok(result);
-        }
-        [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Create(CreateBrandRequest request)
-        {
-            try
-            {
-                var result = await _brandService.CreateAsync(request);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
-        }
-        [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Update(int id, UpdateBrandRequest request)
-        {
-            try
-            {
-                var result = await _brandService.UpdateAsync(id, request);
-                if (result == null) return NotFound(new { message = "Không tìm thấy thương hiệu" });
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
-        }
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> SolfDelete(int id)
-        {
-            try
-            {
-                var success = await _brandService.DeleteAsync(id);
-                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu" });
-                return Ok(new { message = "Xóa thương hiệu thành công" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
-        }
+
+        // GET /api/admin/brands/deleted
         [HttpGet("deleted")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetHidenAll()
+        public async Task<IActionResult> GetDeleted()
         {
             var result = await _brandService.GetAllHidenAsync();
             return Ok(result);
         }
+
+        // GET /api/admin/brands/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _brandService.GetByIdAsync(id);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy thương hiệu" });
+
+            return Ok(result);
+        }
+
+        // POST /api/admin/brands
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateBrandRequest request)
+        {
+            var result = await _brandService.CreateAsync(request);
+            return Ok(new
+            {
+                message = "Thêm thương hiệu thành công",
+                data = result
+            });
+        }
+
+        // PUT /api/admin/brands/{id}
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(
+            int id,
+            [FromBody] UpdateBrandRequest request)
+        {
+            var result = await _brandService.UpdateAsync(id, request);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy thương hiệu" });
+
+            return Ok(new
+            {
+                message = "Cập nhật thương hiệu thành công",
+                data = result
+            });
+        }
+
+        // DELETE /api/admin/brands/{id}
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> SoftDelete(int id)
+        {
+            var success = await _brandService.DeleteAsync(id);
+            if (!success)
+                return NotFound(new { message = "Không tìm thấy thương hiệu" });
+
+            return Ok(new { message = "Xóa thương hiệu thành công" });
+        }
+
+        // PUT /api/admin/brands/recover/{id}
         [HttpPut("recover/{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Restore(int id)
         {
-            try
-            {
-                var success = await _brandService.RestoreAsync(id);
-                if (!success) return NotFound(new { message = "Không tìm thấy thương hiệu" });
-                return Ok(new { message = "Khôi phục thương hiệu thành công" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+            var success = await _brandService.RestoreAsync(id);
+            if (!success)
+                return NotFound(new { message = "Không tìm thấy thương hiệu" });
+
+            return Ok(new { message = "Khôi phục thương hiệu thành công" });
         }
     }
 }

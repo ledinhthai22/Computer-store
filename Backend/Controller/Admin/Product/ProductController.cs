@@ -1,85 +1,83 @@
 using Backend.DTO.Product;
-
 using Backend.Services.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controller.Admin.Product
+namespace Backend.Controllers.Admin
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+    [Route("api/admin/products")]
+    [Authorize(Policy = "AdminOnly")]
+    public class ProductAdminController : ControllerBase
     {
         private readonly IProductService _IProductService;
 
-        public ProductController(IProductService IProductService)
+        public ProductAdminController(IProductService productService)
         {
-            _IProductService = IProductService;
+            _IProductService = productService;
         }
 
-        [HttpGet("{slug}/products")]
-        public async Task<IActionResult> GetProductsByCategoryAsync(string slug,[FromQuery] int page = 1,[FromQuery] int pageSize = 12)
+        // GET /api/admin/products
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _IProductService
-                .GetProductByCategoryAsync(slug, page, pageSize);
-
-            if (result.TotalItems == 0)
-                return NotFound(new { message = "Không có sản phẩm cho danh mục này" });
-
-            return Ok(result);
+            var data = await _IProductService.GetAllAsync();
+            return Ok(new
+            {
+                count = data.Count(),
+                data
+            });
         }
 
+        // GET /api/admin/products/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var product = await _IProductService.GetByIdAsync(id);
+            if (product == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm" });
+
+            return Ok(product);
+        }
+
+        // POST /api/admin/products
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest request)
+        public async Task<IActionResult> Create(
+            [FromBody] CreateProductRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new
                 {
                     message = "Dữ liệu không hợp lệ",
-                    errors = ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage))
+                    errors = ModelState.Values
+                        .SelectMany(x => x.Errors.Select(e => e.ErrorMessage))
                 });
             }
 
-            try
-            {
-                var result = await _IProductService.CreateAsync(request);
-                return Ok(new
-                {
-                    message = "Thêm sản phẩm thành công",
-                    data = result
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
-            }
-        }
+            var result = await _IProductService.CreateAsync(request);
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllAsync()
-        {
-            var data = await _IProductService.GetAllAsync();
             return Ok(new
             {
-                count = data.Count(),
-                data = data
+                message = "Thêm sản phẩm thành công",
+                data = result
             });
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync(int id)
-        {
-            var product = await _IProductService.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound(new { message = "Không tìm thấy sản phẩm" });
-            }
-            return Ok(product);
-        }
+        //// PUT /api/admin/products/{id}
+        //[HttpPut("{id:int}")]
+        //public async Task<IActionResult> Update(int id, UpdateProductRequest request)
+        //{
+        //    var result = await _productService.UpdateAsync(id, request);
+        //    return Ok(result);
+        //}
+
+        //// DELETE /api/admin/products/{id}
+        //[HttpDelete("{id:int}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    await _productService.DeleteAsync(id);
+        //    return Ok(new { message = "Xóa sản phẩm thành công" });
+        //}
     }
 }

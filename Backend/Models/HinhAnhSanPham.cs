@@ -14,6 +14,7 @@ namespace Backend.Models
 
         public bool AnhChinh { get; set; }
         public int ThuTuAnh { get; set; }
+        public DateTime NgayXoa { get; set; }
 
         public int MaBienThe { get; set; }
         [ForeignKey(nameof(MaBienThe))]

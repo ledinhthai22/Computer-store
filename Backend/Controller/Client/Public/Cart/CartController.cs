@@ -4,7 +4,7 @@ using Backend.Services.Cart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Controller.Customer.Cart
+namespace Ecommerce.Controller.Client.Public.Cart
 {
     [Route("api/[controller]")]
     [ApiController]
