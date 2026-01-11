@@ -16,6 +16,6 @@ namespace Backend.Models
         public string ChinhSachDoiTra { get; set; } = null!;
         public string DieuKhoanSuDung { get; set; } = null!;
         public string DuongDanAn { get; set; } = null!;
-        public DateTime? IsDelete { get; set; } 
+        public DateTime? NgayXoa { get; set; } 
     }
 }

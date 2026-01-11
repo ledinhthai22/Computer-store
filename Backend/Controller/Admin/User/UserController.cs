@@ -3,7 +3,7 @@ using Backend.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers.Admin
+namespace Ecommerce.Controller.Admin.User
 {
     [ApiController]
     [Route("api/[controller]")]

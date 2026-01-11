@@ -16,16 +16,7 @@ namespace Backend.Controller.Category
             _categoryService = categoryService;
         }
 
-        [HttpGet("{slug}/products")]
-        public async Task<IActionResult> GetProductsByCategory(string slug)
-        {
-            var result = await _categoryService.GetProductByCategoryAsync(slug);
-
-            if (result.Count == 0)
-                return NotFound(new { message = "Không có sản phẩm cho danh mục này" });
-
-            return Ok(result);
-        }
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

@@ -27,7 +27,7 @@ namespace Backend.Services.Cart
                     GiaBan = c.BienThe.GiaBan.ToString(),
                     DuongDanAnh = c.BienThe.HinhAnhSanPham
                         .Where(i => i.AnhChinh)
-                        .Select(img => img.URL)
+                        .Select(img => img.DuongDanAnh)
                         .FirstOrDefault(),
                     GiaKhuyenMai = c.BienThe.GiaKhuyenMai.ToString(),
                     SoLuong = c.SoLuong
@@ -52,7 +52,7 @@ namespace Backend.Services.Cart
                     TenSanPham = bt.SanPham.TenSanPham, 
                     HinhAnh = bt.HinhAnhSanPham      
                                 .Where(i => i.AnhChinh)
-                                .Select(i => i.URL)
+                                .Select(i => i.DuongDanAnh)
                                 .FirstOrDefault()
                 })
                 .FirstOrDefaultAsync();
@@ -107,7 +107,7 @@ namespace Backend.Services.Cart
                     TenSanPham = bt.SanPham.TenSanPham,
                     HinhAnh = bt.HinhAnhSanPham
                                 .Where(i => i.AnhChinh)
-                                .Select(i => i.URL)
+                                .Select(i => i.DuongDanAnh)
                                 .FirstOrDefault()
                 })
                 .FirstOrDefaultAsync();

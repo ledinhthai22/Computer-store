@@ -16,7 +16,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllAsync()
         {
             return await _DbContext.LienHe
-                .Where(x => x.Delete_At == null )
+                .Where(x => x.NgayXoa == null )
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -31,7 +31,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllUnreadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == false && x.Delete_At == null)
+            .Where(x => x.TrangThai == false && x.NgayXoa == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -45,7 +45,7 @@ namespace Backend.Services.Contact
         public async Task<IEnumerable<ContactResult>> GetAllReadAsync()
         {
             return await _DbContext.LienHe
-            .Where(x => x.TrangThai == true && x.Delete_At == null)
+            .Where(x => x.TrangThai == true && x.NgayXoa == null)
                 .Select(l => new ContactResult
                 {
                     MaLienHe = l.MaLienHe,
@@ -64,7 +64,7 @@ namespace Backend.Services.Contact
                 Email = req.Email,
                 NoiDung = req.NoiDung,
                 TrangThai = false,
-                Delete_At = null,
+                NgayXoa = null,
                 NgayGui = DateTime.Now
             };
 
@@ -93,7 +93,7 @@ namespace Backend.Services.Contact
             }
 
             Contact.TrangThai = true;
-            Contact.Delete_At = DateTime.Now;
+            Contact.NgayXoa = DateTime.Now;
 
             await _DbContext.SaveChangesAsync();
 

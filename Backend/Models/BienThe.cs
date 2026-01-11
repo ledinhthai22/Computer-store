@@ -20,7 +20,7 @@ namespace Backend.Models
         public string BoXuLyTrungTam { get; set; } = null!;
         public int SoLuongTon { get; set; }
         public bool TrangThai { get; set; } = true;
-        public DateTime Deleted_At { get; set; } 
+        public DateTime NgayXoa { get; set; } 
         public int MaSanPham { get; set; }
         [ForeignKey(nameof(MaSanPham))]
         public SanPham SanPham { get; set; } = null!;

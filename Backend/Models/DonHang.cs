@@ -11,13 +11,7 @@ namespace Backend.Models
         public string MaDon { get; set; } = null!;
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TongTienGoc { get; set; }
-
-        [Column(TypeName = "decimal(18,2)")]
         public decimal TongTienThanhToan { get; set; }
-
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal TongTienGiam { get; set; }
 
         public int PhuongThucThanhToan { get; set; }
         public int TrangThai { get; set; }

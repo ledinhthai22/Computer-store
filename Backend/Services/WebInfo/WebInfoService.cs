@@ -16,7 +16,7 @@ namespace Backend.Services.WebInfo
         public async Task<WebInfoResult> GetAsync()
         {
             var webInfo = await _DbContext.ThongTinTrang
-                .Where(t => t.IsDelete == null)
+                .Where(t => t.NgayXoa == null)
                 .FirstOrDefaultAsync();
             if (webInfo == null)
             {
@@ -42,7 +42,7 @@ namespace Backend.Services.WebInfo
         public async Task<List<WebInfoResult>> GetAllHidenAsync()
         {
             var webInfo = await _DbContext.ThongTinTrang
-                .Where(t => t.IsDelete != null)
+                .Where(t => t.NgayXoa != null)
                 .Select(t=> new WebInfoResult
                 {
                     MaThongTinTrang = t.MaThongTin,
@@ -67,11 +67,11 @@ namespace Backend.Services.WebInfo
         public async Task<bool> SoftDelete(int id)
         {
             var webInfo = await _DbContext.ThongTinTrang.FindAsync(id);
-            if (webInfo == null || webInfo.IsDelete != null)
+            if (webInfo == null || webInfo.NgayXoa != null)
             {
                 return false;
             }
-            webInfo.IsDelete = DateTime.Now;
+            webInfo.NgayXoa = DateTime.Now;
             _DbContext.ThongTinTrang.Update(webInfo);
             return await _DbContext.SaveChangesAsync() > 0;
         }
@@ -114,7 +114,7 @@ namespace Backend.Services.WebInfo
         public async Task<WebInfoResult> UpdateWebInfo(int id,WebInfoItemRequest request)
         {
             var WebInfo = await _DbContext.ThongTinTrang.FindAsync(id);
-            if (WebInfo == null || WebInfo.IsDelete != null) return null;
+            if (WebInfo == null || WebInfo.NgayXoa != null) return null;
             WebInfo.TenTrang = request.TenTrang;
             WebInfo.SoDienThoai = request.SoDienThoai;
             WebInfo.DiaChi = request.DiaChi;
@@ -145,13 +145,13 @@ namespace Backend.Services.WebInfo
         public async Task<bool> RestoreWebInfo(int id)
         {
             var webInfo = await _DbContext.ThongTinTrang.FindAsync(id);
-            if (webInfo == null || webInfo.IsDelete == null)
+            if (webInfo == null || webInfo.NgayXoa == null)
             {
                 return false;
             }
             var WebInfoOnl = await GetAsync();
             if(WebInfoOnl != null)  await SoftDelete(WebInfoOnl.MaThongTinTrang);
-            webInfo.IsDelete = null;
+            webInfo.NgayXoa = null;
             _DbContext.ThongTinTrang.Update(webInfo);
             return await _DbContext.SaveChangesAsync() > 0;
         }

@@ -21,7 +21,7 @@ namespace Backend.Models
         public int LuotMua { get; set; }
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public bool TrangThai { get; set; } = true;
-        public DateTime? Delete_At {get;set;}
+        public DateTime? NgayXoa {get;set;}
         public int MaDanhMuc { get; set; }
         [ForeignKey(nameof(MaDanhMuc))]
         public DanhMuc? DanhMuc { get; set; }

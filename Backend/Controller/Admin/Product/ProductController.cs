@@ -1,4 +1,5 @@
 using Backend.DTO.Product;
+
 using Backend.Services.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,17 @@ namespace Backend.Controller.Admin.Product
             _IProductService = IProductService;
         }
 
+        [HttpGet("{slug}/products")]
+        public async Task<IActionResult> GetProductsByCategoryAsync(string slug,[FromQuery] int page = 1,[FromQuery] int pageSize = 12)
+        {
+            var result = await _IProductService
+                .GetProductByCategoryAsync(slug, page, pageSize);
+
+            if (result.TotalItems == 0)
+                return NotFound(new { message = "Không có sản phẩm cho danh mục này" });
+
+            return Ok(result);
+        }
 
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]

@@ -18,7 +18,7 @@ namespace Backend.Services.WishList
         public async Task<List<WishlistResult>> GetByUserIdAsync(int UserId)
         {
             var result = await _dbContext.YeuThich
-                .Where(w => w.MaNguoiDung == UserId && w.Deleted_At == null)
+                .Where(w => w.MaNguoiDung == UserId && w.NgayXoa == null)
                 .Select(w => new WishlistResult
                 {
                     MaYeuThich = w.MaYeuThich,
@@ -28,7 +28,7 @@ namespace Backend.Services.WishList
                     GiaBan = w.BienThe.GiaBan,
                     HinhAnhChinh= w.BienThe.HinhAnhSanPham
                     .Where(i => i.AnhChinh)
-                    .Select(img => img.URL)
+                    .Select(img => img.DuongDanAnh)
                     .FirstOrDefault()
                 })
                 .ToListAsync();
@@ -53,7 +53,7 @@ namespace Backend.Services.WishList
                 {
                     MaBienThe = ProductVariantId,
                     MaNguoiDung = UserId,
-                    Deleted_At = null
+                    NgayXoa = null
                 };
                 _dbContext.YeuThich.Add(newItem);
                 await _dbContext.SaveChangesAsync();
@@ -61,9 +61,9 @@ namespace Backend.Services.WishList
             }
             else
             {
-                if (existingItem.Deleted_At != null)
+                if (existingItem.NgayXoa != null)
                 {
-                    existingItem.Deleted_At = null; // Khôi phục
+                    existingItem.NgayXoa = null; // Khôi phục
                     await _dbContext.SaveChangesAsync();
                 }
                 wishlistId = existingItem.MaYeuThich;
@@ -79,15 +79,15 @@ namespace Backend.Services.WishList
                 GiaBan = productInfo.GiaBan,
                 HinhAnhChinh = productInfo.HinhAnhSanPham
                                 .Where(i => i.AnhChinh)
-                                .Select(i => i.URL)
+                                .Select(i => i.DuongDanAnh)
                                 .FirstOrDefault()
             };
         }
         public async Task<bool> DeleteAsync(int WishListId)
         {
             var WishList = await _dbContext.YeuThich.FindAsync(WishListId);
-            if (WishList == null || WishList.Deleted_At != null) return false;
-            WishList.Deleted_At = DateTime.Now;
+            if (WishList == null || WishList.NgayXoa != null) return false;
+            WishList.NgayXoa = DateTime.Now;
             bool deleted = await _dbContext.SaveChangesAsync() > 0;
             if (!deleted)
             {

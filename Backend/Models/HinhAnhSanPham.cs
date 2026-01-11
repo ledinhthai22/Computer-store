@@ -10,7 +10,7 @@ namespace Backend.Models
 
         [Required]
         [MaxLength(500)]
-        public string URL { get; set; } = null!;
+        public string DuongDanAnh { get; set; } = null!;
 
         public bool AnhChinh { get; set; }
         public int ThuTuAnh { get; set; }
