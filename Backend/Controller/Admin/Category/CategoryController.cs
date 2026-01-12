@@ -21,7 +21,7 @@ namespace Backend.Controllers.Admin
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _categoryService.GetAllAsync();
+            var result = await _categoryService.GetAllAdminAsync();
             return Ok(result);
         }
 

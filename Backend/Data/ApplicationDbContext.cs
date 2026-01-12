@@ -75,11 +75,11 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
            
-            modelBuilder.Entity<HinhAnhSanPham>()
-                .HasOne(h => h.BienThe)
-                .WithMany(bt => bt.HinhAnhSanPham)
-                .HasForeignKey(h => h.MaBienThe)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<HinhAnhSanPham>()
+            //    .HasOne(h => h.BienThe)
+            //    .WithMany(bt => bt.HinhAnhSanPham)
+            //    .HasForeignKey(h => h.MaBienThe)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
          
             modelBuilder.Entity<YeuThich>()

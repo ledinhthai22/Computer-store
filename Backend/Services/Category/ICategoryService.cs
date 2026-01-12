@@ -4,6 +4,7 @@ namespace Backend.Services.Category
 {
     public interface ICategoryService
     {
+        Task<IEnumerable<CategoryResult>> GetAllAdminAsync();
         Task<IEnumerable<CategoryResult>> GetAllAsync();
         Task<IEnumerable<CategoryResult>> GetDeleteListAsync();
         Task<CategoryResult?> GetByIdAsync(int id);

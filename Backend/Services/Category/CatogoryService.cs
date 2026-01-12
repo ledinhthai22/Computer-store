@@ -30,6 +30,22 @@ namespace Backend.Services.Category
                 })
                 .ToListAsync();
         }
+        public async Task<IEnumerable<CategoryResult>> GetAllAdminAsync()
+        {
+            var categories =  await _DbContext.DanhMuc
+                .Where(x => x.TrangThai == true && x.NgayXoa == null)
+                .OrderByDescending(d => d.MaDanhMuc)
+                .Select(d => new CategoryResult
+                {
+                    MaDanhMuc = d.MaDanhMuc,
+                    TenDanhMuc = d.TenDanhMuc,
+                    Slug = d.Slug,
+                    TrangThai = d.TrangThai
+                })
+                .ToListAsync();
+            categories = categories.OrderByDescending(d => d.MaDanhMuc).ToList();
+            return categories;
+        }
 
         public async Task<CategoryResult?> GetByIdAsync(int id)
         {

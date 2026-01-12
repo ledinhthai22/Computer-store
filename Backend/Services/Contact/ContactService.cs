@@ -15,7 +15,7 @@ namespace Backend.Services.Contact
         }
         public async Task<IEnumerable<ContactResult>> GetAllAsync()
         {
-            return await _DbContext.LienHe
+            var contact =  await _DbContext.LienHe
                 .Where(x => x.NgayXoa == null )
                 .Select(l => new ContactResult
                 {
@@ -27,10 +27,12 @@ namespace Backend.Services.Contact
                     Message = l.TrangThai ? "Đã đọc" : "Chưa đọc"
                 })
                 .ToListAsync();
+            contact = contact.OrderByDescending(n => n.NgayGui).ToList();
+            return contact;
         }
         public async Task<IEnumerable<ContactResult>> GetAllUnreadAsync()
         {
-            return await _DbContext.LienHe
+            var contact = await _DbContext.LienHe
             .Where(x => x.TrangThai == false && x.NgayXoa == null)
                 .Select(l => new ContactResult
                 {
@@ -41,10 +43,13 @@ namespace Backend.Services.Contact
                     Message = "Chưa đọc"
                 })
                 .ToListAsync();
+            contact = contact.OrderByDescending(n => n.NgayGui).ToList();
+            return contact;
+
         }
         public async Task<IEnumerable<ContactResult>> GetAllReadAsync()
         {
-            return await _DbContext.LienHe
+            var contact = await _DbContext.LienHe
             .Where(x => x.TrangThai == true && x.NgayXoa == null)
                 .Select(l => new ContactResult
                 {
@@ -55,6 +60,8 @@ namespace Backend.Services.Contact
                     Message = "Đã đọc"
                 })
                 .ToListAsync();
+            contact = contact.OrderByDescending(n => n.NgayGui).ToList();
+            return contact;
         }
         public async Task<ContactResult> SendContactAsync(SendContactRequest req)
         {

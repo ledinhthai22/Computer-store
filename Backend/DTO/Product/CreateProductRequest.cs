@@ -10,7 +10,6 @@ namespace Backend.DTO.Product
     {
         [Required]
         public string TenSanPham { get; set; } = null!;
-        [Required]
         [Range(0, double.MaxValue)]
         public decimal GiaCoBan { get; set; }
         public double KhuyenMai { get; set; }

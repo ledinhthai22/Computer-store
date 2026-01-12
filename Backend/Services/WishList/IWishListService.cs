@@ -10,8 +10,8 @@ namespace Backend.Services.WishList
 {
     public interface IWishListService
     {
-        Task<List<WishlistResult>> GetByUserIdAsync(int UserId);
-        Task<WishlistResult> CreateAsync(CreateWishListRequest request);
-        Task<bool> DeleteAsync(int WishListId);
+        //Task<List<WishlistResult>> GetByUserIdAsync(int UserId);
+        //Task<WishlistResult> CreateAsync(CreateWishListRequest request);
+        //Task<bool> DeleteAsync(int WishListId);
     }
 }

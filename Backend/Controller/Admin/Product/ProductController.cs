@@ -17,52 +17,38 @@ namespace Backend.Controllers.Admin
             _IProductService = productService;
         }
 
-        // GET /api/admin/products
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var data = await _IProductService.GetAllAsync();
-            return Ok(new
-            {
-                count = data.Count(),
-                data
-            });
-        }
+        //// GET /api/admin/products
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var data = await _IProductService.GetAllAsync();
+        //    return Ok(new
+        //    {
+        //        count = data.Count(),
+        //        data
+        //    });
+        //}
 
-        // GET /api/admin/products/{id}
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var product = await _IProductService.GetByIdAsync(id);
-            if (product == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm" });
+        //// GET /api/admin/products/{id}
+        //[HttpGet("{id:int}")]
+        //public async Task<IActionResult> GetById(string slug)
+        //{
+        //    var product = await _IProductService.GetByIdAsync(slug);
+        //    if (product == null)
+        //        return NotFound(new { message = "Không tìm thấy sản phẩm" });
 
-            return Ok(product);
-        }
+        //    return Ok(product);
+        //}
 
-        // POST /api/admin/products
-        [HttpPost]
-        public async Task<IActionResult> Create(
-            [FromBody] CreateProductRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new
-                {
-                    message = "Dữ liệu không hợp lệ",
-                    errors = ModelState.Values
-                        .SelectMany(x => x.Errors.Select(e => e.ErrorMessage))
-                });
-            }
-
-            var result = await _IProductService.CreateAsync(request);
-
-            return Ok(new
-            {
-                message = "Thêm sản phẩm thành công",
-                data = result
-            });
-        }
+        //// POST /api/admin/products
+        //[HttpPost]
+        //[Consumes("multipart/form-data")]
+        //public async Task<IActionResult> Create(
+        //    [FromForm] CreateProductRequest request)
+        //{
+        //    var result = await _IProductService.CreateAsync(request);
+        //    return Ok(result);
+        //}
 
         //// PUT /api/admin/products/{id}
         //[HttpPut("{id:int}")]
