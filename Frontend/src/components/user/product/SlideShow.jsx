@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { MdNavigateNext,MdNavigateBefore } from "react-icons/md";
-import {Link} from "react-router-dom";
+import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
+import { Link } from "react-router-dom";
+
 export default function Slideshow() {
   const [products, setProducts] = useState([]);
   const [index, setIndex] = useState(0);
@@ -10,15 +11,12 @@ export default function Slideshow() {
       .then(res => res.json())
       .then(data => {
         const newestProducts = data.products
-          .sort(
-            (a, b) =>
-              new Date(b.meta.createdAt) - new Date(a.meta.createdAt)
-          )
+          .sort((a, b) => new Date(b.meta.createdAt) - new Date(a.meta.createdAt))
           .slice(0, 5);
-
         setProducts(newestProducts);
       });
   }, []);
+
   useEffect(() => {
     if (products.length === 0) return;
     const timer = setInterval(() => {
@@ -28,32 +26,42 @@ export default function Slideshow() {
   }, [products]);
 
   if (products.length === 0)
-    return <p className="py-10 text-center">Loading...</p>;
+    return <div className="w-full h-[400px] flex items-center justify-center bg-stone-50 rounded-2xl animate-pulse">Loading...</div>;
 
   return (
-    <div className="relative w-full max-w-full mx-auto mt-2 overflow-hidden shadow h-120 rounded-2xl scale-99 bg-stone-100">
-      <Link to={`/products/${products[index].id}`}>
+    <div className="relative w-full mx-auto overflow-hidden shadow-sm h-[350px] lg:h-[450px] rounded-2xl bg-white group border border-stone-100">
+      <Link to={`/products/${products[index].id}`} className="block w-full h-full">
         <img
             src={products[index].thumbnail}
             alt={products[index].title}
-            className="items-center object-cover mx-auto w-100 h-100"/>
+            className="w-full h-full object-contain bg-stone-50"
+        />
       </Link>
+      
+      {/* Nút nằm giữa ảnh */}
       <button
         onClick={() => setIndex((index - 1 + products.length) % products.length)}
-        className="absolute px-4 py-4 -translate-y-1/2 rounded top-1/2 left-4 bg-stone-300 hover:bg-stone-500">
-        <MdNavigateBefore />
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center cursor-pointer justify-center rounded-full bg-white/80 hover:bg-[#2f9ea0] hover:text-white text-gray-800 shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
+      >
+        <MdNavigateBefore size={24} />
       </button>
+      
       <button
         onClick={() => setIndex((index + 1) % products.length)}
-        className="absolute px-4 py-4 -translate-y-1/2 rounded top-1/2 right-4 bg-stone-300 hover:bg-stone-500">
-        <MdNavigateNext />
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center cursor-pointer justify-center rounded-full bg-white/80 hover:bg-[#2f9ea0] hover:text-white text-gray-800 shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
+      >
+        <MdNavigateNext size={24} />
       </button>
-      <div className="absolute flex justify-center w-full gap-2 bottom-4">
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {products.map((_, i) => (
           <div
             key={i}
             onClick={() => setIndex(i)}
-            className={`w-3 h-3 rounded-full cursor-pointer transition-all ${i === index ? "bg-stone-500" : "bg-stone-300"}`}></div>
+            className={`h-2 rounded-full cursor-pointer transition-all duration-300 shadow-sm ${
+                i === index ? "w-6 bg-[#2f9ea0]" : "w-2 bg-gray-300 hover:bg-gray-400"
+            }`}
+          ></div>
         ))}
       </div>
     </div>

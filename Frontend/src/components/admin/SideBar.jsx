@@ -10,7 +10,7 @@ const Sidebar = () => {
     { name: 'Danh mục', icon: Layers, path: '/quan-ly/danh-muc' },
     { name: 'Thương hiệu', icon: Hexagon, path: '/quan-ly/thuong-hieu' },
     { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
-    { name: 'Tài khoản', icon: User, path: '/quan-ly/tai-khoan' },
+    { name: 'Người dùng', icon: User, path: '/quan-ly/nguoi-dung' },
     { name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
   ];
 

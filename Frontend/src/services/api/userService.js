@@ -1,33 +1,34 @@
 import axiosClient from "./axiosClient";
 
 export const userService = {
-  getAll: () => axiosClient.get("/User").then((res) => res.data),
+  getAll: () => axiosClient.get("/admin/users").then((res) => res.data),
 
-  getAllLock: () => axiosClient.get("/User/lock").then((res) => res.data),
+  getAllLock: () =>
+    axiosClient.get("/admin/users/locked").then((res) => res.data),
 
-  getAllUnlock: () => axiosClient.get("/User/unlock").then((res) => res.data),
+  getAllUnlock: () =>
+    axiosClient.get("/admin/users/unlocked").then((res) => res.data),
 
-  getAllDeleted: () => axiosClient.get("/User/deleted").then((res) => res.data),
+  getAllDeleted: () =>
+    axiosClient.get("/admin/users/deleted").then((res) => res.data),
 
-  getById: (id) =>
-    axiosClient.get(`/User/Userinfo/${id}`).then((res) => res.data),
-
-  create: (data) => axiosClient.post("/User", data).then((res) => res.data),
-
-  updateInfo: (id, data) =>
-    axiosClient.put(`/User/Userinfo/${id}`, data).then((res) => res.data),
+  create: (data) =>
+    axiosClient.post("/admin/users/", data).then((res) => res.data),
 
   update: (id, data) =>
-    axiosClient.put(`/User/${id}`, data).then((res) => res.data),
+    axiosClient.put(`/admin/users/${id}`, data).then((res) => res.data),
 
-  delete: (id) => axiosClient.delete(`/User/${id}`).then((res) => res.data),
+  delete: (id) =>
+    axiosClient.delete(`/admin/users/${id}`).then((res) => res.data),
 
-  lock: (id) => axiosClient.put(`/User/${id}/lock`).then((res) => res.data),
+  lock: (id) =>
+    axiosClient.put(`/admin/users/${id}/lock`).then((res) => res.data),
 
-  unlock: (id) => axiosClient.put(`/User/${id}/unlock`).then((res) => res.data),
+  unlock: (id) =>
+    axiosClient.put(`/admin/users/${id}/unlock`).then((res) => res.data),
 
   recover: (id) =>
-    axiosClient.put(`/User/${id}/restore`).then((res) => res.data),
+    axiosClient.put(`/admin/users/${id}/restore`).then((res) => res.data),
 };
 
 // Xử lý bug

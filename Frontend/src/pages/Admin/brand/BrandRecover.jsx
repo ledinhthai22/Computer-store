@@ -76,7 +76,6 @@ const BrandRecover = () => {
             )}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                title="Xác nhận khôi phục thương hiệu"
                 message="Bạn có muốn khôi phục thương hiệu này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}

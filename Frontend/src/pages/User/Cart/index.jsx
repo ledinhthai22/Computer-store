@@ -57,7 +57,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-200 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
 
