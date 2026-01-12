@@ -1,27 +1,29 @@
 import { useState, useEffect } from "react";
-import ProductCard from "./ProductCard";
+import axiosClient from "../../../services/api/axiosClient";
+import ProductCard from "./ProductCard"; 
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 
 export default function TopNew() {
     const [products, setProducts] = useState([]);
     const [startIndex, setStartIndex] = useState(0);
     const ITEMS_PER_VIEW = 5;
-    const TOTAL_ITEMS = 30;
 
     useEffect(() => {
-        fetch(`https://dummyjson.com/products?limit=${TOTAL_ITEMS}`)
-            .then(res => res.json())
-            .then(data => {
-                const newestProducts = data.products
-                    .sort(
-                        (a, b) =>
-                            new Date(b.meta.createdAt) -
-                            new Date(a.meta.createdAt)
-                    )
-                    .slice(0, TOTAL_ITEMS);
+        const fetchProducts = async () => {
+            try {
+                const res = await axiosClient.get('/products?limit=100');
+                const rawData = res.data && Array.isArray(res.data.items) ? res.data.items : [];
 
-                setProducts(newestProducts);
-            });
+                const newestProducts = rawData.sort((a, b) => 
+                    new Date(b.ngayTao) - new Date(a.ngayTao)
+                );
+
+                setProducts(newestProducts.slice(0, 20));
+            } catch (error) {
+                console.error("Lỗi fetch sản phẩm mới:", error);
+            }
+        };
+        fetchProducts();
     }, []);
 
     const visibleProducts = products.slice(
@@ -41,35 +43,47 @@ export default function TopNew() {
         }
     };
 
+    if (products.length === 0) return null;
+
     return (
-        <div className="relative mt-1 scale-99 rounded-2xl bg-stone-50">
-            <div className="flex items-center justify-between w-full p-4 px-6">
-                <h1 className="text-3xl font-bold text-[#2f9ea0] mx-auto">Sản phẩm mới nhất</h1>
+        <div className="relative w-full rounded-2xl bg-stone-50 p-4 shadow-sm border border-stone-100">
+            <div className="flex items-center justify-between mb-4 px-2">
+                <h1 className="text-2xl font-bold text-[#2f9ea0] uppercase tracking-tight">Sản phẩm mới nhất</h1>
             </div>
-            <button
-                onClick={handlePrev}
-                disabled={startIndex === 0}
-                className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full shadow bg-white hover:bg-[#2f9ea0] hover:text-white transition ${
-                    startIndex === 0 ? "opacity-40 cursor-default" : ""
-                }`}
-            >
-                <MdNavigateBefore size={32} />
-            </button>
-            <button
-                onClick={handleNext}
-                disabled={startIndex + ITEMS_PER_VIEW >= products.length}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full shadow bg-white hover:bg-[#2f9ea0] hover:text-white transition ${
-                    startIndex + ITEMS_PER_VIEW >= products.length
-                        ? "opacity-40 cursor-default"
-                        : ""
-                }`}
-            >
-                <MdNavigateNext size={32} />
-            </button>
-            <div className="relative px-10 overflow-hidden">
-                <div className="grid transition-all duration-300 border-t-2 border-[#2f9ea0] lg:grid-cols-5">
+
+            {/* Container slider */}
+            <div className="relative group/slider">
+                
+                {/* Nút Previous */}
+                <button
+                    onClick={handlePrev}
+                    disabled={startIndex === 0}
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md border border-gray-100 hover:bg-[#2f9ea0] hover:text-white transition-all duration-300 -ml-2 lg:-ml-5
+                    ${startIndex === 0 
+                        ? "opacity-0 cursor-default" 
+                        : "opacity-0 group-hover/slider:opacity-100" 
+                    }`}
+                >
+                    <MdNavigateBefore size={28} />
+                </button>
+
+                {/* Nút Next */}
+                <button
+                    onClick={handleNext}
+                    disabled={startIndex + ITEMS_PER_VIEW >= products.length}
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md border border-gray-100 hover:bg-[#2f9ea0] hover:text-white transition-all duration-300 -mr-2 lg:-mr-5
+                    ${startIndex + ITEMS_PER_VIEW >= products.length 
+                        ? "opacity-0 cursor-default" 
+                        : "opacity-0 group-hover/slider:opacity-100"
+                    }`}
+                >
+                    <MdNavigateNext size={28} />
+                </button>
+
+                {/* Grid sản phẩm */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 transition-all duration-300">
                     {visibleProducts.map(product => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.maSanPham} product={product} />
                     ))}
                 </div>
             </div>

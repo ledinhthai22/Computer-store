@@ -18,7 +18,7 @@ function App() {
         <Route element={<UserLayout/>}>
           <Route path="/" element={<Home />} />
           <Route path="/san-pham" element={<UserProduct />} />
-          <Route path="/san-pham/:id" element={<Details />} />
+          <Route path="/san-pham/:slug" element={<Details />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<LienHe />} />
           <Route path="/cart" element={<Cart />} />
