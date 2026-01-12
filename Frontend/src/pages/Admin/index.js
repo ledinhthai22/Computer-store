@@ -8,3 +8,5 @@ export { default as BrandRecover } from "./brand/BrandRecover";
 export { default as Contact } from "./contact/Contact";
 export { default as WebInfo } from "./webinfo/WebInfo";
 export { default as WebInfoRecover } from "./webinfo/WebInfoRecover";
+export { default as User } from "./user/User";
+export { default as UserRecover } from "./user/UserRecover";

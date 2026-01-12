@@ -1,12 +1,12 @@
 // CategoryRecover.js
 import { useEffect, useState } from "react";
-import CategoryRecoverTable from '../../../components/admin/category/CategoryRecoverTable';
+import UserRecoverTable from '../../../components/admin/user/UserRecoverTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
-import { categoryService, handleApiError } from '../../../services/api/categoryService';
+import { userService, handleApiError } from '../../../services/api/userService';
 
-const CategoryRecover = () => {
-    const [categories, setCategories] = useState([]);
+const UserRecover = () => {
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -17,14 +17,14 @@ const CategoryRecover = () => {
         setToast({ show: true, message, type });
     };
 
-    const fetchCategoriesRecover = async () => {
+    const fetchUser = async () => {
         try {
             setLoading(true);
-            const data = await categoryService.getDeleted();
+            const data = await userService.getAllDeleted();
             const formattedData = Array.isArray(data) ? data : [];
-            setCategories(formattedData);
+            setUsers(formattedData);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách danh mục đã xóa thất bại");
+            const errorMessage = handleApiError(err, "Tải danh sách người dùng đã xóa thất bại");
             showToast(errorMessage, "error");
         } finally {
             setLoading(false);
@@ -32,7 +32,7 @@ const CategoryRecover = () => {
     };
 
     useEffect(() => { 
-        fetchCategoriesRecover(); 
+        fetchUser(); 
     }, []);
 
     // MODAL Recover
@@ -44,11 +44,11 @@ const CategoryRecover = () => {
     const handleConfirmRecover = async () => {
         try {
             setIsRecovering(true);
-            await categoryService.recover(recoverId);
-            showToast("Khôi phục danh mục thành công", "success");
-            await fetchCategoriesRecover();
+            await userService.recover(recoverId);
+            showToast("Khôi phục người dùng thành công", "success");
+            await fetchUser();
         } catch (err) {
-            const errorMessage = handleApiError(err, "Khôi phục danh mục thất bại");
+            const errorMessage = handleApiError(err, "Khôi phục người dùng thất bại");
             showToast(errorMessage, "error");
         } finally {
             setIsRecovering(false);
@@ -60,8 +60,8 @@ const CategoryRecover = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-4">
-                <CategoryRecoverTable 
-                    data={categories} 
+                <UserRecoverTable 
+                    data={users} 
                     loading={loading}
                     onRecover={handleRecoverClick}
                 />
@@ -79,7 +79,7 @@ const CategoryRecover = () => {
             {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có muốn khôi phục danh mục này không?"
+                message="Bạn có muốn khôi phục người dùng này không?"
                 onConfirm={handleConfirmRecover}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isRecovering}
@@ -88,4 +88,4 @@ const CategoryRecover = () => {
     );
 }
 
-export default CategoryRecover;
+export default UserRecover;

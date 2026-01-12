@@ -1,83 +1,91 @@
-import {useState, useEffect, useCallback} from 'react';
-import AccountTable from '../../../components/admin/account/AccountTable';
+import { useState, useEffect, useCallback } from 'react';
+import UserTable from '../../../components/admin/user/UserTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import { userService, handleApiError } from '../../../services/api/userService';
 
-const Contact = () => {
+const User = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [filterType, setFilterType] = useState('all');
-
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
-    }
+    };
 
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
-            let res = [];
+            let data;
             if (filterType === 'lock') {
-                res = await userService.getAllLock();
-            } else if (filterType === 'read') {
-                res = await userService.getAllUnlock();
+                data = await userService.getAllLock();
+            } else if (filterType === 'active') {
+                data = await userService.getAllUnlock();
             } else {
-                res = await userService.getAll();
+                data = await userService.getAll();
             }
-            const data = Array.isArray(res) ? res : [];
-            setUsers(data);
+            setUsers(Array.isArray(data) ? data : []);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách người dùng thất bại");
-            showToast(errorMessage, "error");
+            showToast(handleApiError(err, "Tải danh sách thất bại"), "error");
             setUsers([]);
         } finally {
             setLoading(false);
         }
     }, [filterType]);
 
-    useEffect(() => {fetchUsers();}, [fetchUsers]);
+    useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-    // MODAL XÓA
+    const handleLock = async (id) => {
+        try {
+            await userService.lock(id);
+            showToast("Đã khóa tài khoản");
+            fetchUsers();
+        } catch (err) { showToast(handleApiError(err), "error"); }
+    };
+
+    const handleUnlock = async (id) => {
+        try {
+            await userService.unlock(id);
+            showToast("Đã mở khóa tài khoản");
+            fetchUsers();
+        } catch (err) { showToast(handleApiError(err), "error"); }
+    };
+
     const handleDeleteClick = (id) => {
         setDeleteId(id);
         setIsConfirmOpen(true);
     };
+
     const handleConfirmDelete = async () => {
         try {
             setIsDeleting(true);
             await userService.delete(deleteId);
-            showToast("Xóa người dùng thành công", "success");
-            await fetchUsers();
-        } catch (err) {
-            const errorMessage = handleApiError(err, "Xóa người dùng thất bại");
-            showToast(errorMessage, "error");
-        } finally {
+            showToast("Xóa người dùng thành công");
+            fetchUsers();
+        } catch (err) { showToast(handleApiError(err), "error"); }
+        finally {
             setIsDeleting(false);
             setIsConfirmOpen(false);
-            setDeleteId(null);
         }
     };
 
     return (
-        <>
-            <div className="space-y-6">
+        <div className="space-y-6">
             <div className="flex flex-col gap-4">
-                <AccountTable 
-                    data={users} 
-                    loading={loading}
-                    onDelete={handleDeleteClick}
-                    filterType={filterType}
-                    onFilterTypeChange={setFilterType}
-                />
-            </div>
-            
+            <UserTable 
+                data={users} 
+                loading={loading} 
+                filterType={filterType}
+                onFilterTypeChange={setFilterType}
+                onLock={handleLock}
+                onUnlock={handleUnlock}
+                onDelete={handleDeleteClick}
+            />
+
             {/* Hiển thị Toast */}
             {toast.show && (
                 <Toast 
@@ -86,6 +94,7 @@ const Contact = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+            {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
                 message="Bạn có muốn xóa người dùng này không?"
@@ -93,9 +102,9 @@ const Contact = () => {
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
             />
+            </div>
         </div>
-        </>
-    )
-}
+    );
+};
 
-export default Contact;
+export default User;
