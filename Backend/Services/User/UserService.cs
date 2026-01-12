@@ -139,7 +139,7 @@ namespace Backend.Services.User
             {
                 return false;
             }
-            user.TrangThai = true;
+            user.TrangThai = false;
             await _DbContext.SaveChangesAsync();
             return true;
         }
