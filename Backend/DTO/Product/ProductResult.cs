@@ -19,6 +19,6 @@ namespace Backend.DTO.Product
         public ProductSpecificationsResult ThongSoKyThuat { get; set; } = null!;
         public List<ProductVariantResult> BienThe { get; set; } = new();
         public DateTime NgayTao { get; set; }
-         public string message {get;set;} = null!;
+        public string message {get;set;} = null!;
     }
 }

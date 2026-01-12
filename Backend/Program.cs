@@ -11,7 +11,7 @@ using Backend.Services.WishList;
 using Backend.Services.Contact;
 using Backend.Services.WebInfo;
 using Backend.Services.Cart;
-using Backend.Services.Product;
+//using Backend.Services.Product;
 using Backend.Services.User;
 
 namespace Backend
@@ -30,7 +30,7 @@ namespace Backend
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IWebInfoService, WebInfoService>();
             builder.Services.AddScoped<ICartService, CartService>();
-            builder.Services.AddScoped<IProductService, ProductService>();
+            //builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
