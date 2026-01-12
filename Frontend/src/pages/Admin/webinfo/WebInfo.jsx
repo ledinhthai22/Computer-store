@@ -75,7 +75,8 @@ const WebInfoPage = () => {
     };
 
     return (
-        <div className="space-y-6 p-4">
+        <div className="space-y-6">
+            <div className="flex flex-col gap-4">
             <WebInfoTable 
                 data={webinfo} 
                 loading={loading} 
@@ -107,6 +108,7 @@ const WebInfoPage = () => {
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
             />
+            </div>
         </div>
     );
 };

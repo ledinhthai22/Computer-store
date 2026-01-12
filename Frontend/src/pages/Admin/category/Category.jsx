@@ -187,7 +187,7 @@ const Category = () => {
             {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có chắc chắn muốn xóa danh mục này không?"
+                message="Bạn có muốn xóa xóa danh mục này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
