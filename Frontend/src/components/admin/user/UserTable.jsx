@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import TableSearch from '../TableSearch';
 import Pagination from '../Pagination';
 
-const UserTable = ({ data, loading, onLock, onUnlock, onDelete, filterType, onFilterTypeChange }) => {
+const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeChange }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
@@ -78,14 +78,14 @@ const UserTable = ({ data, loading, onLock, onUnlock, onDelete, filterType, onFi
                     {row.trangThai ? (
                         <button 
                             onClick={() => onLock(row.maNguoiDung)} 
-                            className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                            className="p-2 text-orange-500 hover:bg-orange-100 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                         >
                             <Lock size={16} /> Khóa
                         </button>
                     ) : (
                         <button 
                             onClick={() => onUnlock(row.maNguoiDung)} 
-                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                            className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                         >
                             <Unlock size={16} /> Mở
                         </button>
@@ -137,7 +137,6 @@ const UserTable = ({ data, loading, onLock, onUnlock, onDelete, filterType, onFi
                 <DataTable
                     columns={columns}
                     data={filteredItems}
-                    progressPending={loading}
                     pagination
                     paginationComponent={Pagination}
                     paginationPerPage={5}

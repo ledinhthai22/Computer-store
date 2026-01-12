@@ -11,7 +11,6 @@ const User = () => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -62,13 +61,11 @@ const User = () => {
 
     const handleConfirmDelete = async () => {
         try {
-            setIsDeleting(true);
             await userService.delete(deleteId);
             showToast("Xóa người dùng thành công");
             fetchUsers();
         } catch (err) { showToast(handleApiError(err), "error"); }
         finally {
-            setIsDeleting(false);
             setIsConfirmOpen(false);
         }
     };
@@ -100,7 +97,6 @@ const User = () => {
                 message="Bạn có muốn xóa người dùng này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
-                isLoading={isDeleting}
             />
             </div>
         </div>
