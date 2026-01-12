@@ -12,6 +12,11 @@ export default defineConfig({
         target: 'https://localhost:7012', // Cổng của Backend .NET
         changeOrigin: true,
         secure: false, // Bỏ qua lỗi SSL tự ký (quan trọng vì backend là https)
+      },
+      '/images': {
+        target: 'https://localhost:7012', // Trỏ về backend
+        changeOrigin: true,
+        secure: false,
       }
     }
   }

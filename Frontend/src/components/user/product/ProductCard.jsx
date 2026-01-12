@@ -3,41 +3,94 @@ import { Link } from "react-router-dom";
 import Wishlist from "../Wishlist";
 import { FaCartPlus } from "react-icons/fa";
 import useAddToCart from "../../../hooks/useAddToCart";
+
 export default function ProductCard({ product }) {
     const { handleAddToCart } = useAddToCart(product);
+
+    const getProductImage = () => {
+        if (product.bienThe && product.bienThe.length > 0) {
+            const firstVariant = product.bienThe[0];
+            if (firstVariant.hinhAnh && firstVariant.hinhAnh.length > 0) {
+                const fileName = firstVariant.hinhAnh[0];
+                
+                if (fileName.startsWith('http')) {
+                    return fileName;
+                }
+                return `/images/products/${fileName}`; //wwwroot/images/products/
+            }
+        }
+        return "https://via.placeholder.com/300x300?text=No+Image";
+    };
+
+    const imageUrl = getProductImage();
+
+    const giaGoc = product.giaCoBan || 0;
+    const phanTramGiam = product.khuyenMai || 0;
+    const giaSauGiam = giaGoc - (giaGoc * phanTramGiam / 100);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
+    const productLink = `/san-pham/${product.slug}`;
+
     return (
-        <div className="relative m-2 group">
-            <div className="absolute top-2 right-2 z-10">
-                <Wishlist productId={product.id} />
+        <div className="relative group w-full h-full">
+            <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Wishlist product={product} />
             </div>
 
-            <div className="bg-white border border-gray-300 rounded-xl shadow-sm hover:shadow-lg hover:border-[#2f9ea0] transition duration-300 flex flex-col h-full overflow-hidden">
-                <Link to={`/san-pham/${product.id}`} className="block relative">
-                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center p-4">
+            {phanTramGiam > 0 && (
+                <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                    -{phanTramGiam}%
+                </div>
+            )}
+
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-[#2f9ea0] transition-all duration-300 flex flex-col h-full overflow-hidden">
+                <Link to={productLink} className="block relative overflow-hidden">
+                    <div className="w-full aspect-square bg-white flex items-center justify-center p-6">
                         <img 
-                            src={product.thumbnail} 
-                            alt={product.title} 
-                            className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105"
+                            src={imageUrl} 
+                            alt={product.tenSanPham} 
+                            className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/300?text=No+Image";
+                            }}
                         />
                     </div>
                 </Link>
 
                 <div className="p-4 flex flex-col flex-grow">
-                    <span className="text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                        {product.brand || "Computer Store"}
+                    <span className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">
+                        {product.tenThuongHieu || "Computer Store"}
                     </span>
-                    <Link to={`/san-pham/${product.id}`}>
-                        <h2 className="font-bold text-gray-800 line-clamp-2 text-sm mb-2 hover:text-[#2f9ea0] transition-colors" title={product.title}>
-                            {product.title}
+                    
+                    <Link to={productLink} className="mb-2">
+                        <h2 className="font-semibold text-gray-800 line-clamp-2 text-sm hover:text-[#2f9ea0] transition-colors min-h-[40px]" title={product.tenSanPham}>
+                            {product.tenSanPham}
                         </h2>
                     </Link>
-                    <div className="mt-auto flex items-center justify-between">
-                        <div>
-                            <span className="text-red-600 font-bold text-lg">${product.price}</span>
+                    
+                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                        <div className="flex flex-col">
+                            {phanTramGiam > 0 && (
+                                <span className="text-gray-400 text-xs line-through mb-0.5">
+                                    {formatCurrency(giaGoc)}
+                                </span>
+                            )}
+                            <span className="text-[#2f9ea0] font-bold text-base lg:text-lg">
+                                {formatCurrency(giaSauGiam)}
+                            </span>
                         </div>
-                        <div>
-                            <button onClick={handleAddToCart} title="Thêm vào giỏ hàng" className="p-2 rounded-full hover:bg-stone-300 transition-colors cursor-pointer"><FaCartPlus /></button>
-                        </div>
+
+                        <button 
+                            onClick={handleAddToCart} 
+                            title="Thêm vào giỏ hàng" 
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#2f9ea0] hover:text-white transition-all duration-300 shadow-sm cursor-pointer"
+                        >
+                            <FaCartPlus size={14} />
+                        </button>
                     </div>
                 </div>
             </div>

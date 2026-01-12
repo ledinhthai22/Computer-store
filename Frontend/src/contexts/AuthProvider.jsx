@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
 
   const register = async (hoTen, email, matKhau, soDienThoai, xacNhanMatKhau) => {
     try {
-      const response = await axiosClient.post("/auth/register", {
+      await axiosClient.post("/auth/register", {
         hoTen,
         email,
         soDienThoai,
@@ -43,17 +43,14 @@ export function AuthProvider({ children }) {
         xacNhanMatKhau,
       });
 
-      const data = response.data;
+      const loginResult = await login(email, matKhau);
+      
+      if (loginResult.success) {
+         return { success: true };
+      } else {
+         return { success: false, message: "Đăng ký thành công nhưng tự động đăng nhập thất bại." };
+      }
 
-      const userData = {
-        hoTen: data.hoTen,
-        vaiTro: data.vaiTro,
-      };
-
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      return { success: true };
     } catch (error) {
       const errorData = error.response?.data;
 
@@ -79,9 +76,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // --- LOGIC TỰ ĐỘNG GIA HẠN TOKEN ---
   useEffect(() => {
-    // Chỉ chạy nếu user đã đăng nhập
     if (!user) return;
 
     const verifySession = async () => {
