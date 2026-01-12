@@ -82,7 +82,7 @@ namespace Backend.Controllers.Admin
         public async Task<IActionResult> SoftDelete(int id)
         {
             await _userService.DeleteAsync(id);
-            return Ok(new { message = "Đã xóa mềm" });
+            return Ok(new { message = "Đã xóa thành công tài khoản" });
         }
 
         // PUT /api/admin/users/{id}/restore

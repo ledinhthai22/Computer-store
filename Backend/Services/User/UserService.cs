@@ -19,6 +19,7 @@ namespace Backend.Services.User
                 .Where(x => x.Delete_At == null && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
+                    MaNguoiDung = d.MaNguoiDung,
                     HoTen = d.HoTen,
                     Email = d.Email,
                     SoDienThoai = d.SoDienThoai,
@@ -32,9 +33,10 @@ namespace Backend.Services.User
         {
             return await _DbContext.NguoiDung
                 .Include(r => r.VaiTro)
-                .Where(x => x.TrangThai == false  && x.MaVaiTro != 1)
+                .Where(x => x.TrangThai == false && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
+                    MaNguoiDung = d.MaNguoiDung,
                     HoTen = d.HoTen,
                     Email = d.Email,
                     SoDienThoai = d.SoDienThoai,
@@ -47,9 +49,10 @@ namespace Backend.Services.User
         {
             return await _DbContext.NguoiDung
                 .Include(r => r.VaiTro)
-                .Where(x => x.TrangThai == true  && x.MaVaiTro != 1)
+                .Where(x => x.TrangThai == true && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
+                    MaNguoiDung = d.MaNguoiDung,
                     HoTen = d.HoTen,
                     Email = d.Email,
                     SoDienThoai = d.SoDienThoai,
@@ -62,9 +65,10 @@ namespace Backend.Services.User
         {
             return await _DbContext.NguoiDung
                 .Include(r => r.VaiTro)
-                .Where(x => x.Delete_At != null  && x.MaVaiTro != 1)
+                .Where(x => x.Delete_At != null && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
+                    MaNguoiDung = d.MaNguoiDung,
                     HoTen = d.HoTen,
                     Email = d.Email,
                     SoDienThoai = d.SoDienThoai,
@@ -151,7 +155,7 @@ namespace Backend.Services.User
             await _DbContext.SaveChangesAsync();
             return true;
         }
-        public async Task<bool> DeleteAsync(int id )
+        public async Task<bool> DeleteAsync(int id)
         {
             var user = await _DbContext.NguoiDung.FindAsync(id);
             if (user == null)
