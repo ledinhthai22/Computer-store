@@ -1,73 +1,80 @@
-﻿using Backend.Services.Product;
-using Ecommerce.DTO.Product;
+﻿using Backend.DTO.Product;
+using Backend.Services.Product;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ecommerce.Controller.Client.Public
+namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/products")]
-    public class ProductController : ControllerBase
+    public class UserProductController : ControllerBase
     {
         private readonly IProductService _productService;
 
-        public ProductController(IProductService productService)
+        public UserProductController(IProductService productService)
         {
             _productService = productService;
         }
-        //[HttpGet]
-        //public async Task<IActionResult> GetProducts(
-        //    [FromQuery] int page = 1,
-        //    [FromQuery] int pageSize = 12)
-        //{
-        //    var result = await _productService.GetPagedAsync(page, pageSize);
-        //    return Ok(result);
-        //}
 
-        //[HttpGet("category/{slug}")]
-        //public async Task<IActionResult> GetByCategory(
-        //    string slug,
-        //    [FromQuery] int page = 1,
-        //    [FromQuery] int pageSize = 12)
-        //{
-        //    var result = await _productService
-        //        .GetProductByCategoryAsync(slug, page, pageSize);
+        [HttpGet]
+        public async Task<IActionResult> GetProducts([FromQuery] ProductFilterRequest filter)
+        {
+            var result = await _productService.GetProductListAsync(filter);
+            return Ok(result);
+        }
 
-        //    if (result.TotalItems == 0)
-        //        return NotFound(new { message = "Không có sản phẩm cho danh mục này" });
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var product = await _productService.GetByIdForUserAsync(id);
 
-        //    return Ok(result);
-        //}
+            if (product == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm" });
 
-        //// GET /api/products/brand?name=apple&page=1&pageSize=12
-        //[HttpGet("brand")]
-        //public async Task<IActionResult> GetByBrand(
-        //    [FromQuery] string name,
-        //    [FromQuery] int page = 1,
-        //    [FromQuery] int pageSize = 12)
-        //{
-        //    var result = await _productService
-        //        .GetProductByBrandAsync(name, page, pageSize);
+            return Ok(product);
+        }
 
-        //    return Ok(result);
-        //}
 
-        //// POST /api/products/filter/specification
-        //[HttpPost("filter/specification")]
-        //public async Task<IActionResult> FilterBySpecification(
-        //    [FromBody] ProductSpecificationFilterRequest request)
-        //{
-        //    var result = await _productService.FilterBySpecificationAsync(request);
-        //    return Ok(result);
-        //}
-        //// GET /api/products/{slug}
-        //[HttpGet("{slug}")]
-        //public async Task<IActionResult> GetDetail(string slug)
-        //{
-        //    var product = await _productService.GetByIdAsync(slug);
+        [HttpGet("slug/{slug}")]
+        public async Task<IActionResult> GetBySlug(string slug)
+        {
+            var product = await _productService.GetBySlugAsync(slug);
 
-        //    if (product == null)
-        //        return NotFound(new { message = "Không tìm thấy sản phẩm" });
-        //    return Ok(product);
-        //}
+            if (product == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm" });
+
+            return Ok(product);
+        }
+
+
+        [HttpGet("best-selling")]
+        public async Task<IActionResult> GetBestSelling([FromQuery] int soLuong = 10)
+        {
+            var products = await _productService.GetBestSellingProductsAsync(soLuong);
+            return Ok(products);
+        }
+
+
+        [HttpGet("newest")]
+        public async Task<IActionResult> GetNewest([FromQuery] int soLuong = 10)
+        {
+            var products = await _productService.GetNewestProductsAsync(soLuong);
+            return Ok(products);
+        }
+
+
+        [HttpGet("category/{maDanhMuc:int}")]
+        public async Task<IActionResult> GetByCategory(int maDanhMuc, [FromQuery] int soLuong = 12)
+        {
+            var products = await _productService.GetProductsByCategoryAsync(maDanhMuc, soLuong);
+            return Ok(products);
+        }
+
+
+        [HttpGet("brand/{maThuongHieu:int}")]
+        public async Task<IActionResult> GetByBrand(int maThuongHieu, [FromQuery] int soLuong = 12)
+        {
+            var products = await _productService.GetProductsByBrandAsync(maThuongHieu, soLuong);
+            return Ok(products);
+        }
     }
 }

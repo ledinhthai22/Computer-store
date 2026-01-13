@@ -5,20 +5,22 @@ using System.Threading.Tasks;
 
 namespace Backend.DTO.Product
 {
-    public class ProductResult
+    public class ProductListItem
     {
-         public int MaSanPham { get; set; }
+        public int MaSanPham { get; set; }
         public string TenSanPham { get; set; } = null!;
         public string Slug { get; set; } = null!;
         public string TenDanhMuc { get; set; } = null!;
         public string TenThuongHieu { get; set; } = null!;
-        public List<string> HinhAnh { get; set; } = new();
-        public List<ProductVariantResult> BienThe { get; set; } = new();
+        public string? AnhDaiDien { get; set; }
+        public decimal GiaNhoNhat { get; set; }
+        public decimal GiaLonNhat { get; set; }
+        public decimal? GiaKhuyenMaiNhoNhat { get; set; }
         public double DanhGiaTrungBinh { get; set; }
         public int LuotXem { get; set; }
         public int LuotMua { get; set; }
-        public bool TrangThai { get; set; }
         public DateTime NgayTao { get; set; }
-        public DateTime? NgayXoa { get; set; }
+        public int SoLuongBienThe { get; set; }
+        public bool CoKhuyenMai { get; set; }
     }
 }
