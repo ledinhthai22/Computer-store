@@ -24,7 +24,7 @@ namespace Backend.Services.Product
             _DbContext = DbContext;
             _SlugHelper = SlugHelper;
         }
-
+        
       
      
     }

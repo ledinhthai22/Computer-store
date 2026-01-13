@@ -17,6 +17,5 @@ namespace Backend.DTO.Product
         public string BoXuLyDoHoa { get; set; } = null!;
         public string BoXuLyTrungTam { get; set; } = null!;
         public int SoLuongTon { get; set; }
-        public List<string> HinhAnh { get; set; } = new();
     }
 }

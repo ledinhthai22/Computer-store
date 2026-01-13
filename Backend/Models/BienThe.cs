@@ -24,7 +24,8 @@ namespace Backend.Models
         public int MaSanPham { get; set; }
         [ForeignKey(nameof(MaSanPham))]
         public SanPham SanPham { get; set; } = null!;
-       
+
+        public ThongSoKyThuat  thongSoKyThuat {get;set;} =null!;
         public ICollection<ChiTietGioHang> ChiTietGioHang { get; set; } = new List<ChiTietGioHang>();
         public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
         public ICollection<DonHang> DonHang { get; set; } = new List<DonHang>();

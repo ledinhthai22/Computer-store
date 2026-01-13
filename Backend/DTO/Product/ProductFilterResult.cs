@@ -5,6 +5,7 @@
         public int MaSanPham { get; set; }
         public string TenSanPham { get; set; } = null!;
         public string Slug { get; set; } = null!;
+
         public decimal GiaTu { get; set; }
         public decimal GiaDen { get; set; }
 

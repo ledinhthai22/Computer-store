@@ -12,13 +12,14 @@ namespace Backend.DTO.Product
         public string Slug { get; set; } = null!;
         public decimal GiaCoBan { get; set; }
         public double KhuyenMai { get; set; }
-        public int SoLuongTon { get; set; }
-         public int MaDanhMuc { get; set; } 
         public string TenDanhMuc { get; set; } = null!;
         public string TenThuongHieu { get; set; } = null!;
+
+        public List<string> HinhAnh { get; set; } = new();
+
         public ProductSpecificationsResult ThongSoKyThuat { get; set; } = null!;
         public List<ProductVariantResult> BienThe { get; set; } = new();
+
         public DateTime NgayTao { get; set; }
-        public string message {get;set;} = null!;
     }
 }

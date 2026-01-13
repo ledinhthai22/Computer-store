@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113013044_ChangeTableSanPham")]
+    partial class ChangeTableSanPham
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,6 +50,9 @@ namespace Ecommerce.Migrations
                     b.Property<int>("MaSanPham")
                         .HasColumnType("int");
 
+                    b.Property<int>("MaThongSo")
+                        .HasColumnType("int");
+
                     b.Property<string>("MauSac")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -75,6 +81,8 @@ namespace Ecommerce.Migrations
                     b.HasKey("MaBTSP");
 
                     b.HasIndex("MaSanPham");
+
+                    b.HasIndex("MaThongSo");
 
                     b.ToTable("BienThe");
                 });
@@ -328,9 +336,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$KHI1PAX22E/30.F47ibOXurymEnzg6qEGjUOQHSLCToCzAh9AsnRy",
-                            NgayCapNhat = new DateTime(2026, 1, 13, 8, 49, 43, 536, DateTimeKind.Local).AddTicks(3265),
-                            NgayTao = new DateTime(2026, 1, 13, 8, 49, 43, 536, DateTimeKind.Local).AddTicks(3246),
+                            MatKhauMaHoa = "$2a$11$Lj4RxR3KqMABFvhrh3cB1O.ZMNS29PYMWkM9JmRPBFETyrxcTGyIi",
+                            NgayCapNhat = new DateTime(2026, 1, 13, 8, 30, 43, 374, DateTimeKind.Local).AddTicks(2562),
+                            NgayTao = new DateTime(2026, 1, 13, 8, 30, 43, 374, DateTimeKind.Local).AddTicks(2543),
                             SoDienThoai = "0999988884",
                             TrangThai = true
                         });
@@ -419,9 +427,6 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MaBienThe")
-                        .HasColumnType("int");
-
                     b.Property<string>("OCung")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -430,14 +435,16 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("SanPhamMaSanPham")
+                        .HasColumnType("int");
+
                     b.Property<string>("SoKheRam")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MaThongSo");
 
-                    b.HasIndex("MaBienThe")
-                        .IsUnique();
+                    b.HasIndex("SanPhamMaSanPham");
 
                     b.ToTable("ThongSoKyThuat");
                 });
@@ -668,7 +675,15 @@ namespace Ecommerce.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Backend.Models.ThongSoKyThuat", "thongSoKyThuat")
+                        .WithMany()
+                        .HasForeignKey("MaThongSo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("SanPham");
+
+                    b.Navigation("thongSoKyThuat");
                 });
 
             modelBuilder.Entity("Backend.Models.ChiTietGioHang", b =>
@@ -767,13 +782,11 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Backend.Models.ThongSoKyThuat", b =>
                 {
-                    b.HasOne("Backend.Models.BienThe", "BienThe")
-                        .WithOne("thongSoKyThuat")
-                        .HasForeignKey("Backend.Models.ThongSoKyThuat", "MaBienThe")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Backend.Models.SanPham", "SanPham")
+                        .WithMany()
+                        .HasForeignKey("SanPhamMaSanPham");
 
-                    b.Navigation("BienThe");
+                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("Ecommerce.Models.ChiTietDonHang", b =>
@@ -840,9 +853,6 @@ namespace Ecommerce.Migrations
                     b.Navigation("DonHang");
 
                     b.Navigation("YeuThich");
-
-                    b.Navigation("thongSoKyThuat")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Models.DanhMuc", b =>

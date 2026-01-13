@@ -11,7 +11,7 @@ namespace Backend.Services.Product
     public interface IProductService
     {
         //Task<ProductResult?> CreateAsync(CreateProductRequest request);
-        //Task<IEnumerable<ProductResult>> GetAllAsync();
+        // Task<IEnumerable<ProductResult>> GetUserProductAsync(int page,int size);
         //Task<PagedResult<ProductResult>> GetPagedAsync(int page, int pageSize);
         //Task<ProductResult?> GetByIdAsync(string slug);
         //Task<PagedResult<ProductResult>> GetProductByCategoryAsync(string slug, int page, int pageSize);

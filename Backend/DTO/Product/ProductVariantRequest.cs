@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Backend.DTO.Product
 {
-    public class ProductVariantResquest
+    public class ProductVariantRequest
     {
         [Required]
         public string TenBienThe { get; set; } = null!;
@@ -23,7 +23,6 @@ namespace Backend.DTO.Product
         [Range(0, int.MaxValue)]
         public int SoLuongTon { get; set; }
 
-        // File ảnh upload
-        public List<IFormFile> HinhAnh { get; set; } = new();
+       
     }
 }
