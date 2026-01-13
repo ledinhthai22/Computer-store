@@ -38,7 +38,7 @@ const NavNotifications = ({ isOpen, onToggle, onClose }) => {
     <div className="relative" ref={wrapperRef}>
       <button 
         onClick={onToggle}
-        className={`text-blue-200 hover:text-white transition-colors relative p-2 rounded-full ${isOpen ? 'bg-blue-800/50 text-white' : ''}`}
+        className={`text-blue-200 hover:text-white transition-colors relative p-2 rounded-full ${isOpen ? 'bg-blue-800/50 text-white' : ''} cursor-pointer`}
       >
         <Bell className="w-5 h-5" />
         {/* Hiển thị số lượng nếu > 0 */}

@@ -30,7 +30,8 @@ export default function Login() {
           result.message || "Đăng nhập thất bại. Vui lòng thử lại."
         );
       }
-    } catch (error) {
+    } catch (err) {
+      console.log(err)
       setErrorMessage("Lỗi kết nối mạng. Vui lòng kiểm tra console.");
     }
   };
@@ -88,7 +89,7 @@ export default function Login() {
             <div className="text-right">
               <Link
                 className="text-sm text-stone-500 hover:text-[#2f9ea0]"
-                to="/forget-password" // Nhớ kiểm tra lại đường dẫn này trong App.jsx của bạn nhé
+                to="/quen-mat-khau" // Nhớ kiểm tra lại đường dẫn này trong App.jsx của bạn nhé
               >
                 Quên mật khẩu?
               </Link>
@@ -104,7 +105,7 @@ export default function Login() {
 
           <p className="mt-6 text-center text-stone-500">
             Bạn là người mới?{" "}
-            <Link className="text-[#2f9ea0] font-bold hover:underline" to="/register">
+            <Link className="text-[#2f9ea0] font-bold hover:underline" to="/dang-ky">
               ĐĂNG KÝ NGAY
             </Link>
           </p>

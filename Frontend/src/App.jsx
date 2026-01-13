@@ -21,12 +21,12 @@ function App() {
           <Route path="/san-pham/:slug" element={<Details />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<LienHe />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/gio-hang" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<WishList />} />
+          <Route path="/dang-nhap" element={<Login />} />
+          <Route path="/dang-ky" element={<Register />} />
+          <Route path="/thong-tin-ca-nhan" element={<Profile />} />
+          <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/danh-muc/:id" element={<CategoryProduct />} />
           <Route path="/san-pham/thuong-hieu/:id" element={<BrandProduct />} />    
         </Route>

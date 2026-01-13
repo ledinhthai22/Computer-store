@@ -1,9 +1,18 @@
 import { LayoutDashboard, ShoppingBag, Layers, User, LogOut, Hexagon, Mail, AppWindow } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from "../../contexts/AuthProvider";
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
   const location = useLocation();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+  
   const menuItems = [
     { name: 'Thống kê', icon: LayoutDashboard, path: '/quan-ly/thong-ke' }, 
     { name: 'Sản phẩm', icon: ShoppingBag, path: '/quan-ly/san-pham' },
@@ -47,7 +56,7 @@ const Sidebar = () => {
       </div>
 
       <div className="space-y-2 pt-4 border-t border-gray-100">
-        <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group">
+        <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group">
           <LogOut size={20} className="text-gray-400 group-hover:text-red-600" />
           <span className="text-sm font-medium">Đăng xuất</span>
         </button>

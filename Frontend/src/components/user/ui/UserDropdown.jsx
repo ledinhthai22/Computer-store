@@ -39,16 +39,16 @@ export default function UserDropdown() {
 
       {open && (
         <div className="absolute right-0 mt-2 w-52 bg-white border rounded-xl shadow-lg z-50">
-          <Link to="/profile" className="block px-4 py-2 hover:text-blue-500">
+          <Link to="/thong-tin-ca-nhan" className="block px-4 py-2 hover:text-blue-500">
             Chỉnh sửa trang cá nhân
           </Link>
           <Link to="/quan-ly" className="block px-4 py-2 hover:text-blue-500">
             Trang quản trị
           </Link>
-          <Link to="/orders" className="block px-4 py-2 hover:text-blue-500">
+          <Link to="/don-hang" className="block px-4 py-2 hover:text-blue-500">
             Quản lý đơn hàng
           </Link>
-          <Link to="/wishlist" className="block px-4 py-2 hover:text-blue-500">
+          <Link to="/yeu-thich" className="block px-4 py-2 hover:text-blue-500">
             Sản phẩm yêu thích
           </Link>
           <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:text-blue-500 cursor-pointer">
