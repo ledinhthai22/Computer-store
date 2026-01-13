@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import Toast from '../../../components/admin/Toast';
 import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus } from 'lucide-react';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import { productService } from '../../../services/api/productService';
+import { categoryService } from '../../../services/api/categoryService';
+import { brandService } from '../../../services/api/brandService';
 
 const ProductDetail = () => {
   const { maSanPham } = useParams();
@@ -34,9 +36,9 @@ const ProductDetail = () => {
     try {
       setLoading(true);
       const [prodRes, catRes, brandRes] = await Promise.all([
-        axios.get(`https://localhost:7012/api/Product/${maSanPham}`),
-        axios.get(`https://localhost:7012/api/Category`),
-        axios.get(`https://localhost:7012/api/Brand`)
+        productService.getById(maSanPham),
+        categoryService.getAll(),
+        brandService.getAll()
       ]);
 
       const data = prodRes.data;
@@ -120,7 +122,7 @@ const ProductDetail = () => {
     };
 
     try {
-      await axios.put(`https://localhost:7012/api/Product/${maSanPham}`, payload);
+      await productService.update(maSanPham, payload);
       showToast("Chỉnh sửa sản phẩm thành công!", "success");
       setIsEditing(false);
     } catch (error) {
@@ -138,7 +140,7 @@ const ProductDetail = () => {
   const handleConfirmDelete = async () => {
       try {
         setIsDeleting(true);
-        await axios.delete(`https://localhost:7012/api/Product/${maSanPham}`);
+        await productService.delete(maSanPham);
         showToast("Xóa sản phẩm thành công", "success");
         navigate('/quan-ly/san-pham');
       } catch (err) {

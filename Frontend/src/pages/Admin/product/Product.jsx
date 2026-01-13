@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import ProductTable from '../../../components/admin/product/ProductTable';
 import Toast from '../../../components/admin/Toast';
+import { productService } from '../../../services/api/productService';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -14,8 +14,9 @@ const Product = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://localhost:7012/api/Product/all');
-        const actualData = res.data && Array.isArray(res.data.data) ? res.data.data : [];
+        const res = await productService.getAll();
+        console.log("Service:", res);
+        const actualData = res && Array.isArray(res) ? res : [];
         setProducts(actualData);
       } catch (error) {
        console.error("Lỗi fetch:", error);
