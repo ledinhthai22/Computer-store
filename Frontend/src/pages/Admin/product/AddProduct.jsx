@@ -573,7 +573,7 @@ useEffect(() => {
           />
 
           <InputField
-            label="CPU"
+            label="Bộ xử lý trung tâm (CPU)"
             value={v.boXuLyTrungTam}
             onChange={(val) =>
               updateVariant(v.uid, "boXuLyTrungTam", val)
@@ -581,7 +581,7 @@ useEffect(() => {
           />
 
           <InputField
-            label="GPU"
+            label="Bộ xử lý đồ họa (GPU)"
             value={v.boXuLyDoHoa}
             onChange={(val) =>
               updateVariant(v.uid, "boXuLyDoHoa", val)

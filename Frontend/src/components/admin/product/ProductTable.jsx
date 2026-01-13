@@ -43,7 +43,21 @@ const ProductTable = ({ data, loading}) => {
             grow: 2,
             width: '150px',
             cell: row => (
-                <img src={row.anhDaiDien} alt={row.tenSanPham} />
+                <div style={{ padding: '5px' }}>
+            <img 
+                src={`http://localhost:7012${row.anhDaiDien}`} 
+                alt={row.tenSanPham} 
+                style={{ 
+                    width: '100%', 
+                    height: 'auto', 
+                    borderRadius: '4px',
+                    objectFit: 'cover'
+                }} 
+                onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                }}
+            />
+        </div>
             ),
         },
         {
