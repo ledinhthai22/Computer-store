@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Backend.DTO.WebInfo
 {
@@ -18,5 +19,6 @@ namespace Backend.DTO.WebInfo
         public string ?ChinhSachDoiTra { get; set; } 
         public string ?DieuKhoanSuDung { get; set; } 
         public string ?DuongDanAnh { get; set; } 
+        public bool TrangThai { get; set; }
     }
 }
