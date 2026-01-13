@@ -17,7 +17,7 @@ namespace Backend.Models
         public string Email { get; set; } = null!;
         public string SoDienThoai { get; set; } = null!;
         public bool TrangThai { get; set; }
-        public DateTime? Delete_At {get;set;}
+        public DateTime? NgayXoa {get;set;}
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public DateTime NgayCapNhat { get; set; }
         public int MaVaiTro { get; set; }

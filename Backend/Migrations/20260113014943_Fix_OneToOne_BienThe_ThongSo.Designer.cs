@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113014943_Fix_OneToOne_BienThe_ThongSo")]
+    partial class Fix_OneToOne_BienThe_ThongSo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,7 +54,7 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("NgayXoa")
+                    b.Property<DateTime>("NgayXoa")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OCung")
@@ -284,6 +287,9 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNguoiDung"));
 
+                    b.Property<DateTime?>("Delete_At")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -303,9 +309,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NgayXoa")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SoDienThoai")
@@ -328,9 +331,9 @@ namespace Ecommerce.Migrations
                             Email = "admin@gmail.com",
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$qR4iGPBtRjy2.6CGoxsaQOk8JhS9UMkz3dUUGuzdWsBVHVAw8CiJG",
-                            NgayCapNhat = new DateTime(2026, 1, 13, 10, 14, 9, 872, DateTimeKind.Local).AddTicks(2851),
-                            NgayTao = new DateTime(2026, 1, 13, 10, 14, 9, 872, DateTimeKind.Local).AddTicks(2833),
+                            MatKhauMaHoa = "$2a$11$KHI1PAX22E/30.F47ibOXurymEnzg6qEGjUOQHSLCToCzAh9AsnRy",
+                            NgayCapNhat = new DateTime(2026, 1, 13, 8, 49, 43, 536, DateTimeKind.Local).AddTicks(3265),
+                            NgayTao = new DateTime(2026, 1, 13, 8, 49, 43, 536, DateTimeKind.Local).AddTicks(3246),
                             SoDienThoai = "0999988884",
                             TrangThai = true
                         });

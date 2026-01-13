@@ -16,7 +16,7 @@ namespace Backend.Services.User
         {
             return await _DbContext.NguoiDung
                 .Include(r => r.VaiTro)
-                .Where(x => x.Delete_At == null && x.MaVaiTro != 1)
+                .Where(x => x.NgayXoa == null && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
                     MaNguoiDung = d.MaNguoiDung,
@@ -65,7 +65,7 @@ namespace Backend.Services.User
         {
             return await _DbContext.NguoiDung
                 .Include(r => r.VaiTro)
-                .Where(x => x.Delete_At != null && x.MaVaiTro != 1)
+                .Where(x => x.NgayXoa != null && x.MaVaiTro != 1)
                 .Select(d => new UserResult
                 {
                     MaNguoiDung = d.MaNguoiDung,
@@ -162,7 +162,7 @@ namespace Backend.Services.User
             {
                 return false;
             }
-            user.Delete_At = DateTime.Now;
+            user.NgayXoa = DateTime.Now;
             await _DbContext.SaveChangesAsync();
             return true;
         }
@@ -173,7 +173,7 @@ namespace Backend.Services.User
             {
                 return false;
             }
-            user.Delete_At = null;
+            user.NgayXoa = null;
             await _DbContext.SaveChangesAsync();
             return true;
         }
@@ -181,7 +181,7 @@ namespace Backend.Services.User
         {
             var user = await _DbContext.NguoiDung
                 .Include(u => u.VaiTro)
-                .FirstOrDefaultAsync(u => u.MaNguoiDung == id && u.Delete_At == null);
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == id && u.NgayXoa == null);
 
             if (user == null)
             {
@@ -203,7 +203,7 @@ namespace Backend.Services.User
         {
             var user = await _DbContext.NguoiDung
                 .Include(u => u.VaiTro)
-                .FirstOrDefaultAsync(u => u.MaNguoiDung == id && u.Delete_At == null);
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == id && u.NgayXoa == null);
 
             if (user == null)
             {
