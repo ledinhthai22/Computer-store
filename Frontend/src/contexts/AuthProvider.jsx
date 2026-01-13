@@ -86,7 +86,7 @@ export function AuthProvider({ children }) {
         console.log("Phiên đăng nhập hợp lệ. Đã gia hạn token.");
       } catch (error) {
         // Nếu lỗi (401/403) nghĩa là Refresh Token cũng đã hết hạn (do tắt máy quá lâu)
-        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...");
+        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...", error);
         await logout(); // Tự động đăng xuất
       }
     };

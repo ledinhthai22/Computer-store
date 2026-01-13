@@ -14,17 +14,17 @@ const ContactDetailModal = ({ isOpen, onClose, contact }) => {
           </h3>
           <button 
             onClick={onClose}
-            className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+            className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 gap-4">
+        <div className="p-6">
+          <div className="grid grid-cols-1 gap-1">
             
-            <div className="flex items-start gap-3">
+            <div className="flex items-start">
               <div>
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Email liên hệ</p>
                 <p className="text-gray-800 font-medium">{contact.email}</p>
@@ -33,7 +33,7 @@ const ContactDetailModal = ({ isOpen, onClose, contact }) => {
 
             <div className="flex items-start gap-3 border-t pt-4">
               <div className="w-full">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Nội dung tin nhắn</p>
+                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Nội dung</p>
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-700 leading-relaxed max-h-48 overflow-y-auto">
                   {contact.noiDung}
                 </div>

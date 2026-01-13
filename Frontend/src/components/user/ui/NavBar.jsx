@@ -47,12 +47,12 @@ export default function NavBar() {
 
                 {/* RIGHT */}
                 <div className="flex items-center gap-2">
-                <Link to="/cart" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Giỏ hàng">
+                <Link to="/gio-hang" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Giỏ hàng">
                     Giỏ hàng <FaShoppingCart className="ml-2" />
                 </Link>
 
                 {user ? <UserDropdown /> : (
-                    <Link to="/login" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Đăng nhập">
+                    <Link to="/dang-nhap" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Đăng nhập">
                     <FaUser className="mr-2" /> Đăng nhập
                     </Link>
                 )}
