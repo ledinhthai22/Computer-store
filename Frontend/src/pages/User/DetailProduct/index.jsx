@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import useAddToCart from "../../../hooks/useAddToCart";
 export default function Details() {
