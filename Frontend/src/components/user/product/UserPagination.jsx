@@ -91,7 +91,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
               onClick={() => onPageChange(page)}
               className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
                 currentPage === page
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'bg-[#2f9ea0] text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
               }`}
             >

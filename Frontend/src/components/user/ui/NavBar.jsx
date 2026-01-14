@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import { IoMenu, IoSearch } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
@@ -13,53 +12,57 @@ export default function NavBar() {
     const [openDanhMuc, setOpenDanhMuc] = useState(false);
 
     return (
-        <nav className="relative  bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-sm">
-            <div className="flex items-center max-w-[90%] mx-auto py-2">
+        <nav className="bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-md py-2 md:py-3 transition-all">
+            
 
-                {/* LEFT */}
-                <div className="flex items-center gap-2">
-                <Link to="/" className="px-3 py-2 text-xl font-bold hover:bg-[#ffffff30] rounded" title="Trang chủ">
-                    Computer-Store
-                </Link>
+            <div className="container mx-auto px-4 max-w-7xl flex flex-wrap items-center justify-between gap-y-3 md:gap-y-0 md:gap-x-8">
 
-                <div
-                    className="relative px-3 py-2 flex items-center gap-1 hover:bg-[#ffffff30] rounded cursor-pointer"
-                    title="Danh mục sản phẩm"
-                    onMouseEnter={() => setOpenDanhMuc(true)}
-                    onMouseLeave={() => setOpenDanhMuc(false)}
-                >
-                    Danh mục <IoMenu className="text-xl" />
-                    {openDanhMuc && <MenuCategory onClose={() => setOpenDanhMuc(false)} />}
-                </div>
-                </div>
-
-                {/* SEARCH */}
-                <div className="flex-1 mx-6 bg-white text-black rounded-full flex items-center h-11 px-4 max-w-[700px]">
-                <input
-                    className="grow bg-transparent outline-none text-sm"
-                    placeholder="Nhập thông tin cần tìm"
-                    title="Nhập thông tin cần tìm"
-                />
-                <button className="hover:bg-gray-200 rounded-full p-2 cursor-pointer" title="Tìm kiếm">
-                    <IoSearch className="text-xl" />
-                </button>
-                </div>
-
-                {/* RIGHT */}
-                <div className="flex items-center gap-2">
-                <Link to="/gio-hang" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Giỏ hàng">
-                    Giỏ hàng <FaShoppingCart className="ml-2" />
-                </Link>
-
-                {user ? <UserDropdown /> : (
-                    <Link to="/dang-nhap" className="px-3 py-2 hover:bg-[#ffffff30] rounded flex items-center" title="Đăng nhập">
-                    <FaUser className="mr-2" /> Đăng nhập
+                <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                    <Link to="/" className="text-xl md:text-2xl font-bold hover:opacity-90 whitespace-nowrap tracking-tight" title="Trang chủ">
+                        Computer-Store
                     </Link>
-                )}
+
+                    <div
+                        className="relative px-2 py-1 md:px-3 md:py-2 flex items-center gap-1 hover:bg-[#ffffff20] rounded-lg cursor-pointer transition-all duration-200"
+                        title="Danh mục sản phẩm"
+                        onMouseEnter={() => setOpenDanhMuc(true)}
+                        onMouseLeave={() => setOpenDanhMuc(false)}
+                    >
+                        <span className="hidden sm:inline font-medium">Danh mục</span>
+                        <IoMenu className="text-2xl" />
+                        {openDanhMuc && <MenuCategory onClose={() => setOpenDanhMuc(false)} />}
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 md:gap-4 md:order-3 shrink-0">
+                    <Link to="/gio-hang" className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 group" title="Giỏ hàng">
+                        <div className="relative">
+                            <FaShoppingCart className="text-xl group-hover:scale-110 transition-transform" />
+                        </div>
+                        <span className="hidden lg:inline font-medium">Giỏ hàng</span>
+                    </Link>
+
+                    {user ? <UserDropdown /> : (
+                        <Link to="/dang-nhap" className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 font-medium" title="Đăng nhập">
+                            <FaUser className="text-lg" />
+                            <span className="hidden lg:inline">Đăng nhập</span>
+                        </Link>
+                    )}
+                </div>
+                <div className="w-full order-last md:order-2 md:w-auto md:flex-1 flex justify-center md:justify-end lg:justify-center">
+                    <div className="w-full md:max-w-[600px] bg-white text-black rounded-lg flex items-center h-10 px-0 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-[#2f9ea0]/50 transition-all overflow-hidden">
+                        <input
+                            className="grow bg-transparent outline-none text-sm px-4 py-2 placeholder-gray-400"
+                            placeholder="Bạn đang tìm sản phẩm gì..."
+                            title="Nhập thông tin cần tìm"
+                        />
+                        <button className="bg-gray-100 hover:bg-[#2f9ea0] hover:text-white h-full px-4 flex items-center justify-center transition-colors duration-200" title="Tìm kiếm">
+                            <IoSearch className="text-xl" />
+                        </button>
+                    </div>
                 </div>
 
             </div>
         </nav>
-
     );
 }
