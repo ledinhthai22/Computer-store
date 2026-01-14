@@ -28,7 +28,7 @@ function App() {
           <Route path="/thong-tin-ca-nhan" element={<Profile />} />
           <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/danh-muc/:id" element={<CategoryProduct />} />
-          <Route path="/san-pham/thuong-hieu/:id" element={<BrandProduct />} />    
+          <Route path="/san-pham/thuong-hieu/:maThuongHieu" element={<BrandProduct />} />    
         </Route>
 
         {/* --- Quản lý ROUTES --- */}

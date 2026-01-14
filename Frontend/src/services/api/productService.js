@@ -19,15 +19,15 @@ export const productService = {
       .get(`/products/best-selling?soLuong=${soLuong}`)
       .then((res) => res.data),
 
-  usergetByCategory: (maDanhMuc) =>
+  usergetByCategory: (maDanhMuc,soLuong) =>
     axiosClient
-      .get(`/products/category/${maDanhMuc}`)
-      .then((res) => res.data.danhSach),
+      .get(`/products/category/${maDanhMuc}?soLuong=${soLuong}`)
+      .then((res) => res.data),
 
-  usergetByBrand: (maThuongHieu) =>
+  usergetByBrand: (maThuongHieu,soLuong) =>
     axiosClient
-      .get(`/products/brand/${maThuongHieu}`)
-      .then((res) => res.data.danhSach),
+      .get(`/products/brand/${maThuongHieu}?soLuong=${soLuong}`)
+      .then((res) => res.data),
 
   usergetBySlug: (slug) =>
     axiosClient.get(`/products/slug/${slug}`).then((res) => res.data),

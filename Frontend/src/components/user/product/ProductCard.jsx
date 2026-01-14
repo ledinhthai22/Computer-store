@@ -33,7 +33,7 @@ export default function ProductCard({ product }) {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
-    const productLink = `/san-pham/${product.slug}`;
+    const productLink = `/chi-tiet-san-pham/${product.slug}`;
 
     return (
         <div className="relative group w-full h-full">
