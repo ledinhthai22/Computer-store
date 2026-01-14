@@ -26,7 +26,7 @@ export default function Details() {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await productService.getByIdUser(id);
+        const res = await productService.usergetId(id);
         
         if (res && res.bienThe && res.bienThe.length > 0) {
           setProduct(res);
@@ -432,7 +432,6 @@ export default function Details() {
             </div>
             
             <div className="text-center py-8">
-              <div className="text-6xl mb-6">⭐</div>
               <h4 className="text-xl font-semibold text-gray-700 mb-3">Sản phẩm chưa có đánh giá</h4>
               <p className="text-gray-500 mb-8">Hãy là người đầu tiên đánh giá sản phẩm này</p>
               <div className="flex justify-center mb-8">
