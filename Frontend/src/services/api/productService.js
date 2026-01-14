@@ -19,12 +19,12 @@ export const productService = {
       .get(`/products/best-selling?soLuong=${soLuong}`)
       .then((res) => res.data),
 
-  usergetByCategory: (maDanhMuc,soLuong) =>
+  usergetByCategory: (maDanhMuc, soLuong) =>
     axiosClient
       .get(`/products/category/${maDanhMuc}?soLuong=${soLuong}`)
       .then((res) => res.data),
 
-  usergetByBrand: (maThuongHieu,soLuong) =>
+  usergetByBrand: (maThuongHieu, soLuong) =>
     axiosClient
       .get(`/products/brand/${maThuongHieu}?soLuong=${soLuong}`)
       .then((res) => res.data),
@@ -33,27 +33,31 @@ export const productService = {
     axiosClient.get(`/products/slug/${slug}`).then((res) => res.data),
 
   // ADMIN
-  getAll: () =>
-    axiosClient.get("/admin/products").then((res) => res.data.danhSach),
-
-  getDeleted: () =>
-    axiosClient.get("/admin/products/deleted").then((res) => res.data.danhSach),
-
-  getById: (id) =>
-    axiosClient.get(`/admin/products/${id}`).then((res) => res.data.danhSach),
-
-  create: (formData) =>
-    axiosClient.post("/admin/products", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-
-  update: (id, data) =>
-    axiosClient
-      .put(`/admin/products/${id}`, data)
-      .then((res) => res.data.danhSach),
-
+  getAdminList: async () => {
+    const res = await axiosClient.get("/admin/products");
+    return res.data; // API trả mảng
+  },
+  getDetailProduct: async (id) => {
+    const res = await axiosClient.get(`/admin/products/${id}`)
+    return res.data;
+  },
+  // services/api/ProductService.js
+  updateProduct: async (id, formData) => {
+    const res = await axiosClient.put(`/admin/products/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  },
+  AddProduct: async (formData) => {
+    const res = await axiosClient.post(`/admin/products`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+  },
+  deleteProduct: async (id) => {
+    const res = await axiosClient.delete(`/admin/products/${id}`)
+    return res.data;
+  },
   delete: (id) =>
     axiosClient
       .delete(`/admin/products/${id}`)

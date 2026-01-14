@@ -1,6 +1,5 @@
 export { default as Product } from "./product/Product";
 export { default as AddProduct } from "./product/AddProduct";
-export { default as UpdateProduct } from "./product/UpdateProduct";
 export { default as ProductDetail } from "./product/ProductDetail";
 export { default as Category } from "./category/Category";
 export { default as CategoryRecover } from "./category/CategoryRecover";
