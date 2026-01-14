@@ -15,7 +15,19 @@ const ProductTable = ({ data, loading}) => {
                 (item.tenThuongHieu && item.tenThuongHieu?.toLowerCase().includes(filterText.toLowerCase())) ||
                 (item.soLuongTon && item.soLuongTon?.toString().includes(filterText))
     );
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
 
+        return `${hours}:${minutes} - ${day}/${month}/${year}`;
+    };
     const columns = [
         {
             name: 'STT',
@@ -23,6 +35,30 @@ const ProductTable = ({ data, loading}) => {
             width: '60px',
             sortable: false,
             center: true,
+        },
+        {
+            name: 'ẢNH SẢN PHẨM',
+            selector: row => row.anhDaiDien,
+            sortable: true,
+            grow: 2,
+            width: '150px',
+            cell: row => (
+                <div style={{ padding: '5px' }}>
+            <img 
+                src={`http://localhost:7012${row.anhDaiDien}`} 
+                alt={row.tenSanPham} 
+                style={{ 
+                    width: '100%', 
+                    height: 'auto', 
+                    borderRadius: '4px',
+                    objectFit: 'cover'
+                }} 
+                onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                }}
+            />
+        </div>
+            ),
         },
         {
             name: 'TÊN SẢN PHẨM',
@@ -67,6 +103,17 @@ const ProductTable = ({ data, loading}) => {
             cell: row => (
                 <span className="text-gray-600">
                     {row.soLuongTon || 0}
+                </span>
+            ),
+        },
+        {
+            name: 'NGÀY TẠO',
+            selector: row => row.ngayTao,
+            sortable: true,
+            grow: 2,
+            cell: row => (
+                <span className="text-gray-700" title={row.ngayTao}>
+                    {formatDateTime(row.ngayTao)}
                 </span>
             ),
         },

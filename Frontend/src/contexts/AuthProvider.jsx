@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
     } finally {
       localStorage.removeItem("user");
       setUser(null);
-      window.location.href = "/login";
+      window.location.href = "/dang-nhap";
     }
   }, []);
 

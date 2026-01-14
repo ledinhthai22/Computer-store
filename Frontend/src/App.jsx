@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import UserLayout from './layouts/UserLayout'
-import {Product, Category, CategoryRecover, Brand, BrandRecover, Contact, AddProduct, ProductDetail,
+import {Product, Category, CategoryRecover, Brand, BrandRecover, Contact, AddProduct, UpdateProduct, ProductDetail,
   WebInfo, WebInfoRecover, User, UserRecover
 } from './pages/Admin'
 import {Home,UserProduct,About,Cart,Checkout,Details,LienHe,Login,NotFound,Profile,Register,
@@ -38,6 +38,7 @@ function App() {
             <Route path="/quan-ly/san-pham" element={<Product />} />
             <Route path="/quan-ly/san-pham/:maSanPham" element={<ProductDetail />} />
             <Route path="/quan-ly/san-pham/them-san-pham" element={<AddProduct />} />
+            <Route path="/quan-ly/san-pham/cap-nhat-san-pham/:maSanPham" element={<UpdateProduct />} />
 
             <Route path="/quan-ly/danh-muc" element={<Category />} />
             <Route path="/quan-ly/danh-muc/khoi-phuc" element={<CategoryRecover />} />
