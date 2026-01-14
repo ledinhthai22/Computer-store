@@ -30,7 +30,7 @@ export const productService = {
       .then((res) => res.data.danhSach),
 
   usergetBySlug: (slug) =>
-    axiosClient.get(`/products/slug/${slug}`).then((res) => res.data.danhSach),
+    axiosClient.get(`/products/slug/${slug}`).then((res) => res.data),
 
   // ADMIN
   getAll: () =>
