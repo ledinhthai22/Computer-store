@@ -1,6 +1,10 @@
 import axiosClient from "./axiosClient";
 
 export const brandService = {
+  usergetAll : () => axiosClient.get("/brands").then((res) => res.data || []),
+  
+  usergetById: (id) => axiosClient.get(`/brands/${id}`).then((res) => res.data),
+
   getAll: () => axiosClient.get("/brands").then((res) => res.data),
 
   getDeleted: () =>

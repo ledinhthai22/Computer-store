@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { productService, handleApiError } from "../../../services/api/productService";
+import { productService, handleApiError } from "../../../services/api/productService"; 
 import ProductCard from "./ProductCard"; 
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 
-export default function TopNew() {
+export default function BestSeller() {
     const [products, setProducts] = useState([]);
     const [startIndex, setStartIndex] = useState(0);
     const ITEMS_PER_VIEW = 5;
@@ -11,7 +11,7 @@ export default function TopNew() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await productService.usergetNewest(20);
+                const data = await productService.usergetBestSelling(20);
 
                 const sortedProducts = data.sort((a, b) => 
                     new Date(b.ngayTao) - new Date(a.ngayTao)
@@ -20,13 +20,12 @@ export default function TopNew() {
                 setProducts(sortedProducts.slice(0, 20));
 
             } catch (error) {
-                handleApiError(error, "Lỗi fetch sản phẩm mới nhất");
+                handleApiError(error, "Lỗi fetch sản phẩm bán nhiều nhất");
                 setProducts([]); 
             }
         };
         fetchProducts();
     }, []);
-
 
     const visibleProducts = products.slice(
         startIndex,
@@ -52,7 +51,7 @@ export default function TopNew() {
             <div className="flex items-center justify-center mb-8">
                 <div className="relative">
                     <h1 className="text-2xl lg:text-3xl font-bold text-[#2f9ea0] uppercase tracking-tight text-center relative z-10 px-4 bg-stone-50">
-                        SẢN PHẨM MỚI NHẤT
+                        SẢN PHẨM BÁN CHẠY NHẤT
                     </h1>
                     <div className="absolute w-full h-[2px] bg-gray-200 top-1/2 left-0 -z-0"></div>
                 </div>

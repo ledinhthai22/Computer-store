@@ -42,9 +42,11 @@ export default function UserDropdown() {
           <Link to="/thong-tin-ca-nhan" className="block px-4 py-2 hover:text-blue-500">
             Chỉnh sửa trang cá nhân
           </Link>
-          <Link to="/quan-ly" className="block px-4 py-2 hover:text-blue-500">
+          {user.vaiTro === "QuanTriVien" && (
+            <Link to="/quan-ly" className="block px-4 py-2 hover:text-blue-500">
             Trang quản trị
           </Link>
+          )}
           <Link to="/don-hang" className="block px-4 py-2 hover:text-blue-500">
             Quản lý đơn hàng
           </Link>
