@@ -11,22 +11,38 @@ import {
   HardDrive,
   Monitor,
   Battery,
-  Smartphone
+  Hd,
+  Airplay,
+  Plug2
 } from "lucide-react";
+
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return "/placeholder.jpg";
+  
+  // Nếu đã là URL đầy đủ thì trả về luôn
+  if (imagePath.startsWith('http')) return imagePath;
+
+  const backendUrl = "https://localhost:7012";
+  
+  // Đảm bảo không bị dư dấu gạch chéo (//)
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  return `${backendUrl}${cleanPath}`.replace(/ /g, '%20');
+};
 
 export default function Details() {
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { id } = useParams();
+  const { slug } = useParams();
   const [quantity, setQuantity] = useState(1);
   
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await productService.usergetId(id);
+        const res = await productService.usergetBySlug(slug);
         
         if (res && res.bienThe && res.bienThe.length > 0) {
           setProduct(res);
@@ -40,7 +56,7 @@ export default function Details() {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   const handleAddToCart = () => {
     if (selectedVariant) {
@@ -155,9 +171,9 @@ export default function Details() {
           <ol className="flex items-center gap-2 text-sm text-gray-600">
             <li><Link to="/" className="hover:text-[#2f9ea0] transition-colors">Trang chủ</Link></li>
             <li><ChevronRight size={16} /></li>
-            <li><Link to="/products" className="hover:text-[#2f9ea0] transition-colors">Sản phẩm</Link></li>
+            <li><Link to="/" className="hover:text-[#2f9ea0] transition-colors">Sản phẩm</Link></li>
             <li><ChevronRight size={16} /></li>
-            <li><span className="text-gray-900 font-medium">{product.tenSanPham}</span></li>
+            <li><Link to={`/chi-tiet-san-pham/${slug}`}><span className="text-gray-900 font-medium">{product.tenSanPham}</span></Link></li>
           </ol>
         </nav>
 
@@ -181,9 +197,13 @@ export default function Details() {
               <div className="relative group">
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-100">
                   <img
-                    src={product.hinhAnh?.[selectedImage] || "/placeholder.jpg"}
+                    src={getImageUrl(product.hinhAnh[selectedImage])}
                     alt={product.tenSanPham}
-                    className="w-full h-96 object-contain transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-96 object-contain"
+                    onError={(e) => {
+                      console.log("Lỗi tải ảnh tại URL:", e.target.src); // Xem URL lỗi thực tế ở console
+                      e.target.src = "https://placehold.co/600x400?text=No+Image";
+                    }}
                   />
                 </div>
                 
@@ -198,7 +218,7 @@ export default function Details() {
               </div>
 
               {/* Thumbnail Images */}
-              <div className="mt-30.5">
+              <div className="mt-30">
                 <div className="flex gap-3 overflow-x-auto pb-2">
                   {product.hinhAnh?.map((img, index) => (
                     <button
@@ -211,7 +231,7 @@ export default function Details() {
                       }`}
                     >
                       <img
-                        src={img}
+                        src={getImageUrl(img)}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       />
@@ -372,7 +392,7 @@ export default function Details() {
               </div>
               
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                <Smartphone className="text-gray-400" size={20} />
+                <Hd className="text-gray-400" size={20} />
                 <div className="flex-1">
                   <div className="text-sm text-gray-500">VGA</div>
                   <div className="font-medium">{selectedVariant.thongSoKyThuat?.loaiXuLyDoHoa || selectedVariant.boXuLyDoHoa}</div>
@@ -385,7 +405,7 @@ export default function Details() {
                   <div className="text-sm text-gray-500">RAM</div>
                   <div className="font-medium">
                     {selectedVariant.thongSoKyThuat?.soKheRam 
-                      ? `${selectedVariant.thongSoKyThuat.soKheRam} khe, ${selectedVariant.ram}`
+                      ? `${selectedVariant.thongSoKyThuat.soKheRam} x ${selectedVariant.ram}`
                       : selectedVariant.ram}
                   </div>
                 </div>
@@ -418,6 +438,21 @@ export default function Details() {
                   <div className="font-medium">{selectedVariant.thongSoKyThuat?.pin || "Thông tin đang cập nhật"}</div>
                 </div>
               </div>
+
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <Airplay className="text-gray-400" size={20} />
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500">Hệ điều hành</div>
+                  <div className="font-medium">{selectedVariant.thongSoKyThuat?.heDieuHanh || "Thông tin đang cập nhật"}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <Plug2 className="text-gray-400" size={20} />
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500">Cổng giao tiếp</div>
+                  <div className="font-medium">{selectedVariant.thongSoKyThuat?.congGiaoTiep || "Thông tin đang cập nhật"}</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -425,10 +460,6 @@ export default function Details() {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold text-gray-900">ĐÁNH GIÁ SẢN PHẨM</h3>
-              <button className="flex items-center gap-2 text-[#2f9ea0] font-medium hover:text-[#25888a]">
-                Xem tất cả
-                <ChevronRight size={16} />
-              </button>
             </div>
             
             <div className="text-center py-8">
@@ -439,7 +470,6 @@ export default function Details() {
               </div>
               <p className="text-sm text-gray-500 mb-8">Đánh giá trung bình: {product.danhGiaTrungBinh || 0}/5</p>
               <button className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2f9ea0] to-[#25888a] text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                <Star size={20} />
                 Viết đánh giá
               </button>
             </div>
