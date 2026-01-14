@@ -2,150 +2,130 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { brandService, handleApiError } from "../../../services/api/brandService";
 import { categoryService } from "../../../services/api/categoryService";
+import { IoClose } from "react-icons/io5";
+
 export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
   useEffect(() => {
     const fetchBrands = async () => {
-      try{
-        const data = await brandService.getAll();
+      try {
+        const data = await brandService.usergetAll();
         setBrand(data);
-      } catch(error){
+      } catch (error) {
         handleApiError(error, "Lỗi khi tải thương hiệu");
         setBrand([]);
       }
     };
     fetchBrands();
   }, []);
-  
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try{
-        const data = await categoryService.getAll();
+      try {
+        const data = await categoryService.usergetAll();
         setCategory(data);
-      } catch(error){
-        handleApiError(error, "Lỗi khi tải thương hiệu");
+      } catch (error) {
+        handleApiError(error, "Lỗi khi tải danh mục");
         setCategory([]);
       }
     };
     fetchCategories();
   }, []);
-  
 
   return (
-    <div className="absolute top-full left-0 z-1000 inline-flex bg-white text-black rounded-md shadow-lg p-6" onMouseLeave={onClose}>
-      <div className="">
-        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Nhu cầu sử dụng</h4>
-        <ul className="space-y-3 text-sm whitespace-nowrap">
-          {categories.map(c => (
-            <li key={c.maDanhMuc}>
-              <Link to={`/san-pham/danh-muc/${c.maDanhMuc}`} className="hover:text-blue-600 transition">
-                {c.tenDanhMuc}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <>
+      {/* 1. LỚP PHỦ (OVERLAY) */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        onClick={onClose}
+      ></div>
 
-      <div className="pl-8">
-        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Thương hiệu</h4>
-        <ul className="space-y-3 text-sm whitespace-nowrap">
-          {brands.map(b => (
-            <li key={b.maThuongHieu}>
-              <Link to={`/san-pham/thuong-hieu/${b.maThuongHieu}`} className="hover:text-blue-600 transition">
-                {b.tenThuongHieu}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div 
+        className="mt-0.5 fixed inset-x-4 top-20 z-50 bg-white text-black rounded-lg shadow-2xl p-4 overflow-y-auto max-h-[80vh] 
+                   lg:absolute lg:inset-auto lg:top-full lg:left-0 lg:p-6 lg:rounded-md lg:shadow-lg lg:overflow-visible
+                   lg:w-max" 
+        onMouseLeave={onClose}
+      >
+        
+        {/* Nút Đóng cho Mobile */}
+        <div className="flex justify-between items-center mb-4 lg:hidden border-b pb-2">
+            <span className="font-bold text-gray-700">Danh mục</span>
+            <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-red-100 text-red-500">
+                <IoClose size={24} />
+            </button>
+        </div>
 
-      <div className="pl-8">
-        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Dòng chip</h4>
-        <ul className="space-y-3 text-sm whitespace-nowrap">
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop Core i3
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop Core i5
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop Core i7
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop Core i9
-              </Link>
-            </li>
-        </ul>
-      </div>
+        {/* EDIT 2: Sử dụng Grid 5 cột (lg:grid-cols-5) thay vì Flex để chia đều khoảng cách */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid lg:grid-cols-5 gap-6 lg:gap-8">
 
-      <div className="pl-8">
-        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Màn hình</h4>
-        <ul className="space-y-3 text-sm whitespace-nowrap">
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop 13 inch
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop 14 inch
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop 15.6 inch
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Laptop 16 inch
-              </Link>
-            </li>
-        </ul>
-      </div>
-      
-      <div className="pl-8">
-        <h4 className="font-semibold mb-3 text-[#2f9ea0] whitespace-nowrap">Phân khúc giá</h4>
-        <ul className="space-y-3 text-sm whitespace-nowrap">
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Dưới 10 triệu
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Từ 10 - 15 triệu
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Từ 15 - 20 triệu
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Từ 20 - 25 triệu
-              </Link>
-            </li>
-            <li>
-              <Link to={`/`} className="hover:text-blue-600 transition">
-                Hơn 25 triệu
-              </Link>
-            </li>
-        </ul>
-      </div>
+            {/* Cột 1: Thương hiệu */}
+            <div className=""> {/* Bỏ min-w-[150px] để grid tự căn chỉnh */}
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Thương hiệu</h4>
+                <ul className="space-y-2 lg:space-y-3 text-sm">
+                    {brands.map(b => (
+                    <li key={b.maThuongHieu}>
+                        <Link to={`/san-pham/thuong-hieu/${b.maThuongHieu}`} onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">
+                        {b.tenThuongHieu}
+                        </Link>
+                    </li>
+                    ))}
+                </ul>
+            </div>
 
-      
-    </div>
+            {/* Cột 2: Nhu cầu */}
+            <div className="">
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Nhu cầu sử dụng</h4>
+                <ul className="space-y-2 lg:space-y-3 text-sm">
+                    {categories.map(c => (
+                    <li key={c.maDanhMuc}>
+                        <Link to={`/san-pham/danh-muc/${c.maDanhMuc}`} onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">
+                        {c.tenDanhMuc}
+                        </Link>
+                    </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Cột 3: Dòng Chip */}
+            <div className="">
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Dòng chip</h4>
+                <ul className="space-y-2 lg:space-y-3 text-sm">
+                    {['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'].map((chip, index) => (
+                        <li key={index}>
+                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">Laptop {chip}</Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Cột 4: Màn hình */}
+             <div className="">
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Màn hình</h4>
+                <ul className="space-y-2 lg:space-y-3 text-sm">
+                    {['13 inch', '14 inch', '15.6 inch', '16 inch'].map((size, index) => (
+                        <li key={index}>
+                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">Laptop {size}</Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Cột 5: Mức giá */}
+            <div className="">
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Khoảng giá</h4>
+                <ul className="space-y-2 lg:space-y-3 text-sm">
+                    {['Dưới 5 triệu', '5 - 10 triệu', '10 - 15 triệu', '15 - 20 triệu', '20 - 25 triệu', '25 - 30 triệu', 'Trên 30 triệu'].map((price, index) => (
+                        <li key={index}>
+                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">{price}</Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+        </div>
+      </div>
+    </>
   );
 }

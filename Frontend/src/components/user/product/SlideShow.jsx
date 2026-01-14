@@ -26,10 +26,10 @@ export default function Slideshow() {
   }, [products]);
 
   if (products.length === 0)
-    return <div className="w-full h-[400px] flex items-center justify-center bg-stone-50 rounded-2xl animate-pulse">Loading...</div>;
+    return <div className="w-full h-[400px] flex items-center justify-center bg-stone-50 animate-pulse">Loading...</div>;
 
   return (
-    <div className="relative w-full mx-auto overflow-hidden shadow-sm h-[350px] lg:h-[450px] rounded-2xl bg-white group border border-stone-100">
+    <div className="relative w-full mx-auto overflow-hidden shadow-sm h-[350px] lg:h-[450px] bg-white group border border-stone-100">
       <Link to={`/products/${products[index].id}`} className="block w-full h-full">
         <img
             src={products[index].thumbnail}

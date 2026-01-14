@@ -246,7 +246,7 @@ export default function Register() {
             Bạn đã có tài khoản?{" "}
             <Link
               className="text-[#2f9ea0] font-bold hover:underline"
-              to="/login"
+              to="/dang-nhap"
             >
               ĐĂNG NHẬP
             </Link>
