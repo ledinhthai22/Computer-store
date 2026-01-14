@@ -1,6 +1,20 @@
 import axiosClient from "./axiosClient";
 
 export const productService = {
+  usergetAll: (params) => axiosClient.get("/products",{params: params}).then((res) => {return res.data}),
+
+  usergetId: (id) => axiosClient.get(`/products/${id}`).then((res) => res.data.danhSach),
+
+  usergetNewest: (soLuong) => axiosClient.get(`/products/newest?soLuong=${soLuong}`).then((res) => res.data),
+
+  usergetBestSelling: (soLuong) => axiosClient.get(`/products/best-selling?soLuong=${soLuong}`).then((res) => res.data),
+
+  usergetByCategory: (maDanhMuc) => axiosClient.get(`/products/category/${maDanhMuc}`).then((res) => res.data.danhSach),
+
+  usergetByBrand: (maThuongHieu) => axiosClient.get(`/products/brand/${maThuongHieu}`).then((res) => res.data.danhSach),
+  
+  usergetBySlug: (slug) => axiosClient.get(`/products/slug/${slug}`).then((res) => res.data.danhSach),
+ 
   getAll: () =>
     axiosClient.get("/admin/products").then((res) => res.data.danhSach),
 

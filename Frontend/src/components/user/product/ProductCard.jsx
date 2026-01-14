@@ -4,29 +4,30 @@ import Wishlist from "../Wishlist";
 import { FaCartPlus } from "react-icons/fa";
 import useAddToCart from "../../../hooks/useAddToCart";
 
+const API_BASE_URL = "https://localhost:7012"; 
+
 export default function ProductCard({ product }) {
+    if (!product) return null;
+
     const { handleAddToCart } = useAddToCart(product);
 
     const getProductImage = () => {
-        if (product.bienThe && product.bienThe.length > 0) {
-            const firstVariant = product.bienThe[0];
-            if (firstVariant.hinhAnh && firstVariant.hinhAnh.length > 0) {
-                const fileName = firstVariant.hinhAnh[0];
-                
-                if (fileName.startsWith('http')) {
-                    return fileName;
-                }
-                return `/images/products/${fileName}`; //wwwroot/images/products/
-            }
+        if (product.anhDaiDien) {
+            return `${API_BASE_URL}/Product/Image/${product.anhDaiDien}`;
         }
+
         return "https://via.placeholder.com/300x300?text=No+Image";
     };
 
     const imageUrl = getProductImage();
 
-    const giaGoc = product.giaCoBan || 0;
-    const phanTramGiam = product.khuyenMai || 0;
-    const giaSauGiam = giaGoc - (giaGoc * phanTramGiam / 100);
+    const giaGoc = product.giaNhoNhat || 0;
+    const giaHienTai = product.giaKhuyenMaiNhoNhat || giaGoc; 
+    
+    let phanTramGiam = 0;
+    if (giaGoc > giaHienTai && giaGoc > 0) {
+        phanTramGiam = Math.round(((giaGoc - giaHienTai) / giaGoc) * 100);
+    }
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -36,10 +37,12 @@ export default function ProductCard({ product }) {
 
     return (
         <div className="relative group w-full h-full">
+            {/* Nút yêu thích */}
             <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Wishlist product={product} />
             </div>
 
+            {/* Tem giảm giá */}
             {phanTramGiam > 0 && (
                 <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
                     -{phanTramGiam}%
@@ -54,8 +57,10 @@ export default function ProductCard({ product }) {
                             alt={product.tenSanPham} 
                             className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
                             onError={(e) => {
+                                // Xử lý khi ảnh lỗi
                                 e.target.onerror = null;
-                                e.target.src = "https://via.placeholder.com/300?text=No+Image";
+                                // console.warn("Lỗi tải ảnh:", imageUrl); 
+                                e.target.src = "https://via.placeholder.com/300?text=Not+Found";
                             }}
                         />
                     </div>
@@ -80,13 +85,13 @@ export default function ProductCard({ product }) {
                                 </span>
                             )}
                             <span className="text-[#2f9ea0] font-bold text-base lg:text-lg">
-                                {formatCurrency(giaSauGiam)}
+                                {formatCurrency(giaHienTai)}
                             </span>
                         </div>
 
                         <button 
                             onClick={handleAddToCart} 
-                            title="Thêm vào giỏ hàng" 
+                            title="Thêm vào giỏ"
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#2f9ea0] hover:text-white transition-all duration-300 shadow-sm cursor-pointer"
                         >
                             <FaCartPlus size={14} />

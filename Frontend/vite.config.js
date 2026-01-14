@@ -13,7 +13,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: false, // Bỏ qua lỗi SSL tự ký (quan trọng vì backend là https)
       },
-      '/images': {
+      '/Product': {
         target: 'https://localhost:7012', // Trỏ về backend
         changeOrigin: true,
         secure: false,
