@@ -1,6 +1,26 @@
 import axiosClient from "./axiosClient";
 
 export const productService = {
+  // USER
+  getByIdUser: async (id) => {
+    console.log("Đang gọi API với id:", id);
+    console.log(
+      "URL đầy đủ:",
+      `${axiosClient.defaults.baseURL}/products/${id}`
+    );
+
+    try {
+      const response = await axiosClient.get(`/products/${id}`);
+      console.log("API Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("API Error:", error);
+      console.error("Error URL:", error.config?.url);
+      throw error;
+    }
+  },
+
+  // ADMIN
   getAll: () =>
     axiosClient.get("/admin/products").then((res) => res.data.danhSach),
 
