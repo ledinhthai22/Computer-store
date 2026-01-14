@@ -442,31 +442,6 @@ export default function Details() {
           </div>
         </div>
        </div>
-      {/* Custom CSS for scrollbar */}
-      <style jsx>{`
-        /* Hide number input arrows */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-        input[type="number"] {
-          -moz-appearance: textfield;
-        }
-        
-        /* Custom scrollbar for thumbnail */
-        .overflow-x-auto::-webkit-scrollbar {
-          height: 4px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-          background: #2f9ea0;
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }
