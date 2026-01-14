@@ -1,6 +1,7 @@
 import axiosClient from "./axiosClient";
 
 export const productService = {
+  // USER
   usergetAll: (params) => axiosClient.get("/products",{params: params}).then((res) => {return res.data}),
 
   usergetId: (id) => axiosClient.get(`/products/${id}`).then((res) => res.data.danhSach),
@@ -14,7 +15,8 @@ export const productService = {
   usergetByBrand: (maThuongHieu) => axiosClient.get(`/products/brand/${maThuongHieu}`).then((res) => res.data.danhSach),
   
   usergetBySlug: (slug) => axiosClient.get(`/products/slug/${slug}`).then((res) => res.data.danhSach),
- 
+
+  // ADMIN
   getAll: () =>
     axiosClient.get("/admin/products").then((res) => res.data.danhSach),
 
