@@ -140,6 +140,7 @@ namespace Backend
                 app.UseCors("AllowReact");
 
             }
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 

@@ -14,7 +14,7 @@ namespace Backend.DTO.Product
         public int? MaDanhMuc { get; set; }
 
         public int? MaThuongHieu { get; set; }
-
+        public int SoLuongTon { get; set; }
         public List<IFormFile>? HinhAnhMoi { get; set; }
 
         public List<int>? HinhAnhXoa { get; set; }

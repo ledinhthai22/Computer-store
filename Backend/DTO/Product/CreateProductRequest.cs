@@ -13,7 +13,7 @@ namespace Backend.DTO.Product
 
         [Required(ErrorMessage = "Mã thương hiệu không được để trống")]
         public int MaThuongHieu { get; set; }
-
+        public int SoLuongTon { get; set; } 
         public List<IFormFile>? HinhAnh { get; set; }
 
         [Required(ErrorMessage = "Phải có ít nhất 1 biến thể")]

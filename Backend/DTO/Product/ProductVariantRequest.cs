@@ -22,9 +22,7 @@ namespace Backend.DTO.Product
 
         [Range(0, int.MaxValue)]
         public int SoLuongTon { get; set; }
-
-        // 🔥 1–1
         [Required]
-        public ProductSpecificationFilterRequest ThongSoKyThuat { get; set; } = null!;
+        public ProductSpecificationRequest ThongSoKyThuat { get; set; } = null!;
     }
 }

@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
 export const brandService = {
-  getAll: () => axiosClient.get("/brands").then((res) => res.data),
+  getAll: () => axiosClient.get("/admin/brands").then((res) => res.data),
 
   getDeleted: () => axiosClient.get("/admin/brands/deleted").then((res) => res.data),
 
