@@ -43,7 +43,7 @@ function App() {
         <Route element={<UserLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/san-pham" element={<UserProduct />} />
-          <Route path="/san-pham/:slug" element={<Details />} />
+          <Route path="/chi-tiet-san-pham/:slug" element={<Details />} />
           <Route path="/san-pham/danh-muc/:id" element={<CategoryProduct />} />
           <Route path="/san-pham/thuong-hieu/:id" element={<BrandProduct />} />
           <Route path="/about" element={<About />} />

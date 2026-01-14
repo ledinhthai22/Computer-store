@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { productService } from "../../../services/api/productService";
+import useAddToCart from "../../../hooks/useAddToCart";
 import { 
   ShoppingCart, 
   Star, 
@@ -16,19 +17,7 @@ import {
   Plug2
 } from "lucide-react";
 
-const getImageUrl = (imagePath) => {
-  if (!imagePath) return "/placeholder.jpg";
-  
-  // Nếu đã là URL đầy đủ thì trả về luôn
-  if (imagePath.startsWith('http')) return imagePath;
-
-  const backendUrl = "https://localhost:7012";
-  
-  // Đảm bảo không bị dư dấu gạch chéo (//)
-  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  
-  return `${backendUrl}${cleanPath}`.replace(/ /g, '%20');
-};
+const API_BASE_URL = "https://localhost:7012"; 
 
 export default function Details() {
   const [product, setProduct] = useState(null);
@@ -37,7 +26,9 @@ export default function Details() {
   const [loading, setLoading] = useState(true);
   const { slug } = useParams();
   const [quantity, setQuantity] = useState(1);
-  
+
+  const { handleAddToCart } = useAddToCart(product);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -57,29 +48,6 @@ export default function Details() {
     };
     fetchProduct();
   }, [slug]);
-
-  const handleAddToCart = () => {
-    if (selectedVariant) {
-      const cartItem = {
-        maSanPham: product.maSanPham,
-        maBTSP: selectedVariant.maBTSP,
-        tenSanPham: product.tenSanPham,
-        tenBienThe: selectedVariant.tenBienThe,
-        giaBan: selectedVariant.giaBan,
-        giaKhuyenMai: selectedVariant.giaKhuyenMai,
-        hinhAnh: product.hinhAnh?.[0] || "",
-        quantity: quantity
-      };
-      console.log("Thêm vào giỏ:", cartItem);
-      
-      // Thêm animation feedback
-      const btn = document.querySelector('.add-to-cart-btn');
-      if (btn) {
-        btn.classList.add('animate-pulse');
-        setTimeout(() => btn.classList.remove('animate-pulse'), 300);
-      }
-    }
-  };
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
@@ -197,11 +165,13 @@ export default function Details() {
               <div className="relative group">
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-100">
                   <img
-                    src={getImageUrl(product.hinhAnh[selectedImage])}
+                    // Sử dụng selectedImage và nối URL
+                    src={product.hinhAnh[selectedImage]?.duongDan?.startsWith('http') 
+                          ? product.hinhAnh[selectedImage]?.duongDan 
+                          : `${API_BASE_URL}${product.hinhAnh[selectedImage]?.duongDan}`}
                     alt={product.tenSanPham}
                     className="w-full h-96 object-contain"
                     onError={(e) => {
-                      console.log("Lỗi tải ảnh tại URL:", e.target.src); // Xem URL lỗi thực tế ở console
                       e.target.src = "https://placehold.co/600x400?text=No+Image";
                     }}
                   />
@@ -224,16 +194,12 @@ export default function Details() {
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 overflow-hidden transition-all duration-300 ${
-                        selectedImage === index 
-                          ? "border-[#2f9ea0] shadow-lg scale-105" 
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      className={`... ${selectedImage === index ? "border-[#2f9ea0] cursor-pointer ..." : "... cursor-pointer"}`} 
                     >
                       <img
-                        src={getImageUrl(img)}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        src={img.duongDan?.startsWith('http') ? img.duongDan : `${API_BASE_URL}${img.duongDan}`}
+                        alt={img.maHinhAnh}
+                        className="w-full h-full object-cover"
                       />
                     </button>
                   ))}
@@ -274,7 +240,7 @@ export default function Details() {
                   <button
                     key={variant.maBTSP}
                     onClick={() => setSelectedVariant(variant)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
                       selectedVariant?.maBTSP === variant.maBTSP
                         ? "border-[#2f9ea0] bg-gradient-to-r from-[#2f9ea0]/10 to-transparent shadow-md"
                         : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
@@ -324,7 +290,7 @@ export default function Details() {
                   <div className="flex items-center border border-gray-300 rounded-lg">
                     <button
                       onClick={decreaseQuantity}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
                     >
                       −
                     </button>
@@ -337,7 +303,7 @@ export default function Details() {
                     />
                     <button
                       onClick={increaseQuantity}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
                     >
                       +
                     </button>
@@ -353,7 +319,7 @@ export default function Details() {
                 <button 
                   onClick={handleAddToCart}
                   disabled={!selectedVariant.trangThai || selectedVariant.soLuongTon <= 0}
-                  className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3 add-to-cart-btn ${
+                  className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3 add-to-cart-btn cursor-pointer ${
                     selectedVariant.trangThai && selectedVariant.soLuongTon > 0
                       ? "bg-gradient-to-r from-[#2f9ea0] to-[#25888a] hover:from-[#25888a] hover:to-[#1d6e70] text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -476,31 +442,6 @@ export default function Details() {
           </div>
         </div>
        </div>
-      {/* Custom CSS for scrollbar */}
-      <style jsx>{`
-        /* Hide number input arrows */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-        input[type="number"] {
-          -moz-appearance: textfield;
-        }
-        
-        /* Custom scrollbar for thumbnail */
-        .overflow-x-auto::-webkit-scrollbar {
-          height: 4px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-          background: #2f9ea0;
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }
