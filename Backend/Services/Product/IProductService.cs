@@ -1,21 +1,18 @@
-// ===================================
-// IProductService.cs
-// ===================================
 using Backend.DTO.Product;
 
 namespace Backend.Services.Product
 {
     public interface IProductService
     {
-        // ========== ADMIN - CRUD ==========
+        // admin
         Task<ProductResult?> GetByIdAsync(int id);
-        Task<ProductListResponse> GetAdminProductListAsync(AdminProductFilterRequest filter);
+        Task<List<AdminListProductItem>> GetAdminProductListAsync();
         Task<ProductResult?> CreateAsync(CreateProductRequest request);
         Task<ProductResult?> UpdateAsync(int id, UpdateProductRequest request);
         Task<bool> DeleteAsync(int id);
         Task<bool> RestoreAsync(int id);
 
-        // ========== USER - PUBLIC ==========
+        //user
         Task<ProductResult?> GetByIdForUserAsync(int id);
         Task<ProductResult?> GetBySlugAsync(string slug);
         Task<ProductListResponse> GetProductListAsync(ProductFilterRequest filter);

@@ -2,7 +2,7 @@
 
 namespace Ecommerce.DTO.Product
 {
-    public class ProductSpecificationFilterRequest
+    public class ProductSpecificationRequest
     {
         [MaxLength(50)]
         public string? KichThuocManHinh { get; set; }

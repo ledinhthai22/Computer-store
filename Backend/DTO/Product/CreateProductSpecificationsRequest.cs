@@ -10,6 +10,8 @@ namespace Backend.DTO.Product
     {
         [MaxLength(50)]
         public string? KichThuocManHinh { get; set; }
+        [MaxLength(50)]
+        public string? DungLuongRam { get; set; }
 
         [MaxLength(50)]
         public string? SoKheRam { get; set; }

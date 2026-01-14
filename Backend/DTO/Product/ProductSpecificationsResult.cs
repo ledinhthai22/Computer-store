@@ -8,6 +8,7 @@ namespace Backend.DTO.Product
     public class ProductSpecificationsResult
     {
         public string? KichThuocManHinh { get; set; }
+        public string? DungLuongRam { get; set; }
         public string? SoKheRam { get; set; }
         public string? OCung { get; set; }
         public string? Pin { get; set; }

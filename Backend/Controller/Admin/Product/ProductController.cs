@@ -18,9 +18,9 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] AdminProductFilterRequest filter)
+        public async Task<IActionResult> GetList()
         {
-            var result = await _productService.GetAdminProductListAsync(filter);
+            var result = await _productService.GetAdminProductListAsync();
             return Ok(result);
         }
 

@@ -1,23 +1,23 @@
 import { createContext, useState, useContext, useEffect, useCallback } from "react";
-import axiosClient from "../services/api/axiosClient"; 
+import axiosClient from "../services/api/axiosClient";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {  
+  const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const login = async (email, matKhau) => {
     try {
-      const response = await axiosClient.post("/auth/login", { 
-        email, 
-        matKhau 
+      const response = await axiosClient.post("/auth/login", {
+        email,
+        matKhau
       });
 
       const data = response.data;
-      
+
       const userData = {
         hoTen: data.hoTen,
         vaiTro: data.vaiTro,
@@ -44,11 +44,11 @@ export function AuthProvider({ children }) {
       });
 
       const loginResult = await login(email, matKhau);
-      
+
       if (loginResult.success) {
-         return { success: true };
+        return { success: true };
       } else {
-         return { success: false, message: "Đăng ký thành công nhưng tự động đăng nhập thất bại." };
+        return { success: false, message: "Đăng ký thành công nhưng tự động đăng nhập thất bại." };
       }
 
     } catch (error) {
@@ -78,16 +78,20 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!user) return;
-
+    let isSubscribed = true;
     const verifySession = async () => {
       try {
         // Gọi API để gia hạn token (Refresh Token gửi qua Cookie)
         await axiosClient.post("/auth/refresh-token");
-        console.log("Phiên đăng nhập hợp lệ. Đã gia hạn token.");
+        if (isSubscribed) {
+          console.log("Phiên đăng nhập hợp lệ. Đã gia hạn token.");
+        }
       } catch (error) {
         // Nếu lỗi (401/403) nghĩa là Refresh Token cũng đã hết hạn (do tắt máy quá lâu)
-        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...", error);
-        await logout(); // Tự động đăng xuất
+        if (isSubscribed) {
+        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...",error);
+        await logout();
+      } // Tự động đăng xuất
       }
     };
 

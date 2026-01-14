@@ -9,6 +9,7 @@ namespace Backend.Models
         public int MaThongSo { get; set; }
 
         public string KichThuocManHinh { get; set; } = null!;
+        public string DungLuongRam { get; set; } = null!;
         public string SoKheRam { get; set; } = null!;
         public string OCung { get; set; } = null!;
         public string Pin { get; set; } = null!;
@@ -18,7 +19,6 @@ namespace Backend.Models
         public string LoaiXuLyDoHoa { get; set; } = null!;
         public string CongGiaoTiep { get; set; } = null!;
 
-        // 🔑 FK 1–1 tới Biến Thể
         public int MaBienThe { get; set; }
 
         [ForeignKey(nameof(MaBienThe))]

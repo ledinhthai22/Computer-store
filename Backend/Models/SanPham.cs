@@ -18,7 +18,7 @@ namespace Backend.Models
         public string Slug { get; set; } = null!;
 
         public double DanhGiaTrungBinh { get; set; }
-
+        public int SoLuongTon { get; set; }
         public int LuotXem { get; set; }
         public int LuotMua { get; set; }
 
