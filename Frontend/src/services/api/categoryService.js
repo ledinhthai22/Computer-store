@@ -1,6 +1,10 @@
 import axiosClient from "./axiosClient";
 
 export const categoryService = {
+  usergetAll:()=> axiosClient.get("/categories").then((res) => res.data || []),
+  
+  usergetById: (id) => axiosClient.get(`/categories/${id}`).then((res) => res.data),
+
   getAll: () => axiosClient.get("/admin/categories").then((res) => res.data),
 
   getDeleted: () =>

@@ -2,23 +2,19 @@ import axiosClient from "./axiosClient";
 
 export const productService = {
   // USER
-  getByIdUser: async (id) => {
-    console.log("Đang gọi API với id:", id);
-    console.log(
-      "URL đầy đủ:",
-      `${axiosClient.defaults.baseURL}/products/${id}`
-    );
+  usergetAll: (params) => axiosClient.get("/products",{params: params}).then((res) => {return res.data}),
 
-    try {
-      const response = await axiosClient.get(`/products/${id}`);
-      console.log("API Response:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("API Error:", error);
-      console.error("Error URL:", error.config?.url);
-      throw error;
-    }
-  },
+  usergetId: (id) => axiosClient.get(`/products/${id}`).then((res) => res.data.danhSach),
+
+  usergetNewest: (soLuong) => axiosClient.get(`/products/newest?soLuong=${soLuong}`).then((res) => res.data),
+
+  usergetBestSelling: (soLuong) => axiosClient.get(`/products/best-selling?soLuong=${soLuong}`).then((res) => res.data),
+
+  usergetByCategory: (maDanhMuc) => axiosClient.get(`/products/category/${maDanhMuc}`).then((res) => res.data.danhSach),
+
+  usergetByBrand: (maThuongHieu) => axiosClient.get(`/products/brand/${maThuongHieu}`).then((res) => res.data.danhSach),
+  
+  usergetBySlug: (slug) => axiosClient.get(`/products/slug/${slug}`).then((res) => res.data.danhSach),
 
   // ADMIN
   getAll: () =>

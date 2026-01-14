@@ -1,6 +1,8 @@
 import axiosClient from "./axiosClient";
 
 export const contactService = {
+  userSendMessage: (data) => axiosClient.post("/contacts", data).then((res) => res.data),
+  
   getAll: () => axiosClient.get("/admin/contacts").then((res) => res.data),
 
   getAllUnread: () =>
