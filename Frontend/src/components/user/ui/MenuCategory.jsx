@@ -114,7 +114,7 @@ export default function MenuCategory({ onClose }) {
 
             {/* Cột 5: Mức giá */}
             <div className="">
-                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Mức giá</h4>
+                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Khoảng giá</h4>
                 <ul className="space-y-2 lg:space-y-3 text-sm">
                     {['Dưới 5 triệu', '5 - 10 triệu', '10 - 15 triệu', '15 - 20 triệu', '20 - 25 triệu', '25 - 30 triệu', 'Trên 30 triệu'].map((price, index) => (
                         <li key={index}>
