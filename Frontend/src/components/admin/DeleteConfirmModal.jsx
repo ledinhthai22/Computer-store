@@ -24,9 +24,9 @@ const ConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }) => {
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition-colors disabled:bg-red-300 flex items-center gap-2"
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md transition-colors disabled:bg-amber-300 flex items-center gap-2"
           >
-            {isLoading ? 'Đang xử lý...' : 'Xác nhận xóa'}
+            {isLoading ? 'Đang xử lý...' : 'Xác nhận'}
           </button>
         </div>
       </div>
@@ -34,4 +34,4 @@ const ConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }) => {
   );
 };
 
-export default ConfirmModal;
+export default ConfirmModal

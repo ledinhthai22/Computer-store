@@ -17,10 +17,11 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${disabled
-        ? 'bg-gray-50 text-gray-400 border-transparent'
-        : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
-        }`}
+      className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+        disabled
+          ? 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'
+          : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+      }`}
     />
   </div>
 );
@@ -110,7 +111,10 @@ const ProductDetail = () => {
     fetchData();
   }, [maSanPham]);
 
-  const showToast = (message, type = 'success') => setToast({ show: true, message, type });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   const addVariant = () => {
     const newId = `new-${Date.now()}`;
@@ -230,10 +234,8 @@ const ProductDetail = () => {
       const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
       formData.append('SoLuongTon', totalStock);
 
-      // Xử lý ảnh xóa
       deletedImageIds.forEach(id => formData.append('HinhAnhXoa', id));
 
-      // Xử lý ảnh chính
       const mainImage = images.find(i => i.anhChinh);
 
       if (mainImage?.isNew) {
@@ -243,16 +245,13 @@ const ProductDetail = () => {
         formData.append('AnhMoiDauTienLaAnhChinh', 'false');
       }
 
-      // Upload ảnh mới
       const newImages = images.filter(img => img.isNew && img.file);
       newImages.forEach(img => {
         formData.append('HinhAnhMoi', img.file);
       });
 
-      // Xử lý biến thể xóa
       deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
 
-      // Xử lý biến thể
       variants.forEach((v, i) => {
         if (Number.isInteger(v.maBTSP) && v.maBTSP > 0) {
           formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
@@ -319,7 +318,6 @@ const ProductDetail = () => {
 
       setIsEditing(false);
 
-      // Refetch để đảm bảo data mới nhất
       setTimeout(async () => {
         try {
           const refreshed = await productService.getDetailProduct(maSanPham);
@@ -331,10 +329,7 @@ const ProductDetail = () => {
             setImages(formatted);
           }
         } catch (error) {
-          showToast(
-            "Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"),
-            "error"
-          );
+          showToast("Lỗi tải lại dữ liệu", error);
         }
       }, 800);
 
@@ -364,419 +359,435 @@ const ProductDetail = () => {
   };
 
   if (loading && !isEditing) {
-    return <div className="p-20 text-center font-medium text-gray-500 animate-pulse">Đang tải dữ liệu sản phẩm...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
-  const mainImage = images.find(img => img.anhChinh === true) || images[0];
+  const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-24 bg-gray-50/50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-semibold transition-colors cursor-pointer group"
-        >
-          <div className="p-2 rounded-lg group-hover:bg-blue-50">
-            <ArrowLeft size={20} />
-          </div>
-          Quay lại
-        </button>
-        <div className="flex gap-3 w-full md:w-auto">
-          {!isEditing ? (
-            <>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all cursor-pointer"
-              >
-                <Edit3 size={18} /> Chỉnh sửa
-              </button>
-              <button
-                onClick={() => setIsConfirmDeleteOpen(true)}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all cursor-pointer"
-              >
-                <Trash2 size={18} /> Xóa
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 md:flex-none px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all cursor-pointer"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleUpdateClick}
-                disabled={isUpdating}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save size={18} /> {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
 
-      {/* Grid chính */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Phần ảnh */}
-        <section className="lg:col-span-5 space-y-4">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <h3 className="text-sm font-black text-gray-400 uppercase mb-4 tracking-widest">Hình ảnh sản phẩm</h3>
-
-            {/* Ảnh chính */}
-            <div className="relative aspect-square w-full border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50 flex flex-col items-center justify-center overflow-hidden group">
-              {mainImage ? (
-                <>
-                  <img
-                    src={mainImage.duongDan}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    alt="Ảnh chính"
-                  />
-                  {isEditing && (
-                    <button
-                      onClick={() => removeImage(images.findIndex(img => img === mainImage))}
-                      className="absolute top-4 right-4 p-2 bg-white/90 text-red-500 rounded-full shadow-xl hover:bg-red-500 hover:text-white transition-all z-10"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div className="text-center text-gray-400 p-10">
-                  <Camera size={48} className="mx-auto mb-4 opacity-20" />
-                  <p className="text-sm font-medium">Chưa có ảnh chính</p>
-                  {isEditing && <p className="text-xs mt-2">Nhấn vào đây để upload ảnh chính mới</p>}
-                </div>
-              )}
-
-              {isEditing && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                  onChange={(e) => handleImageUpload(e, true)}
-                />
-              )}
+        {/* Header giống AddProduct */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate(-1)} 
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                <ArrowLeft size={20} className="text-gray-700" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Chi Tiết Sản Phẩm</h1>
+                <p className="text-sm text-gray-500 mt-0.5">Mã sản phẩm: {maSanPham}</p>
+              </div>
             </div>
 
-            {/* Ảnh phụ */}
-            <div className="flex flex-wrap gap-3 mt-4">
-              {images
-                .filter(img => img !== mainImage && !img.anhChinh)
-                .sort((a, b) => (a.thuTuAnh || 0) - (b.thuTuAnh || 0))
-                .map((img, idx) => (
-                  <div
-                    key={img.maHinhAnh || img.duongDan || `temp-${idx}`}
-                    className="relative w-20 h-20 rounded-2xl border border-gray-100 overflow-hidden group shadow-sm"
+            <div className="flex gap-3">
+              {!isEditing ? (
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-sm"
+                  >
+                    <Edit3 size={18} /> Chỉnh sửa
+                  </button>
+                  <button
+                    onClick={() => setIsConfirmDeleteOpen(true)}
+                    className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-sm"
+                  >
+                    <Trash2 size={18} /> Xóa
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-all"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={handleUpdateClick}
+                    disabled={isUpdating}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
+                  >
+                    {isUpdating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Đang lưu...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} /> Lưu thay đổi
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Nội dung chính */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Product Images */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ImageIcon size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Hình Ảnh Sản Phẩm</h2>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                {images.map((img, index) => (
+                  <div 
+                    key={index} 
+                    className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group"
                   >
                     <img
                       src={img.duongDan}
+                      alt={`Product image ${index + 1}`}
                       className="w-full h-full object-cover"
-                      alt={`Ảnh phụ ${idx + 1}`}
                     />
+                    {index === 0 && (
+                      <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
+                        Ảnh chính
+                      </div>
+                    )}
                     {isEditing && (
                       <button
-                        onClick={() => removeImage(images.findIndex(i => i === img))}
-                        className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       >
-                        <X size={20} />
+                        <X size={14} />
                       </button>
                     )}
                   </div>
                 ))}
 
-              {isEditing && (
-                <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50 cursor-pointer hover:border-blue-400 hover:text-blue-500 transition-all">
-                  <Plus size={24} />
-                  <span className="text-xs mt-1 text-gray-500">Thêm ảnh phụ</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageUpload(e, false)}
-                    multiple
-                  />
-                </label>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Thông tin chính */}
-        <section className="lg:col-span-7 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-            <div className="w-2 h-8 bg-blue-600 rounded-full"></div>
-            THÔNG TIN CHÍNH
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <InputField
-                label="Tên sản phẩm"
-                value={basicInfo.tenSanPham}
-                onChange={(v) => setBasicInfo({ ...basicInfo, tenSanPham: v })}
-                disabled={!isEditing}
-                placeholder="Nhập tên sản phẩm..."
-              />
-            </div>
-            <InputField
-              label="Đường dẫn (Slug)"
-              value={basicInfo.slug}
-              onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
-              disabled={true}
-            />
-            <InputField
-              label="Tổng kho dự kiến"
-              type="number"
-              value={basicInfo.soLuongTon}
-              disabled={true}
-            />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Danh mục</label>
-              <div className="relative">
-                <select
-                  disabled={!isEditing}
-                  value={basicInfo.maDanhMuc}
-                  onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
-                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
-                    : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
-                    }`}
-                >
-                  <option value="" disabled className="text-gray-400">
-                    Chọn danh mục
-                  </option>
-                  {categories.map((cat) => (
-                    <option key={cat.maDanhMuc} value={String(cat.maDanhMuc)}>
-                      {cat.tenDanhMuc}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown
-                    size={18}
-                    className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Thương hiệu</label>
-              <div className="relative">
-                <select
-                  disabled={!isEditing}
-                  value={basicInfo.maThuongHieu}
-                  onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
-                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
-                    : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
-                    }`}
-                >
-                  <option value="" disabled className="text-gray-400">
-                    Chọn thương hiệu
-                  </option>
-                  {brands.map((brand) => (
-                    <option key={brand.maThuongHieu} value={String(brand.maThuongHieu)}>
-                      {brand.tenThuongHieu}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown
-                    size={18}
-                    className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Biến thể */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-            <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
-            BIẾN THỂ VÀ THÔNG SỐ KỸ THUẬT
-          </h2>
-          {isEditing && (
-            <button
-              type="button"
-              onClick={addVariant}
-              className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all cursor-pointer"
-            >
-              <Plus size={18} /> Thêm phiên bản
-            </button>
-          )}
-        </div>
-
-        <div className="p-8 space-y-6 max-h-[1000px] overflow-y-auto">
-          {variants.map((v, index) => {
-            const currentId = v.maBTSP || v.id;
-            const isOpen = openSpecs[currentId];
-            return (
-              <div
-                key={currentId}
-                className={`rounded-3xl border transition-all duration-300 ${isOpen ? 'border-indigo-200 bg-indigo-50/10 shadow-md' : 'border-gray-100 bg-white shadow-sm'
-                  }`}
-              >
-                <div
-                  className="p-5 flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSpecs(currentId)}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full font-black text-sm">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <h3 className="font-bold text-gray-800">{v.tenBienThe || "Tên phiên bản chưa đặt"}</h3>
-                      <p className="text-xs text-gray-500">
-                        {v.mauSac || 'Chưa chọn màu'} • {v.ram || '0GB'} RAM • {v.oCung || 'Chưa rõ'} SSD
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right hidden md:block">
-                      <p className="text-sm font-bold text-blue-600">{(v.giaBan || 0).toLocaleString()}đ</p>
-                      <p className="text-xs text-gray-400">Kho: {v.soLuongTon || 0}</p>
-                    </div>
-                    {isEditing && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeVariant(currentId);
-                        }}
-                        className="p-2 text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    )}
-                    {isOpen ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
-                  </div>
-                </div>
-
-                {isOpen && (
-                  <div className="p-6 pt-0 space-y-8 animate-in fade-in duration-300">
-                    <div className="h-px bg-gray-100 w-full"></div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                      <div className="md:col-span-2">
-                        <InputField
-                          label="Tên biến thể"
-                          value={v.tenBienThe}
-                          onChange={(val) => updateVariant(currentId, 'tenBienThe', val)}
-                          disabled={!isEditing}
-                          placeholder="VD: MacBook Air M2 8GB/256GB"
-                        />
-                      </div>
-                      <InputField
-                        label="Giá bán (VNĐ)"
-                        type="number"
-                        value={v.giaBan}
-                        onChange={(val) => updateVariant(currentId, 'giaBan', Number(val))}
-                        disabled={!isEditing}
-                      />
-                      <InputField
-                        label="Giá KM (VNĐ)"
-                        type="number"
-                        value={v.giaKhuyenMai}
-                        onChange={(val) => updateVariant(currentId, 'giaKhuyenMai', Number(val))}
-                        disabled={!isEditing}
-                      />
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl border border-gray-100 space-y-6 shadow-inner">
-                      <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest">Thông số phần cứng</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <InputField
-                          label="Màu sắc"
-                          value={v.mauSac}
-                          onChange={(val) => updateVariant(currentId, 'mauSac', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Dung lượng RAM"
-                          value={v.ram}
-                          onChange={(val) => updateVariant(currentId, 'ram', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Dung lượng Ổ cứng"
-                          value={v.oCung}
-                          onChange={(val) => updateVariant(currentId, 'oCung', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Số lượng tồn kho"
-                          type="number"
-                          value={v.soLuongTon}
-                          onChange={(val) => updateVariant(currentId, 'soLuongTon', Number(val))}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="CPU (Bộ vi xử lý)"
-                          value={v.boXuLyTrungTam}
-                          onChange={(val) => updateVariant(currentId, 'boXuLyTrungTam', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="GPU (Card đồ họa)"
-                          value={v.boXuLyDoHoa}
-                          onChange={(val) => updateVariant(currentId, 'boXuLyDoHoa', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Kích thước màn hình"
-                          value={v.thongSoKyThuat?.kichThuocManHinh}
-                          onChange={(val) => updateVariantSpec(currentId, 'kichThuocManHinh', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Độ phân giải"
-                          value={v.thongSoKyThuat?.doPhanGiaiManHinh}
-                          onChange={(val) => updateVariantSpec(currentId, 'doPhanGiaiManHinh', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Hệ điều hành"
-                          value={v.thongSoKyThuat?.heDieuHanh}
-                          onChange={(val) => updateVariantSpec(currentId, 'heDieuHanh', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Dung lượng PIN"
-                          value={v.thongSoKyThuat?.pin}
-                          onChange={(val) => updateVariantSpec(currentId, 'pin', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Số khe RAM"
-                          value={v.thongSoKyThuat?.soKheRam}
-                          onChange={(val) => updateVariantSpec(currentId, 'soKheRam', val)}
-                          disabled={!isEditing}
-                        />
-                        <InputField
-                          label="Cổng giao tiếp"
-                          value={v.thongSoKyThuat?.congGiaoTiep}
-                          onChange={(val) => updateVariantSpec(currentId, 'congGiaoTiep', val)}
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                {isEditing && (
+                  <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                    <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2" />
+                    <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium">Thêm ảnh</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                    />
+                  </label>
                 )}
               </div>
-            );
-          })}
-        </div>
-      </section>
+            </div>
 
-      {/* Toast & Modals */}
-      {toast.show && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />}
+            {/* Basic Info */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Package size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Thông Tin Cơ Bản</h2>
+              </div>
+
+              <div className="space-y-4">
+                <InputField
+                  label="Tên Sản Phẩm *"
+                  value={basicInfo.tenSanPham}
+                  onChange={(v) => setBasicInfo({ ...basicInfo, tenSanPham: v })}
+                  disabled={!isEditing}
+                  placeholder="VD: Dell XPS 15 9520"
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Danh Mục *</label>
+                    <div className="relative">
+                      <select
+                        value={basicInfo.maDanhMuc}
+                        onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all appearance-none pr-10 ${
+                          !isEditing
+                            ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
+                            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                        }`}
+                      >
+                        <option value="">Chọn danh mục</option>
+                        {categories.map(cat => (
+                          <option key={cat.maDanhMuc} value={String(cat.maDanhMuc)}>
+                            {cat.tenDanhMuc}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Thương Hiệu *</label>
+                    <div className="relative">
+                      <select
+                        value={basicInfo.maThuongHieu}
+                        onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all appearance-none pr-10 ${
+                          !isEditing
+                            ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
+                            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                        }`}
+                      >
+                        <option value="">Chọn thương hiệu</option>
+                        {brands.map(brand => (
+                          <option key={brand.maThuongHieu} value={String(brand.maThuongHieu)}>
+                            {brand.tenThuongHieu}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <InputField
+                  label="Slug"
+                  value={basicInfo.slug}
+                  onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
+                  disabled={true}
+                />
+              </div>
+            </div>
+
+            {/* Variants Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Settings size={20} className="text-blue-600" />
+                  <h2 className="text-lg font-bold text-gray-900">Biến Thể Sản Phẩm</h2>
+                </div>
+                {isEditing && (
+                  <button
+                    onClick={addVariant}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all flex items-center gap-2 shadow-sm"
+                  >
+                    <Plus size={16} /> Thêm biến thể
+                  </button>
+                )}
+              </div>
+
+              {variants.length === 0 && (
+                <p className="text-center text-gray-500 py-8">Chưa có biến thể nào</p>
+              )}
+
+              {variants.map((variant, index) => {
+                const id = variant.maBTSP || variant.id;
+                const isOpen = openSpecs[id];
+
+                return (
+                  <div 
+                    key={id} 
+                    className={`border border-gray-200 rounded-lg p-4 mb-4 ${
+                      isOpen ? 'bg-blue-50/30' : ''
+                    }`}
+                  >
+                    <div 
+                      className="flex justify-between items-center cursor-pointer"
+                      onClick={() => toggleSpecs(id)}
+                    >
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          Biến thể {index + 1} {variant.tenBienThe && `- ${variant.tenBienThe}`}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {variant.mauSac || '—'} • {variant.ram || '—'} • {variant.oCung || '—'} • {variant.soLuongTon || 0} sp
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        {isEditing && variants.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeVariant(id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      </div>
+                    </div>
+
+                    {isOpen && (
+                      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <InputField
+                          label="Tên biến thể"
+                          value={variant.tenBienThe}
+                          onChange={(val) => updateVariant(id, 'tenBienThe', val)}
+                          disabled={!isEditing}
+                          placeholder="VD: i7-16GB-512GB"
+                        />
+                        <InputField
+                          label="Giá bán (VNĐ)"
+                          type="number"
+                          value={variant.giaBan}
+                          onChange={(val) => updateVariant(id, 'giaBan', Number(val))}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Giá khuyến mãi (VNĐ)"
+                          type="number"
+                          value={variant.giaKhuyenMai}
+                          onChange={(val) => updateVariant(id, 'giaKhuyenMai', Number(val))}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Màu sắc"
+                          value={variant.mauSac}
+                          onChange={(val) => updateVariant(id, 'mauSac', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="RAM"
+                          value={variant.ram}
+                          onChange={(val) => updateVariant(id, 'ram', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Ổ cứng"
+                          value={variant.oCung}
+                          onChange={(val) => updateVariant(id, 'oCung', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="CPU"
+                          value={variant.boXuLyTrungTam}
+                          onChange={(val) => updateVariant(id, 'boXuLyTrungTam', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="GPU"
+                          value={variant.boXuLyDoHoa}
+                          onChange={(val) => updateVariant(id, 'boXuLyDoHoa', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Số lượng tồn"
+                          type="number"
+                          value={variant.soLuongTon}
+                          onChange={(val) => updateVariant(id, 'soLuongTon', Number(val))}
+                          disabled={!isEditing}
+                        />
+
+                        {/* Technical specs - collapsible nếu muốn, nhưng hiện tại để phẳng */}
+                        <div className="md:col-span-3 mt-4 pt-4 border-t border-gray-200">
+                          <h4 className="text-md font-semibold mb-3">Thông số kỹ thuật</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <InputField
+                              label="Kích thước màn hình"
+                              value={variant.thongSoKyThuat?.kichThuocManHinh || ''}
+                              onChange={(val) => updateVariantSpec(id, 'kichThuocManHinh', val)}
+                              disabled={!isEditing}
+                            />
+                            <InputField
+                              label="Độ phân giải"
+                              value={variant.thongSoKyThuat?.doPhanGiaiManHinh || ''}
+                              onChange={(val) => updateVariantSpec(id, 'doPhanGiaiManHinh', val)}
+                              disabled={!isEditing}
+                            />
+                            <InputField
+                              label="Hệ điều hành"
+                              value={variant.thongSoKyThuat?.heDieuHanh || ''}
+                              onChange={(val) => updateVariantSpec(id, 'heDieuHanh', val)}
+                              disabled={!isEditing}
+                            />
+                            <InputField
+                              label="Dung lượng PIN"
+                              value={variant.thongSoKyThuat?.pin || ''}
+                              onChange={(val) => updateVariantSpec(id, 'pin', val)}
+                              disabled={!isEditing}
+                            />
+                            <InputField
+                              label="Số khe RAM"
+                              value={variant.thongSoKyThuat?.soKheRam || ''}
+                              onChange={(val) => updateVariantSpec(id, 'soKheRam', val)}
+                              disabled={!isEditing}
+                            />
+                            <InputField
+                              label="Cổng giao tiếp"
+                              value={variant.thongSoKyThuat?.congGiaoTiep || ''}
+                              onChange={(val) => updateVariantSpec(id, 'congGiaoTiep', val)}
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Column - Summary */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+              <div className="flex items-center gap-2 mb-4">
+                <DollarSign size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Tổng Quan</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Tổng biến thể:</span>
+                  <span className="font-bold text-gray-900">{variants.length}</span>
+                </div>
+
+                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Tổng số lượng tồn:</span>
+                  <span className="font-bold text-blue-600">{totalStock.toLocaleString()}</span>
+                </div>
+
+                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Số lượng ảnh:</span>
+                  <span className="font-bold text-gray-900">{images.length}</span>
+                </div>
+
+                <div className="pt-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                      <strong>Lưu ý:</strong> Ảnh đầu tiên sẽ là ảnh chính. Chỉ chấp nhận file ảnh ≤ 5MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Toast */}
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className={`px-6 py-4 rounded-lg shadow-lg border-l-4 ${
+            toast.type === 'success' 
+              ? 'bg-green-50 border-green-500 text-green-800' 
+              : 'bg-red-50 border-red-500 text-red-800'
+          }`}>
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} />
+              <span className="font-medium">{toast.message}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal xác nhận xóa */}
       <DeleteConfirmModal

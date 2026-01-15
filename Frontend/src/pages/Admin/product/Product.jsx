@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { productService } from "../../../services/api/ProductService";
+import { productService } from "../../../services/api/productService";
 import ProductTable from "../../../components/admin/product/ProductTable";
 import Toast from "../../../components/admin/Toast";
 
