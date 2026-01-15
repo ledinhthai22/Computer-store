@@ -144,7 +144,7 @@ const OrderTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeC
                             <option value="#">Đang giao</option>
                             <option value="#">Đã giao</option>
                             <option value="#">Hoàn thành</option>
-                            <option value="#">Đã hủy</option>
+                            <option value="#">Đã hủy</option> 
                             <option value="#">Trả hàng</option>
                         </select>
                     </div>

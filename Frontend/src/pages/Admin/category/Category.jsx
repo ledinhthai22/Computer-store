@@ -128,7 +128,7 @@ const Category = () => {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
                         <form onSubmit={handleSave} className="p-6">
-                            <h2 className="text-xl font-bold mb-5 text-gray-800">
+                            <h2 className="text-xl font-bold mb-5 text-gray-800 text-center">
                                 {editing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
                             </h2>
                             
