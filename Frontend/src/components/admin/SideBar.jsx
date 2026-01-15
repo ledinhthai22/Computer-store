@@ -16,12 +16,12 @@ const Sidebar = () => {
   const menuItems = [
     { name: 'Thống kê', icon: LayoutDashboard, path: '/quan-ly/thong-ke' }, 
     { name: 'Sản phẩm', icon: ShoppingBag, path: '/quan-ly/san-pham' },
+    { name: 'Đơn hàng', icon: Newspaper, path: '/quan-ly/don-hang' },
     { name: 'Danh mục', icon: Layers, path: '/quan-ly/danh-muc' },
     { name: 'Thương hiệu', icon: Hexagon, path: '/quan-ly/thuong-hieu' },
-    { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
     { name: 'Người dùng', icon: User, path: '/quan-ly/nguoi-dung' },
+    { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
     { name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
-    { name: 'Đơn hàng', icon: Newspaper, path: '/quan-ly/don-hang' },
   ];
 
   return (

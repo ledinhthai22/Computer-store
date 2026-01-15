@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import UserTable from '../../../components/admin/user/UserTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import UserModalCreate from '../../../components/admin/user/UserModalCreate';
 import { userService, handleApiError } from '../../../services/api/userService';
 
 const User = () => {
@@ -11,6 +12,7 @@ const User = () => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -69,7 +71,10 @@ const User = () => {
             setIsConfirmOpen(false);
         }
     };
-
+    const handleAddSuccess = (message) => {
+        showToast(message, "success");
+        fetchUsers();
+    };
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-4">
@@ -81,6 +86,7 @@ const User = () => {
                 onLock={handleLock}
                 onUnlock={handleUnlock}
                 onDelete={handleDeleteClick}
+                onOpenAddModal={() => setIsAddModalOpen(true)}
             />
 
             {/* Hiển thị Toast */}
@@ -97,6 +103,11 @@ const User = () => {
                 message="Bạn có muốn xóa người dùng này không?"
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
+            />
+            <UserModalCreate 
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onSuccess={handleAddSuccess}
             />
             </div>
         </div>

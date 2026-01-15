@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { productService } from "../../../services/api/productService";
 import useAddToCart from "../../../hooks/useAddToCart";
@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   Star, 
   ChevronRight,
+  ChevronLeft,
   CheckCircle,
   Cpu,
   MemoryStick,
@@ -28,6 +29,25 @@ export default function Details() {
   const [quantity, setQuantity] = useState(1);
 
   const { handleAddToCart } = useAddToCart(product);
+
+  // Hàm chuyển ảnh tiếp theo (dùng cho cả nút bấm và slideshow)
+  const nextImage = useCallback(() => {
+    if (product?.hinhAnh?.length > 0) {
+      setSelectedImage((prev) => (prev + 1) % product.hinhAnh.length);
+    }
+  }, [product?.hinhAnh?.length]);
+
+  const prevImage = () => {
+    if (product?.hinhAnh?.length > 0) {
+      setSelectedImage((prev) => (prev - 1 + product.hinhAnh.length) % product.hinhAnh.length);
+    }
+  };
+  useEffect(() => {
+    if (!loading && product?.hinhAnh?.length > 1) {
+      const timer = setInterval(nextImage, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [loading, product?.hinhAnh?.length, nextImage]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -88,9 +108,7 @@ export default function Details() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 text-gray-300">📦</div>
           <h2 className="text-2xl font-bold text-gray-700 mb-2">Sản phẩm không tồn tại</h2>
-          <p className="text-gray-500 mb-6">Không tìm thấy thông tin sản phẩm</p>
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2f9ea0] to-[#25888a] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
@@ -130,7 +148,13 @@ export default function Details() {
     }
     return stars;
   };
-
+  const getImageUrl = (imgData) => {
+    if (!imgData) return "https://placehold.co/600x400?text=No+Image";
+    // Nếu imgData là string thì dùng trực tiếp, nếu là Object thì lấy thuộc tính duongDan
+    const path = typeof imgData === 'string' ? imgData : imgData.duongDan;
+    if (!path) return "https://placehold.co/600x400?text=No+Image";
+    return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -149,34 +173,34 @@ export default function Details() {
           {/* Left Column - Images */}
           <div className="lg:w-1/2">
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-              {/* Stock Status Badge */}
-              <div className="mb-6">
-                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-                  selectedVariant.trangThai && selectedVariant.soLuongTon > 0
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
-                }`}>
-                  <CheckCircle size={16} />
-                  {selectedVariant.trangThai && selectedVariant.soLuongTon > 0 ? "Còn hàng" : "Hết hàng"}
-                </span>
-              </div>
-
               {/* Main Image */}
               <div className="relative group">
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-100">
                   <img
-                    // Sử dụng selectedImage và nối URL
-                    src={product.hinhAnh[selectedImage]?.duongDan?.startsWith('http') 
-                          ? product.hinhAnh[selectedImage]?.duongDan 
-                          : `${API_BASE_URL}${product.hinhAnh[selectedImage]?.duongDan}`}
-                    alt={product.tenSanPham}
-                    className="w-full h-96 object-contain"
-                    onError={(e) => {
-                      e.target.src = "https://placehold.co/600x400?text=No+Image";
-                    }}
-                  />
+                  src={getImageUrl(product.hinhAnh[selectedImage])}
+                  alt={product.tenSanPham}
+                  className="w-full h-153 object-contain transition-all duration-500 ease-in-out"
+                />
                 </div>
-                
+                <button 
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                {/* Chấm tròn báo vị trí ảnh (Dots) */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {product.hinhAnh.map((_, i) => (
+                    <div key={i} className={`h-1.5 rounded-full transition-all ${selectedImage === i ? "w-6 bg-[#2f9ea0]" : "w-2 bg-gray-300"}`} />
+                  ))}
+                </div>
                 {/* Discount Badge */}
                 {discountPercent > 0 && (
                   <div className="absolute top-4 left-4">
@@ -188,22 +212,22 @@ export default function Details() {
               </div>
 
               {/* Thumbnail Images */}
-              <div className="mt-30">
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {product.hinhAnh?.map((img, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`... ${selectedImage === index ? "border-[#2f9ea0] cursor-pointer ..." : "... cursor-pointer"}`} 
-                    >
-                      <img
-                        src={img.duongDan?.startsWith('http') ? img.duongDan : `${API_BASE_URL}${img.duongDan}`}
-                        alt={img.maHinhAnh}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {product.hinhAnh.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg border-2 overflow-hidden transition-all ${
+                      selectedImage === index ? "border-[#2f9ea0] shadow-md" : "border-transparent hover:border-gray-200"
+                    }`}
+                  >
+                    <img
+                      src={getImageUrl(img)}
+                      className="w-full h-full object-cover"
+                      alt="thumbnail"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -213,7 +237,17 @@ export default function Details() {
             {/* Product Info - Moved to top */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-6">{product.tenSanPham}</h1>
-              
+              {/* Stock Status Badge */}
+              <div className="mb-6">
+                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                  selectedVariant.trangThai && selectedVariant.soLuongTon > 0
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}>
+                  <CheckCircle size={16} />
+                  {selectedVariant.trangThai && selectedVariant.soLuongTon > 0 ? "Còn hàng" : "Hết hàng"}
+                </span>
+              </div>
               <div className="space-y-4 mb-6">
                 <div className="flex items-start gap-3">
                   <span className="font-semibold text-gray-700 min-w-28">Thương hiệu:</span>

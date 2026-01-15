@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { Trash2, History, ArrowUpIcon, Lock, Unlock, Filter } from "lucide-react";
+import { Trash2, History, ArrowUpIcon, Lock, Unlock, Filter, Plus } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import TableSearch from '../TableSearch';
 import Pagination from '../Pagination';
 
-const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeChange }) => {
+const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeChange, onOpenAddModal }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
@@ -123,7 +123,13 @@ const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeC
                             <option value="lock">Đang bị khóa</option>
                         </select>
                     </div>
-
+                    <button 
+                        onClick={onOpenAddModal}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
+                    >
+                        <Plus size={16} />
+                        <span>Thêm mới</span>
+                    </button>
                     <button
                         onClick={() => navigate('/quan-ly/nguoi-dung/khoi-phuc')}
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
