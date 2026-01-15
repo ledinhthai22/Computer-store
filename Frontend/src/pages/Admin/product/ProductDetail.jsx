@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Toast from '../../../components/admin/Toast';
 import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp } from 'lucide-react';
-import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import DeleteConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import UpdateConfirmModal from '../../../components/admin/UpdateConfirmModal';
 import { productService } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
 import { brandService } from "../../../services/api/brandService";
@@ -778,7 +779,7 @@ const ProductDetail = () => {
       {toast.show && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />}
 
       {/* Modal xác nhận xóa */}
-      <ConfirmModal
+      <DeleteConfirmModal
         isOpen={isConfirmDeleteOpen}
         message="Dữ liệu bị xóa sẽ không thể khôi phục. Bạn chắc chắn muốn xóa sản phẩm này?"
         onConfirm={handleConfirmDelete}
@@ -787,7 +788,7 @@ const ProductDetail = () => {
       />
 
       {/* Modal xác nhận cập nhật */}
-      <ConfirmModal
+      <UpdateConfirmModal
         isOpen={isConfirmUpdateOpen}
         message="Bạn có chắc chắn muốn lưu các thay đổi này?"
         onConfirm={handleConfirmUpdate}
