@@ -17,8 +17,8 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${disabled
-          ? 'bg-gray-50 text-gray-400 border-transparent'
-          : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+        ? 'bg-gray-50 text-gray-400 border-transparent'
+        : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
         }`}
     />
   </div>
@@ -33,8 +33,10 @@ const ProductDetail = () => {
   const [deletedVariantIds, setDeletedVariantIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [isConfirmUpdateOpen, setIsConfirmUpdateOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [openSpecs, setOpenSpecs] = useState({});
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -99,8 +101,7 @@ const ProductDetail = () => {
           );
         }
       } catch (error) {
-        showToast("Không thể tải dữ liệu sản phẩm", "error");
-        console.error('Fetch error:', error);
+        showToast("Không thể tải dữ liệu sản phẩm", error);
       } finally {
         setLoading(false);
       }
@@ -167,45 +168,32 @@ const ProductDetail = () => {
 
   const handleImageUpload = (e, isMain = false) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    const newImages = files.map(file => ({
-      duongDan: URL.createObjectURL(file),
-      file,
-      isNew: true,
-      anhChinh: isMain,
-    }));
+    if (!files.length) return;
 
     setImages(prev => {
       let updated = [...prev];
 
       if (isMain) {
-        // Tìm ảnh chính cũ (có maHinhAnh để biết là ảnh đã lưu trên server)
-        const oldMain = prev.find(img => img.anhChinh === true && img.maHinhAnh);
+        updated = updated.map(img => ({ ...img, anhChinh: false }));
 
-        // Loại bỏ toàn bộ ảnh chính cũ khỏi danh sách hiển thị
-        updated = updated.filter(img => !img.anhChinh);
+        const newImage = {
+          duongDan: URL.createObjectURL(files[0]),
+          file: files[0],
+          isNew: true,
+          anhChinh: true,
+        };
 
-        // Lấy ảnh chính mới (chỉ file đầu tiên nếu upload nhiều)
-        const [newMain, ...restNew] = newImages;
-
-        // Thêm ảnh chính mới vào đầu
-        updated = [newMain, ...updated, ...restNew];
-
-        // Đánh dấu xóa ảnh chính cũ trên server (nếu tồn tại)
-        if (oldMain?.maHinhAnh) {
-          setDeletedImageIds(prevIds =>
-            prevIds.includes(oldMain.maHinhAnh)
-              ? prevIds
-              : [...prevIds, oldMain.maHinhAnh]
-          );
-        }
-      } else {
-        // Ảnh phụ thêm vào cuối
-        updated = [...updated, ...newImages];
+        return [newImage, ...updated];
       }
 
-      return updated;
+      const newImages = files.map(f => ({
+        duongDan: URL.createObjectURL(f),
+        file: f,
+        isNew: true,
+        anhChinh: false,
+      }));
+
+      return [...updated, ...newImages];
     });
   };
 
@@ -219,86 +207,80 @@ const ProductDetail = () => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleUpdate = async () => {
-    const formData = new FormData();
-    const fallback = "Đang cập nhật";
-
+  const handleUpdateClick = () => {
     if (!basicInfo.tenSanPham?.trim()) {
       showToast("Vui lòng nhập tên sản phẩm", "error");
       return;
     }
+    setIsConfirmUpdateOpen(true);
+  };
 
-    formData.append('TenSanPham', basicInfo.tenSanPham.trim());
-    formData.append('MaDanhMuc', basicInfo.maDanhMuc);
-    formData.append('MaThuongHieu', basicInfo.maThuongHieu);
+  const handleConfirmUpdate = async () => {
+    const formData = new FormData();
+    const fallback = "Đang cập nhật";
 
-    const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
-    formData.append('SoLuongTon', totalStock);
+    try {
+      setIsUpdating(true);
 
-    console.log('🖼️ === DEBUG ẢNH TRƯỚC KHI GỬI ===');
-    console.log('Tổng ảnh:', images.length);
-    images.forEach((img, i) => {
-      console.log(`Ảnh ${i + 1}:`, {
-        maHinhAnh: img.maHinhAnh || 'mới',
-        anhChinh: !!img.anhChinh,
-        isNew: !!img.isNew,
-        duongDan: img.duongDan?.substring(0, 60) + '...',
-      });
-    });
+      formData.append('TenSanPham', basicInfo.tenSanPham.trim());
+      formData.append('MaDanhMuc', basicInfo.maDanhMuc);
+      formData.append('MaThuongHieu', basicInfo.maThuongHieu);
 
-    deletedImageIds.forEach(id => formData.append('HinhAnhXoa', id));
+      const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
+      formData.append('SoLuongTon', totalStock);
 
-    const mainImage = images.find(img => img.anhChinh === true) || images[0];
+      // Xử lý ảnh xóa
+      deletedImageIds.forEach(id => formData.append('HinhAnhXoa', id));
 
-    if (mainImage) {
-      if (mainImage.isNew && mainImage.file) {
+      // Xử lý ảnh chính
+      const mainImage = images.find(i => i.anhChinh);
+
+      if (mainImage?.isNew) {
         formData.append('AnhMoiDauTienLaAnhChinh', 'true');
-      } else if (mainImage.maHinhAnh) {
+      } else if (mainImage?.maHinhAnh) {
         formData.append('MaAnhChinh', mainImage.maHinhAnh);
         formData.append('AnhMoiDauTienLaAnhChinh', 'false');
       }
-    }
 
-    images.forEach(img => {
-      if (img.isNew && img.file) {
+      // Upload ảnh mới
+      const newImages = images.filter(img => img.isNew && img.file);
+      newImages.forEach(img => {
         formData.append('HinhAnhMoi', img.file);
-      }
-    });
+      });
 
-    deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
+      // Xử lý biến thể xóa
+      deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
 
-    variants.forEach((v, i) => {
-      if (v.maBTSP && typeof v.maBTSP === 'number' && v.maBTSP > 0) {
-        formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
-      }
-      formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe || fallback);
-      formData.append(`BienThe[${i}].GiaBan`, v.giaBan || 0);
-      formData.append(`BienThe[${i}].GiaKhuyenMai`, v.giaKhuyenMai || 0);
-      formData.append(`BienThe[${i}].MauSac`, v.mauSac || fallback);
-      formData.append(`BienThe[${i}].Ram`, v.ram || fallback);
-      formData.append(`BienThe[${i}].OCung`, v.oCung || fallback);
-      formData.append(`BienThe[${i}].BoXuLyTrungTam`, v.boXuLyTrungTam || fallback);
-      formData.append(`BienThe[${i}].BoXuLyDoHoa`, v.boXuLyDoHoa || fallback);
-      formData.append(`BienThe[${i}].SoLuongTon`, v.soLuongTon || 0);
-      formData.append(`BienThe[${i}].TrangThai`, v.trangThai ?? true);
+      // Xử lý biến thể
+      variants.forEach((v, i) => {
+        if (Number.isInteger(v.maBTSP) && v.maBTSP > 0) {
+          formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
+        }
+        formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe || fallback);
+        formData.append(`BienThe[${i}].GiaBan`, v.giaBan || 0);
+        formData.append(`BienThe[${i}].GiaKhuyenMai`, v.giaKhuyenMai || 0);
+        formData.append(`BienThe[${i}].MauSac`, v.mauSac || fallback);
+        formData.append(`BienThe[${i}].Ram`, v.ram || fallback);
+        formData.append(`BienThe[${i}].OCung`, v.oCung || fallback);
+        formData.append(`BienThe[${i}].BoXuLyTrungTam`, v.boXuLyTrungTam || fallback);
+        formData.append(`BienThe[${i}].BoXuLyDoHoa`, v.boXuLyDoHoa || fallback);
+        formData.append(`BienThe[${i}].SoLuongTon`, v.soLuongTon || 0);
+        formData.append(`BienThe[${i}].TrangThai`, v.trangThai ?? true);
 
-      const ts = v.thongSoKyThuat || {};
-      formData.append(`BienThe[${i}].ThongSoKyThuat.KichThuocManHinh`, ts.kichThuocManHinh || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.DungLuongRam`, ts.dungLuongRam || v.ram || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.SoKheRam`, ts.soKheRam || "1");
-      formData.append(`BienThe[${i}].ThongSoKyThuat.OCung`, ts.oCung || v.oCung || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.Pin`, ts.pin || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.HeDieuHanh`, ts.heDieuHanh || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.DoPhanGiaiManHinh`, ts.doPhanGiaiManHinh || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.LoaiXuLyTrungTam`, ts.loaiXuLyTrungTam || v.boXuLyTrungTam || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.LoaiXuLyDoHoa`, ts.loaiXuLyDoHoa || v.boXuLyDoHoa || fallback);
-      formData.append(`BienThe[${i}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || fallback);
-    });
+        const ts = v.thongSoKyThuat || {};
+        formData.append(`BienThe[${i}].ThongSoKyThuat.KichThuocManHinh`, ts.kichThuocManHinh || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.DungLuongRam`, ts.dungLuongRam || v.ram || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.SoKheRam`, ts.soKheRam || "1");
+        formData.append(`BienThe[${i}].ThongSoKyThuat.OCung`, ts.oCung || v.oCung || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.Pin`, ts.pin || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.HeDieuHanh`, ts.heDieuHanh || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.DoPhanGiaiManHinh`, ts.doPhanGiaiManHinh || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.LoaiXuLyTrungTam`, ts.loaiXuLyTrungTam || v.boXuLyTrungTam || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.LoaiXuLyDoHoa`, ts.loaiXuLyDoHoa || v.boXuLyDoHoa || fallback);
+        formData.append(`BienThe[${i}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || fallback);
+      });
 
-    try {
-      setLoading(true);
       const response = await productService.updateProduct(maSanPham, formData);
-      console.log('✅ API Update Response:', response);
 
       showToast("Cập nhật thành công!", "success");
 
@@ -321,8 +303,6 @@ const ProductDetail = () => {
             duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
           }));
           setImages(formatted);
-          console.log('✅ Images updated from API:', formatted.length, 'ảnh');
-          console.log('Ảnh chính trong response:', formatted.find(i => i.anhChinh)?.maHinhAnh);
         }
 
         if (response.bienThe) {
@@ -338,7 +318,7 @@ const ProductDetail = () => {
 
       setIsEditing(false);
 
-      // Refetch để chắc chắn
+      // Refetch để đảm bảo data mới nhất
       setTimeout(async () => {
         try {
           const refreshed = await productService.getDetailProduct(maSanPham);
@@ -348,21 +328,23 @@ const ProductDetail = () => {
               duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
             }));
             setImages(formatted);
-            console.log('🔄 Refetch images success:', formatted.length, 'ảnh');
           }
-        } catch (err) {
-          console.warn('Refetch sau update fail, nhưng không ảnh hưởng lớn', err);
+        } catch (error) {
+          showToast(
+            "Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"),
+            "error"
+          );
         }
       }, 800);
 
     } catch (error) {
-      console.error('❌ Update error:', error);
       showToast(
         "Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"),
         "error"
       );
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
+      setIsConfirmUpdateOpen(false);
     }
   };
 
@@ -372,12 +354,11 @@ const ProductDetail = () => {
       await productService.deleteProduct(maSanPham);
       showToast("Xóa thành công");
       setTimeout(() => navigate('/quan-ly/san-pham'), 1200);
-    } catch (err) {
-      showToast("Xóa thất bại", "error");
-      console.error('Delete error:', err);
+    } catch (error) {
+      showToast("Xóa thất bại", error);
     } finally {
       setIsDeleting(false);
-      setIsConfirmOpen(false);
+      setIsConfirmDeleteOpen(false);
     }
   };
 
@@ -410,7 +391,7 @@ const ProductDetail = () => {
                 <Edit3 size={18} /> Chỉnh sửa
               </button>
               <button
-                onClick={() => setIsConfirmOpen(true)}
+                onClick={() => setIsConfirmDeleteOpen(true)}
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all cursor-pointer"
               >
                 <Trash2 size={18} /> Xóa
@@ -425,10 +406,11 @@ const ProductDetail = () => {
                 Hủy
               </button>
               <button
-                onClick={handleUpdate}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all cursor-pointer"
+                onClick={handleUpdateClick}
+                disabled={isUpdating}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save size={18} /> Lưu thay đổi
+                <Save size={18} /> {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </>
           )}
@@ -474,7 +456,6 @@ const ProductDetail = () => {
                   accept="image/*"
                   className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   onChange={(e) => handleImageUpload(e, true)}
-                  multiple
                 />
               )}
             </div>
@@ -522,7 +503,7 @@ const ProductDetail = () => {
           </div>
         </section>
 
-        {/* Thông tin chính và biến thể giữ nguyên như cũ */}
+        {/* Thông tin chính */}
         <section className="lg:col-span-7 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
           <h2 className="text-xl font-bold text-gray-800 mb-8 flex items-center gap-3">
             <div className="w-2 h-8 bg-blue-600 rounded-full"></div>
@@ -537,19 +518,19 @@ const ProductDetail = () => {
                 disabled={!isEditing}
                 placeholder="Nhập tên sản phẩm..."
               />
-              <InputField
-                label="Đường dẫn (Slug)"
-                value={basicInfo.slug}
-                onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
-                disabled={!isEditing}
-              />
-              <InputField
-                label="Tổng kho dự kiến"
-                type="number"
-                value={basicInfo.soLuongTon}
-                disabled={true}
-              />
             </div>
+            <InputField
+              label="Đường dẫn (Slug)"
+              value={basicInfo.slug}
+              onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
+              disabled={true}
+            />
+            <InputField
+              label="Tổng kho dự kiến"
+              type="number"
+              value={basicInfo.soLuongTon}
+              disabled={true}
+            />
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Danh mục</label>
               <div className="relative">
@@ -558,8 +539,8 @@ const ProductDetail = () => {
                   value={basicInfo.maDanhMuc}
                   onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
                   className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
-                      ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
-                      : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
+                    : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
                     }`}
                 >
                   <option value="" disabled className="text-gray-400">
@@ -588,8 +569,8 @@ const ProductDetail = () => {
                   value={basicInfo.maThuongHieu}
                   onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
                   className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
-                      ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
-                      : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
+                    : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
                     }`}
                 >
                   <option value="" disabled className="text-gray-400">
@@ -735,7 +716,6 @@ const ProductDetail = () => {
                           onChange={(val) => updateVariant(currentId, 'soLuongTon', Number(val))}
                           disabled={!isEditing}
                         />
-
                         <InputField
                           label="CPU (Bộ vi xử lý)"
                           value={v.boXuLyTrungTam}
@@ -759,7 +739,8 @@ const ProductDetail = () => {
                           value={v.thongSoKyThuat?.doPhanGiaiManHinh}
                           onChange={(val) => updateVariantSpec(currentId, 'doPhanGiaiManHinh', val)}
                           disabled={!isEditing}
-                        /><InputField
+                        />
+                        <InputField
                           label="Hệ điều hành"
                           value={v.thongSoKyThuat?.heDieuHanh}
                           onChange={(val) => updateVariantSpec(currentId, 'heDieuHanh', val)}
@@ -785,10 +766,6 @@ const ProductDetail = () => {
                         />
                       </div>
                     </div>
-
-                    {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-
-                    </div> */}
                   </div>
                 )}
               </div>
@@ -797,18 +774,28 @@ const ProductDetail = () => {
         </div>
       </section>
 
+      {/* Toast & Modals */}
       {toast.show && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />}
 
+      {/* Modal xác nhận xóa */}
       <ConfirmModal
-        isOpen={isConfirmOpen}
+        isOpen={isConfirmDeleteOpen}
         message="Dữ liệu bị xóa sẽ không thể khôi phục. Bạn chắc chắn muốn xóa sản phẩm này?"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setIsConfirmOpen(false)}
+        onCancel={() => setIsConfirmDeleteOpen(false)}
         isLoading={isDeleting}
+      />
+
+      {/* Modal xác nhận cập nhật */}
+      <ConfirmModal
+        isOpen={isConfirmUpdateOpen}
+        message="Bạn có chắc chắn muốn lưu các thay đổi này?"
+        onConfirm={handleConfirmUpdate}
+        onCancel={() => setIsConfirmUpdateOpen(false)}
+        isLoading={isUpdating}
       />
     </div>
   );
 };
 
 export default ProductDetail;
-

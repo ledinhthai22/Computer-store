@@ -1,11 +1,13 @@
+using System.IO;
 using Backend.Data;
 using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
 using Backend.Services.File;
 using Ecommerce.DTO.Product;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
+using IOFile = System.IO.File;
 namespace Backend.Services.Product
 {
     public class ProductService : IProductService
@@ -15,18 +17,21 @@ namespace Backend.Services.Product
         private readonly IFileService _fileService;
         private readonly IConfiguration _config;
         private readonly ILogger<ProductService> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         public ProductService(
             ApplicationDbContext db,
             SlugHelper slugHelper,
             IFileService fileService,
             IConfiguration config,
-            ILogger<ProductService> logger)
+            ILogger<ProductService> logger,
+            IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
             _slugHelper = slugHelper;
             _fileService = fileService;
             _config = config;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<ProductResult?> GetByIdAsync(int id)
@@ -52,7 +57,7 @@ namespace Backend.Services.Product
                 TenThuongHieu = product.ThuongHieu!.TenThuongHieu,
                 SoLuongTon = product.BienThe.Sum(bt => bt.SoLuongTon), // Tổng tồn kho từ các biến thể
 
-                // FIX: Mapping sang List<ProductImageResult> thay vì List<string>
+                // List<ProductImageResult> thay vì List<string>
                 HinhAnh = product.HinhAnhSanPham
                     .Where(img => img.NgayXoa == null) // Chỉ lấy ảnh chưa bị xóa
                     .OrderBy(img => img.ThuTuAnh)     // Sắp xếp theo thứ tự hiển thị
@@ -340,8 +345,6 @@ namespace Backend.Services.Product
 
             if (product == null)
                 return null;
-
-            // ===== CẬP NHẬT THÔNG TIN CƠ BẢN =====
             if (!string.IsNullOrWhiteSpace(request.TenSanPham) &&
                 !string.Equals(request.TenSanPham.Trim(), product.TenSanPham?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
@@ -392,42 +395,44 @@ namespace Backend.Services.Product
                     .Max();
 
                 int stt = maxThuTu + 1;
+                bool isFirstNewImage = true;
 
                 foreach (var file in request.HinhAnhMoi)
                 {
                     if (file == null || file.Length == 0) continue;
 
+                    bool willBeMainImage = isFirstNewImage && request.AnhMoiDauTienLaAnhChinh;
+
                     var duongDanAnh = await _fileService.UploadProductImageAsync(
                         file,
                         product.TenSanPham ?? "SanPham",
                         "BienTheMacDinh",
-                        false, // Tạm thời set false, sẽ xử lý sau
+                        willBeMainImage,
                         stt
                     );
 
                     var newImage = new HinhAnhSanPham
                     {
                         DuongDanAnh = duongDanAnh,
-                        AnhChinh = false, // Tạm thời false
+                        AnhChinh = false,
                         ThuTuAnh = stt,
                         MaSanPham = product.MaSanPham
                     };
 
                     product.HinhAnhSanPham.Add(newImage);
                     newlyAddedImages.Add(newImage);
+
+                    isFirstNewImage = false;
                     stt++;
                 }
             }
 
-            // ===== XỬ LÝ ẢNH CHÍNH - LOGIC QUAN TRỌNG NHẤT =====
-
-            // Bước 1: Reset tất cả ảnh về không phải ảnh chính
+            // ===== XỬ LÝ ẢNH CHÍNH =====
             foreach (var img in product.HinhAnhSanPham.Where(i => i.NgayXoa == null))
             {
                 img.AnhChinh = false;
             }
 
-            // Bước 2: Set ảnh chính theo yêu cầu
             bool mainImageSet = false;
 
             // Trường hợp 1: Client chỉ định ảnh cũ làm ảnh chính
@@ -440,16 +445,16 @@ namespace Backend.Services.Product
                 {
                     selectedMainImage.AnhChinh = true;
                     mainImageSet = true;
-                    _logger?.LogInformation($"Set ảnh chính: ID = {selectedMainImage.MaHinhAnh} (ảnh cũ được chọn)");
+                    await RenameImageToMainAsync(selectedMainImage, product.TenSanPham);
                 }
             }
 
-            // Trường hợp 2: Client muốn ảnh mới đầu tiên làm ảnh chính
+            // Trường hợp 2: Ảnh mới đầu tiên làm ảnh chính
             if (!mainImageSet && request.AnhMoiDauTienLaAnhChinh && newlyAddedImages.Any())
             {
-                newlyAddedImages.First().AnhChinh = true;
+                var newMainImage = newlyAddedImages.First();
+                newMainImage.AnhChinh = true;
                 mainImageSet = true;
-                _logger?.LogInformation($"Set ảnh chính: Ảnh mới đầu tiên");
             }
 
             // Trường hợp 3: Fallback - Chọn ảnh đầu tiên theo thứ tự
@@ -463,19 +468,18 @@ namespace Backend.Services.Product
                 if (firstImage != null)
                 {
                     firstImage.AnhChinh = true;
-                    _logger?.LogInformation($"Set ảnh chính: Fallback - Ảnh ID = {firstImage.MaHinhAnh}");
-                }
-                else
-                {
-                    _logger?.LogWarning("Không có ảnh nào để set làm ảnh chính!");
+                    await RenameImageToMainAsync(firstImage, product.TenSanPham);
                 }
             }
 
-            // ===== LOG DEBUG =====
-            _logger?.LogInformation("=== TRẠNG THÁI ẢNH SAU CẬP NHẬT ===");
-            foreach (var img in product.HinhAnhSanPham.Where(i => i.NgayXoa == null).OrderBy(i => i.ThuTuAnh))
+            // Đổi tên các ảnh phụ
+            var secondaryImages = product.HinhAnhSanPham
+                .Where(i => i.NgayXoa == null && !i.AnhChinh)
+                .ToList();
+
+            foreach (var img in secondaryImages)
             {
-                _logger?.LogInformation($"ID: {img.MaHinhAnh}, Thứ tự: {img.ThuTuAnh}, Ảnh chính: {img.AnhChinh}, Đường dẫn: {img.DuongDanAnh}");
+                await RenameImageToSecondaryAsync(img, product.TenSanPham);
             }
 
             // ===== XỬ LÝ XÓA BIẾN THỂ =====
@@ -577,8 +581,99 @@ namespace Backend.Services.Product
                 }
             }
 
+            // ===== LƯU VÀO DATABASE =====
             await _db.SaveChangesAsync();
+
             return await GetByIdAsync(id);
+        }
+
+        // ===== HÀM HELPER ĐỔI TÊN ẢNH =====
+        private async Task RenameImageToMainAsync(HinhAnhSanPham image, string productName)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var oldPath = Path.Combine(_webHostEnvironment.WebRootPath, image.DuongDanAnh);
+
+                    if (!IOFile.Exists(oldPath))
+                        return;
+
+                    var fileName = Path.GetFileName(image.DuongDanAnh);
+
+                    if (fileName.Contains("_AnhChinh-"))
+                        return;
+
+                    var newFileName = fileName.Replace("_AnhPhu-", "_AnhChinh-");
+
+                    if (newFileName == fileName)
+                    {
+                        var extension = Path.GetExtension(fileName);
+                        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+                        newFileName = $"{nameWithoutExt}_AnhChinh{extension}";
+                    }
+
+                    var directory = Path.GetDirectoryName(oldPath);
+                    var newPath = Path.Combine(directory!, newFileName);
+
+                    if (IOFile.Exists(newPath))
+                    {
+                        IOFile.Delete(newPath);
+                    }
+
+                    IOFile.Move(oldPath, newPath);
+
+                    image.DuongDanAnh = $"product/image/{newFileName}";
+                }
+                catch (Exception)
+                {
+                    // Silent fail
+                }
+            });
+        }
+
+        private async Task RenameImageToSecondaryAsync(HinhAnhSanPham image, string productName)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var oldPath = Path.Combine(_webHostEnvironment.WebRootPath, image.DuongDanAnh);
+
+                    if (!IOFile.Exists(oldPath))
+                        return;
+
+                    var fileName = Path.GetFileName(image.DuongDanAnh);
+
+                    if (fileName.Contains("_AnhPhu-"))
+                        return;
+
+                    var newFileName = fileName.Replace("_AnhChinh-", "_AnhPhu-");
+
+                    if (newFileName == fileName)
+                    {
+                        var extension = Path.GetExtension(fileName);
+                        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+                        newFileName = $"{nameWithoutExt}_AnhPhu{extension}";
+                    }
+
+                    var directory = Path.GetDirectoryName(oldPath);
+                    var newPath = Path.Combine(directory!, newFileName);
+
+                    if (IOFile.Exists(newPath))
+                    {
+                        IOFile.Delete(newPath);
+                    }
+
+                    IOFile.Move(oldPath, newPath);
+
+                    image.DuongDanAnh = $"product/image/{newFileName}";
+                }
+                catch (Exception)
+                {
+                    // Silent fail
+                }
+            });
         }
 
         public async Task<bool> DeleteAsync(int id)
