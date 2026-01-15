@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, 
-  AlertCircle, Package, Image as ImageIcon, DollarSign, 
-  ChevronDown, ChevronUp, Settings 
-} from 'lucide-react';
-import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import Toast from '../../../components/admin/Toast';
+import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import DeleteConfirmModal from '../../../components/admin/DeleteConfirmModal';
+import UpdateConfirmModal from '../../../components/admin/UpdateConfirmModal';
 import { productService } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
 import { brandService } from "../../../services/api/brandService";
@@ -792,8 +789,8 @@ const ProductDetail = () => {
         </div>
       )}
 
-      {/* Confirm Modals */}
-      <ConfirmModal
+      {/* Modal xác nhận xóa */}
+      <DeleteConfirmModal
         isOpen={isConfirmDeleteOpen}
         message="Dữ liệu bị xóa sẽ không thể khôi phục. Bạn chắc chắn muốn xóa sản phẩm này?"
         onConfirm={handleConfirmDelete}
@@ -801,7 +798,8 @@ const ProductDetail = () => {
         isLoading={isDeleting}
       />
 
-      <ConfirmModal
+      {/* Modal xác nhận cập nhật */}
+      <UpdateConfirmModal
         isOpen={isConfirmUpdateOpen}
         message="Bạn có chắc chắn muốn lưu các thay đổi này?"
         onConfirm={handleConfirmUpdate}

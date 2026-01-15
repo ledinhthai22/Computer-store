@@ -16,6 +16,7 @@ import {
   WebInfoRecover,
   User,
   UserRecover,
+  Order
 } from "./pages/Admin";
 
 import {
@@ -80,6 +81,7 @@ function App() {
 
             <Route path="nguoi-dung" element={<User />} />
             <Route path="nguoi-dung/khoi-phuc" element={<UserRecover />} />
+            <Route path="don-hang" element={<Order />} />
           </Route>
         </Route>
 
