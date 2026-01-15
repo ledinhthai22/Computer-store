@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Toast from '../../../components/admin/Toast';
 import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
-import { productService } from "../../../services/api/ProductService";
+import { productService } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
 import { brandService } from "../../../services/api/brandService";
 
@@ -17,8 +17,8 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${disabled
-        ? 'bg-gray-50 text-gray-400 border-transparent'
-        : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+          ? 'bg-gray-50 text-gray-400 border-transparent'
+          : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
         }`}
     />
   </div>
@@ -30,7 +30,7 @@ const ProductDetail = () => {
 
   const [images, setImages] = useState([]);
   const [deletedImageIds, setDeletedImageIds] = useState([]);
-  const [deletedVariantIds, setDeletedVariantIds] = useState([]); // Mới: lưu ID biến thể cũ cần xóa mềm
+  const [deletedVariantIds, setDeletedVariantIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -47,10 +47,17 @@ const ProductDetail = () => {
     slug: '',
     maDanhMuc: '',
     maThuongHieu: '',
-    soLuongTon: 0
+    soLuongTon: 0,
   });
 
   const [variants, setVariants] = useState([]);
+
+  const formatImageUrl = (rawPath) => {
+    if (!rawPath) return '';
+    if (rawPath.startsWith('http')) return rawPath;
+    const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+    return `https://localhost:7012/${cleanPath}`;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,44 +66,41 @@ const ProductDetail = () => {
         const [product, categoriesData, brandsData] = await Promise.all([
           productService.getDetailProduct(maSanPham),
           categoryService.getAll(),
-          brandService.getAll()
+          brandService.getAll(),
         ]);
 
         setCategories(categoriesData);
         setBrands(brandsData);
+
         setBasicInfo({
           maSanPham: product.maSanPham,
           tenSanPham: product.tenSanPham || '',
           slug: product.slug || '',
           maDanhMuc: String(product.maDanhMuc || ''),
           maThuongHieu: String(product.maThuongHieu || ''),
-          soLuongTon: product.soLuongTon || 0
+          soLuongTon: product.soLuongTon || 0,
         });
 
         if (product.hinhAnh) {
-          const formattedImages = product.hinhAnh.map(img => {
-            const rawPath = img.duongDan || img.duongDanAnh;
-            if (!rawPath) return img;
-            if (rawPath.startsWith('http')) return { ...img, duongDan: rawPath };
-
-            const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
-            return {
-              ...img,
-              duongDan: `https://localhost:7012/${cleanPath}`
-            };
-          });
-          setImages(formattedImages);
+          const formatted = product.hinhAnh.map(img => ({
+            ...img,
+            duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+          }));
+          setImages(formatted);
         }
 
         if (product.bienThe) {
-          setVariants(product.bienThe.map(bt => ({
-            ...bt,
-            id: bt.maBTSP,
-            thongSoKyThuat: bt.thongSoKyThuat || {}
-          })));
+          setVariants(
+            product.bienThe.map(bt => ({
+              ...bt,
+              id: bt.maBTSP,
+              thongSoKyThuat: bt.thongSoKyThuat || {},
+            }))
+          );
         }
       } catch (error) {
-        showToast("Không thể tải dữ liệu", error);
+        showToast("Không thể tải dữ liệu sản phẩm", "error");
+        console.error('Fetch error:', error);
       } finally {
         setLoading(false);
       }
@@ -108,42 +112,51 @@ const ProductDetail = () => {
 
   const addVariant = () => {
     const newId = `new-${Date.now()}`;
-    setVariants([...variants, {
-      id: newId,
-      maBTSP: null,
-      tenBienThe: '',
-      giaBan: 0,
-      giaKhuyenMai: 0,
-      mauSac: '',
-      ram: '',
-      oCung: '',
-      boXuLyTrungTam: '',
-      boXuLyDoHoa: '',
-      soLuongTon: 0,
-      trangThai: true,
-      thongSoKyThuat: {}
-    }]);
+    setVariants([
+      ...variants,
+      {
+        id: newId,
+        maBTSP: null,
+        tenBienThe: '',
+        giaBan: 0,
+        giaKhuyenMai: 0,
+        mauSac: '',
+        ram: '',
+        oCung: '',
+        boXuLyTrungTam: '',
+        boXuLyDoHoa: '',
+        soLuongTon: 0,
+        trangThai: true,
+        thongSoKyThuat: {},
+      },
+    ]);
     setOpenSpecs(prev => ({ ...prev, [newId]: true }));
   };
 
   const updateVariant = (id, field, value) => {
-    setVariants(prev => prev.map(v => (v.id === id || v.maBTSP === id) ? { ...v, [field]: value } : v));
+    setVariants(prev =>
+      prev.map(v => (v.id === id || v.maBTSP === id ? { ...v, [field]: value } : v))
+    );
   };
 
   const updateVariantSpec = (id, field, value) => {
-    setVariants(prev => prev.map(v => {
-      if (v.id === id || v.maBTSP === id) {
-        return { ...v, thongSoKyThuat: { ...(v.thongSoKyThuat || {}), [field]: value } };
-      }
-      return v;
-    }));
+    setVariants(prev =>
+      prev.map(v => {
+        if (v.id === id || v.maBTSP === id) {
+          return {
+            ...v,
+            thongSoKyThuat: { ...(v.thongSoKyThuat || {}), [field]: value },
+          };
+        }
+        return v;
+      })
+    );
   };
 
   const removeVariant = (id) => {
     setVariants(prev => {
       const variantToRemove = prev.find(v => v.id === id || v.maBTSP === id);
       if (variantToRemove?.maBTSP && variantToRemove.maBTSP > 0) {
-        // Biến thể cũ → lưu ID để gửi xóa mềm lên server
         setDeletedVariantIds(prevIds => [...prevIds, variantToRemove.maBTSP]);
       }
       return prev.filter(v => v.id !== id && v.maBTSP !== id);
@@ -152,7 +165,6 @@ const ProductDetail = () => {
 
   const toggleSpecs = (id) => setOpenSpecs(prev => ({ ...prev, [id]: !prev[id] }));
 
-  // Upload ảnh
   const handleImageUpload = (e, isMain = false) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -161,23 +173,48 @@ const ProductDetail = () => {
       duongDan: URL.createObjectURL(file),
       file,
       isNew: true,
+      anhChinh: isMain,
     }));
 
     setImages(prev => {
+      let updated = [...prev];
+
       if (isMain) {
-        const [newMainImage, ...additionalNewImages] = newImages;
-        const oldSubImages = prev.slice(1);
-        return [newMainImage, ...oldSubImages, ...additionalNewImages];
+        // Tìm ảnh chính cũ (có maHinhAnh để biết là ảnh đã lưu trên server)
+        const oldMain = prev.find(img => img.anhChinh === true && img.maHinhAnh);
+
+        // Loại bỏ toàn bộ ảnh chính cũ khỏi danh sách hiển thị
+        updated = updated.filter(img => !img.anhChinh);
+
+        // Lấy ảnh chính mới (chỉ file đầu tiên nếu upload nhiều)
+        const [newMain, ...restNew] = newImages;
+
+        // Thêm ảnh chính mới vào đầu
+        updated = [newMain, ...updated, ...restNew];
+
+        // Đánh dấu xóa ảnh chính cũ trên server (nếu tồn tại)
+        if (oldMain?.maHinhAnh) {
+          setDeletedImageIds(prevIds =>
+            prevIds.includes(oldMain.maHinhAnh)
+              ? prevIds
+              : [...prevIds, oldMain.maHinhAnh]
+          );
+        }
       } else {
-        return [...prev, ...newImages];
+        // Ảnh phụ thêm vào cuối
+        updated = [...updated, ...newImages];
       }
+
+      return updated;
     });
   };
 
   const removeImage = (index) => {
     const imgToRemove = images[index];
     if (imgToRemove?.maHinhAnh && !imgToRemove.isNew) {
-      setDeletedImageIds(prev => [...prev, imgToRemove.maHinhAnh]);
+      setDeletedImageIds(prev =>
+        prev.includes(imgToRemove.maHinhAnh) ? prev : [...prev, imgToRemove.maHinhAnh]
+      );
     }
     setImages(prev => prev.filter((_, i) => i !== index));
   };
@@ -191,17 +228,36 @@ const ProductDetail = () => {
       return;
     }
 
-    formData.append('TenSanPham', basicInfo.tenSanPham);
+    formData.append('TenSanPham', basicInfo.tenSanPham.trim());
     formData.append('MaDanhMuc', basicInfo.maDanhMuc);
     formData.append('MaThuongHieu', basicInfo.maThuongHieu);
 
     const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
     formData.append('SoLuongTon', totalStock);
 
+    console.log('🖼️ === DEBUG ẢNH TRƯỚC KHI GỬI ===');
+    console.log('Tổng ảnh:', images.length);
+    images.forEach((img, i) => {
+      console.log(`Ảnh ${i + 1}:`, {
+        maHinhAnh: img.maHinhAnh || 'mới',
+        anhChinh: !!img.anhChinh,
+        isNew: !!img.isNew,
+        duongDan: img.duongDan?.substring(0, 60) + '...',
+      });
+    });
+
     deletedImageIds.forEach(id => formData.append('HinhAnhXoa', id));
 
-    // Gửi danh sách ID biến thể cần xóa mềm
-    deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
+    const mainImage = images.find(img => img.anhChinh === true) || images[0];
+
+    if (mainImage) {
+      if (mainImage.isNew && mainImage.file) {
+        formData.append('AnhMoiDauTienLaAnhChinh', 'true');
+      } else if (mainImage.maHinhAnh) {
+        formData.append('MaAnhChinh', mainImage.maHinhAnh);
+        formData.append('AnhMoiDauTienLaAnhChinh', 'false');
+      }
+    }
 
     images.forEach(img => {
       if (img.isNew && img.file) {
@@ -209,11 +265,12 @@ const ProductDetail = () => {
       }
     });
 
+    deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
+
     variants.forEach((v, i) => {
       if (v.maBTSP && typeof v.maBTSP === 'number' && v.maBTSP > 0) {
         formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
       }
-
       formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe || fallback);
       formData.append(`BienThe[${i}].GiaBan`, v.giaBan || 0);
       formData.append(`BienThe[${i}].GiaKhuyenMai`, v.giaKhuyenMai || 0);
@@ -238,24 +295,72 @@ const ProductDetail = () => {
       formData.append(`BienThe[${i}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || fallback);
     });
 
-    console.log('=== FormData Debug ===');
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
-    console.log('Deleted Variant IDs gửi lên:', deletedVariantIds);
-
     try {
       setLoading(true);
-      await productService.updateProduct(maSanPham, formData);
-      showToast("Cập nhật thành công!");
-      setIsEditing(false);
+      const response = await productService.updateProduct(maSanPham, formData);
+      console.log('✅ API Update Response:', response);
+
+      showToast("Cập nhật thành công!", "success");
+
       setDeletedImageIds([]);
-      setDeletedVariantIds([]); // Reset sau khi lưu thành công
-      setTimeout(() => window.location.reload(), 1000);
+      setDeletedVariantIds([]);
+
+      if (response) {
+        setBasicInfo({
+          maSanPham: response.maSanPham,
+          tenSanPham: response.tenSanPham || basicInfo.tenSanPham,
+          slug: response.slug || basicInfo.slug,
+          maDanhMuc: String(response.maDanhMuc || basicInfo.maDanhMuc),
+          maThuongHieu: String(response.maThuongHieu || basicInfo.maThuongHieu),
+          soLuongTon: response.soLuongTon || basicInfo.soLuongTon,
+        });
+
+        if (response.hinhAnh?.length) {
+          const formatted = response.hinhAnh.map(img => ({
+            ...img,
+            duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+          }));
+          setImages(formatted);
+          console.log('✅ Images updated from API:', formatted.length, 'ảnh');
+          console.log('Ảnh chính trong response:', formatted.find(i => i.anhChinh)?.maHinhAnh);
+        }
+
+        if (response.bienThe) {
+          setVariants(
+            response.bienThe.map(bt => ({
+              ...bt,
+              id: bt.maBTSP,
+              thongSoKyThuat: bt.thongSoKyThuat || {},
+            }))
+          );
+        }
+      }
+
+      setIsEditing(false);
+
+      // Refetch để chắc chắn
+      setTimeout(async () => {
+        try {
+          const refreshed = await productService.getDetailProduct(maSanPham);
+          if (refreshed?.hinhAnh?.length) {
+            const formatted = refreshed.hinhAnh.map(img => ({
+              ...img,
+              duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+            }));
+            setImages(formatted);
+            console.log('🔄 Refetch images success:', formatted.length, 'ảnh');
+          }
+        } catch (err) {
+          console.warn('Refetch sau update fail, nhưng không ảnh hưởng lớn', err);
+        }
+      }, 800);
+
     } catch (error) {
-      showToast("Lỗi cập nhật sản phẩm", "error");
-      console.error('=== Update Error ===', error);
-      console.error('Response data:', error.response?.data);
+      console.error('❌ Update error:', error);
+      showToast(
+        "Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"),
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -266,38 +371,63 @@ const ProductDetail = () => {
       setIsDeleting(true);
       await productService.deleteProduct(maSanPham);
       showToast("Xóa thành công");
-      setTimeout(() => navigate('/quan-ly/san-pham'), 1000);
+      setTimeout(() => navigate('/quan-ly/san-pham'), 1200);
     } catch (err) {
-      showToast("Xóa thất bại", err);
+      showToast("Xóa thất bại", "error");
+      console.error('Delete error:', err);
     } finally {
       setIsDeleting(false);
       setIsConfirmOpen(false);
     }
   };
 
-  if (loading && !isEditing) return <div className="p-20 text-center font-medium text-gray-500 animate-pulse">Đang tải dữ liệu sản phẩm...</div>;
+  if (loading && !isEditing) {
+    return <div className="p-20 text-center font-medium text-gray-500 animate-pulse">Đang tải dữ liệu sản phẩm...</div>;
+  }
+
+  const mainImage = images.find(img => img.anhChinh === true) || images[0];
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-24 bg-gray-50/50 min-h-screen">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-semibold transition-colors cursor-pointer group">
-          <div className="p-2 rounded-lg group-hover:bg-blue-50"><ArrowLeft size={20} /></div>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-semibold transition-colors cursor-pointer group"
+        >
+          <div className="p-2 rounded-lg group-hover:bg-blue-50">
+            <ArrowLeft size={20} />
+          </div>
           Quay lại
         </button>
         <div className="flex gap-3 w-full md:w-auto">
           {!isEditing ? (
             <>
-              <button onClick={() => setIsEditing(true)} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all cursor-pointer">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all cursor-pointer"
+              >
                 <Edit3 size={18} /> Chỉnh sửa
               </button>
-              <button onClick={() => setIsConfirmOpen(true)} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all cursor-pointer">
+              <button
+                onClick={() => setIsConfirmOpen(true)}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all cursor-pointer"
+              >
                 <Trash2 size={18} /> Xóa
               </button>
             </>
           ) : (
             <>
-              <button onClick={() => setIsEditing(false)} className="flex-1 md:flex-none px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all cursor-pointer">Hủy</button>
-              <button onClick={handleUpdate} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all cursor-pointer">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="flex-1 md:flex-none px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all cursor-pointer"
+              >
                 <Save size={18} /> Lưu thay đổi
               </button>
             </>
@@ -305,23 +435,25 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      {/* Grid chính */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Phần ảnh */}
         <section className="lg:col-span-5 space-y-4">
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
             <h3 className="text-sm font-black text-gray-400 uppercase mb-4 tracking-widest">Hình ảnh sản phẩm</h3>
 
             {/* Ảnh chính */}
             <div className="relative aspect-square w-full border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50 flex flex-col items-center justify-center overflow-hidden group">
-              {images.length > 0 ? (
+              {mainImage ? (
                 <>
                   <img
-                    src={images[0].duongDan}
+                    src={mainImage.duongDan}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     alt="Ảnh chính"
                   />
                   {isEditing && (
                     <button
-                      onClick={() => removeImage(0)}
+                      onClick={() => removeImage(images.findIndex(img => img === mainImage))}
                       className="absolute top-4 right-4 p-2 bg-white/90 text-red-500 rounded-full shadow-xl hover:bg-red-500 hover:text-white transition-all z-10"
                     >
                       <Trash2 size={20} />
@@ -349,22 +481,29 @@ const ProductDetail = () => {
 
             {/* Ảnh phụ */}
             <div className="flex flex-wrap gap-3 mt-4">
-              {images.slice(1).map((img, idx) => (
-                <div
-                  key={idx + 1}
-                  className="relative w-20 h-20 rounded-2xl border border-gray-100 overflow-hidden group shadow-sm"
-                >
-                  <img src={img.duongDan} className="w-full h-full object-cover" alt={`Ảnh phụ ${idx + 1}`} />
-                  {isEditing && (
-                    <button
-                      onClick={() => removeImage(idx + 1)}
-                      className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <X size={20} />
-                    </button>
-                  )}
-                </div>
-              ))}
+              {images
+                .filter(img => img !== mainImage && !img.anhChinh)
+                .sort((a, b) => (a.thuTuAnh || 0) - (b.thuTuAnh || 0))
+                .map((img, idx) => (
+                  <div
+                    key={img.maHinhAnh || img.duongDan || `temp-${idx}`}
+                    className="relative w-20 h-20 rounded-2xl border border-gray-100 overflow-hidden group shadow-sm"
+                  >
+                    <img
+                      src={img.duongDan}
+                      className="w-full h-full object-cover"
+                      alt={`Ảnh phụ ${idx + 1}`}
+                    />
+                    {isEditing && (
+                      <button
+                        onClick={() => removeImage(images.findIndex(i => i === img))}
+                        className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <X size={20} />
+                      </button>
+                    )}
+                  </div>
+                ))}
 
               {isEditing && (
                 <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50 cursor-pointer hover:border-blue-400 hover:text-blue-500 transition-all">
@@ -383,6 +522,7 @@ const ProductDetail = () => {
           </div>
         </section>
 
+        {/* Thông tin chính và biến thể giữ nguyên như cũ */}
         <section className="lg:col-span-7 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
           <h2 className="text-xl font-bold text-gray-800 mb-8 flex items-center gap-3">
             <div className="w-2 h-8 bg-blue-600 rounded-full"></div>
@@ -390,11 +530,26 @@ const ProductDetail = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <InputField label="Tên sản phẩm" value={basicInfo.tenSanPham} onChange={(v) => setBasicInfo({ ...basicInfo, tenSanPham: v })} disabled={!isEditing} placeholder="Nhập tên sản phẩm..." />
+              <InputField
+                label="Tên sản phẩm"
+                value={basicInfo.tenSanPham}
+                onChange={(v) => setBasicInfo({ ...basicInfo, tenSanPham: v })}
+                disabled={!isEditing}
+                placeholder="Nhập tên sản phẩm..."
+              />
+              <InputField
+                label="Đường dẫn (Slug)"
+                value={basicInfo.slug}
+                onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
+                disabled={!isEditing}
+              />
+              <InputField
+                label="Tổng kho dự kiến"
+                type="number"
+                value={basicInfo.soLuongTon}
+                disabled={true}
+              />
             </div>
-            <InputField label="Đường dẫn (Slug)" value={basicInfo.slug} onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })} disabled={!isEditing} />
-            <InputField label="Tổng kho dự kiến" type="number" value={basicInfo.soLuongTon} disabled={true} />
-
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Danh mục</label>
               <div className="relative">
@@ -402,18 +557,25 @@ const ProductDetail = () => {
                   disabled={!isEditing}
                   value={basicInfo.maDanhMuc}
                   onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm
-                    ${!isEditing ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent' : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
+                      ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
+                      : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                    }`}
                 >
-                  <option value="" disabled className="text-gray-400">Chọn danh mục</option>
-                  {categories.map(cat => (
+                  <option value="" disabled className="text-gray-400">
+                    Chọn danh mục
+                  </option>
+                  {categories.map((cat) => (
                     <option key={cat.maDanhMuc} value={String(cat.maDanhMuc)}>
                       {cat.tenDanhMuc}
                     </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`} />
+                  <ChevronDown
+                    size={18}
+                    className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`}
+                  />
                 </div>
               </div>
             </div>
@@ -425,19 +587,25 @@ const ProductDetail = () => {
                   disabled={!isEditing}
                   value={basicInfo.maThuongHieu}
                   onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm
-                    ${!isEditing ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent' : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'}`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-200 appearance-none cursor-pointer shadow-sm ${!isEditing
+                      ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-transparent'
+                      : 'hover:border-blue-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                    }`}
                 >
-                  <option value="" disabled className="text-gray-400">Chọn thương hiệu</option>
-                  {brands.map(brand => (
+                  <option value="" disabled className="text-gray-400">
+                    Chọn thương hiệu
+                  </option>
+                  {brands.map((brand) => (
                     <option key={brand.maThuongHieu} value={String(brand.maThuongHieu)}>
                       {brand.tenThuongHieu}
                     </option>
                   ))}
-                  ///conflict
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`} />
+                  <ChevronDown
+                    size={18}
+                    className={`text-gray-400 transition-transform duration-200 ${!isEditing ? 'opacity-50' : ''}`}
+                  />
                 </div>
               </div>
             </div>
@@ -445,6 +613,7 @@ const ProductDetail = () => {
         </section>
       </div>
 
+      {/* Biến thể */}
       <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-3">
@@ -452,7 +621,11 @@ const ProductDetail = () => {
             BIẾN THỂ VÀ THÔNG SỐ KỸ THUẬT
           </h2>
           {isEditing && (
-            <button type="button" onClick={addVariant} className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all cursor-pointer">
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all cursor-pointer"
+            >
               <Plus size={18} /> Thêm phiên bản
             </button>
           )}
@@ -463,13 +636,24 @@ const ProductDetail = () => {
             const currentId = v.maBTSP || v.id;
             const isOpen = openSpecs[currentId];
             return (
-              <div key={currentId} className={`rounded-3xl border transition-all duration-300 ${isOpen ? 'border-indigo-200 bg-indigo-50/10 shadow-md' : 'border-gray-100 bg-white shadow-sm'}`}>
-                <div className="p-5 flex items-center justify-between cursor-pointer" onClick={() => toggleSpecs(currentId)}>
+              <div
+                key={currentId}
+                className={`rounded-3xl border transition-all duration-300 ${isOpen ? 'border-indigo-200 bg-indigo-50/10 shadow-md' : 'border-gray-100 bg-white shadow-sm'
+                  }`}
+              >
+                <div
+                  className="p-5 flex items-center justify-between cursor-pointer"
+                  onClick={() => toggleSpecs(currentId)}
+                >
                   <div className="flex items-center gap-4">
-                    <span className="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full font-black text-sm">{index + 1}</span>
+                    <span className="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full font-black text-sm">
+                      {index + 1}
+                    </span>
                     <div>
                       <h3 className="font-bold text-gray-800">{v.tenBienThe || "Tên phiên bản chưa đặt"}</h3>
-                      <p className="text-xs text-gray-500">{v.mauSac || 'Chưa chọn màu'} • {v.ram || '0GB'} RAM • {v.oCung || 'Chưa rõ'} SSD</p>
+                      <p className="text-xs text-gray-500">
+                        {v.mauSac || 'Chưa chọn màu'} • {v.ram || '0GB'} RAM • {v.oCung || 'Chưa rõ'} SSD
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -499,33 +683,112 @@ const ProductDetail = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                       <div className="md:col-span-2">
-                        <InputField label="Tên biến thể" value={v.tenBienThe} onChange={(val) => updateVariant(currentId, 'tenBienThe', val)} disabled={!isEditing} placeholder="VD: MacBook Air M2 8GB/256GB" />
+                        <InputField
+                          label="Tên biến thể"
+                          value={v.tenBienThe}
+                          onChange={(val) => updateVariant(currentId, 'tenBienThe', val)}
+                          disabled={!isEditing}
+                          placeholder="VD: MacBook Air M2 8GB/256GB"
+                        />
                       </div>
-                      <InputField label="Giá bán (VNĐ)" type="number" value={v.giaBan} onChange={(val) => updateVariant(currentId, 'giaBan', Number(val))} disabled={!isEditing} />
-                      <InputField label="Giá KM (VNĐ)" type="number" value={v.giaKhuyenMai} onChange={(val) => updateVariant(currentId, 'giaKhuyenMai', Number(val))} disabled={!isEditing} />
+                      <InputField
+                        label="Giá bán (VNĐ)"
+                        type="number"
+                        value={v.giaBan}
+                        onChange={(val) => updateVariant(currentId, 'giaBan', Number(val))}
+                        disabled={!isEditing}
+                      />
+                      <InputField
+                        label="Giá KM (VNĐ)"
+                        type="number"
+                        value={v.giaKhuyenMai}
+                        onChange={(val) => updateVariant(currentId, 'giaKhuyenMai', Number(val))}
+                        disabled={!isEditing}
+                      />
                     </div>
 
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 space-y-6 shadow-inner">
                       <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest">Thông số phần cứng</h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <InputField label="Màu sắc" value={v.mauSac} onChange={(val) => updateVariant(currentId, 'mauSac', val)} disabled={!isEditing} />
-                        <InputField label="Dung lượng RAM" value={v.ram} onChange={(val) => updateVariant(currentId, 'ram', val)} disabled={!isEditing} />
-                        <InputField label="Dung lượng Ổ cứng" value={v.oCung} onChange={(val) => updateVariant(currentId, 'oCung', val)} disabled={!isEditing} />
-                        <InputField label="Số lượng tồn kho" type="number" value={v.soLuongTon} onChange={(val) => updateVariant(currentId, 'soLuongTon', Number(val))} disabled={!isEditing} />
+                        <InputField
+                          label="Màu sắc"
+                          value={v.mauSac}
+                          onChange={(val) => updateVariant(currentId, 'mauSac', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Dung lượng RAM"
+                          value={v.ram}
+                          onChange={(val) => updateVariant(currentId, 'ram', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Dung lượng Ổ cứng"
+                          value={v.oCung}
+                          onChange={(val) => updateVariant(currentId, 'oCung', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Số lượng tồn kho"
+                          type="number"
+                          value={v.soLuongTon}
+                          onChange={(val) => updateVariant(currentId, 'soLuongTon', Number(val))}
+                          disabled={!isEditing}
+                        />
 
-                        <InputField label="CPU (Bộ vi xử lý)" value={v.boXuLyTrungTam} onChange={(val) => updateVariant(currentId, 'boXuLyTrungTam', val)} disabled={!isEditing} />
-                        <InputField label="GPU (Card đồ họa)" value={v.boXuLyDoHoa} onChange={(val) => updateVariant(currentId, 'boXuLyDoHoa', val)} disabled={!isEditing} />
-                        <InputField label="Kích thước màn hình" value={v.thongSoKyThuat?.kichThuocManHinh} onChange={(val) => updateVariantSpec(currentId, 'kichThuocManHinh', val)} disabled={!isEditing} />
-                        <InputField label="Độ phân giải" value={v.thongSoKyThuat?.doPhanGiaiManHinh} onChange={(val) => updateVariantSpec(currentId, 'doPhanGiaiManHinh', val)} disabled={!isEditing} />
+                        <InputField
+                          label="CPU (Bộ vi xử lý)"
+                          value={v.boXuLyTrungTam}
+                          onChange={(val) => updateVariant(currentId, 'boXuLyTrungTam', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="GPU (Card đồ họa)"
+                          value={v.boXuLyDoHoa}
+                          onChange={(val) => updateVariant(currentId, 'boXuLyDoHoa', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Kích thước màn hình"
+                          value={v.thongSoKyThuat?.kichThuocManHinh}
+                          onChange={(val) => updateVariantSpec(currentId, 'kichThuocManHinh', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Độ phân giải"
+                          value={v.thongSoKyThuat?.doPhanGiaiManHinh}
+                          onChange={(val) => updateVariantSpec(currentId, 'doPhanGiaiManHinh', val)}
+                          disabled={!isEditing}
+                        /><InputField
+                          label="Hệ điều hành"
+                          value={v.thongSoKyThuat?.heDieuHanh}
+                          onChange={(val) => updateVariantSpec(currentId, 'heDieuHanh', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Dung lượng PIN"
+                          value={v.thongSoKyThuat?.pin}
+                          onChange={(val) => updateVariantSpec(currentId, 'pin', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Số khe RAM"
+                          value={v.thongSoKyThuat?.soKheRam}
+                          onChange={(val) => updateVariantSpec(currentId, 'soKheRam', val)}
+                          disabled={!isEditing}
+                        />
+                        <InputField
+                          label="Cổng giao tiếp"
+                          value={v.thongSoKyThuat?.congGiaoTiep}
+                          onChange={(val) => updateVariantSpec(currentId, 'congGiaoTiep', val)}
+                          disabled={!isEditing}
+                        />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <InputField label="Hệ điều hành" value={v.thongSoKyThuat?.heDieuHanh} onChange={(val) => updateVariantSpec(currentId, 'heDieuHanh', val)} disabled={!isEditing} />
-                      <InputField label="Dung lượng PIN" value={v.thongSoKyThuat?.pin} onChange={(val) => updateVariantSpec(currentId, 'pin', val)} disabled={!isEditing} />
-                      <InputField label="Số khe RAM" value={v.thongSoKyThuat?.soKheRam} onChange={(val) => updateVariantSpec(currentId, 'soKheRam', val)} disabled={!isEditing} />
-                      <InputField label="Cổng giao tiếp" value={v.thongSoKyThuat?.congGiaoTiep} onChange={(val) => updateVariantSpec(currentId, 'congGiaoTiep', val)} disabled={!isEditing} />
-                    </div>
+                    {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+                    </div> */}
                   </div>
                 )}
               </div>
@@ -548,3 +811,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

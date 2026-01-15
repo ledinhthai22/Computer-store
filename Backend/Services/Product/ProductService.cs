@@ -14,16 +14,19 @@ namespace Backend.Services.Product
         private readonly SlugHelper _slugHelper;
         private readonly IFileService _fileService;
         private readonly IConfiguration _config;
+        private readonly ILogger<ProductService> _logger;
         public ProductService(
             ApplicationDbContext db,
             SlugHelper slugHelper,
             IFileService fileService,
-            IConfiguration config)
+            IConfiguration config,
+            ILogger<ProductService> logger)
         {
             _db = db;
             _slugHelper = slugHelper;
             _fileService = fileService;
             _config = config;
+            _logger = logger;
         }
 
         public async Task<ProductResult?> GetByIdAsync(int id)
@@ -34,7 +37,7 @@ namespace Backend.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                     .ThenInclude(bt => bt.thongSoKyThuat)
-                .FirstOrDefaultAsync(x => x.MaSanPham == id);
+                .FirstOrDefaultAsync(x => x.MaSanPham == id && x.NgayXoa == null);
 
             if (product == null) return null;
 
@@ -101,7 +104,6 @@ namespace Backend.Services.Product
                 DanhGiaTrungBinh = 0 // Tính toán logic đánh giá nếu cần
             };
         }
-
 
 
         public async Task<List<AdminListProductItem>> GetAdminProductListAsync()
@@ -328,7 +330,6 @@ namespace Backend.Services.Product
             return await GetByIdAsync(product.MaSanPham);
         }
 
-
         public async Task<ProductResult?> UpdateAsync(int id, UpdateProductRequest request)
         {
             var product = await _db.SanPham
@@ -340,14 +341,14 @@ namespace Backend.Services.Product
             if (product == null)
                 return null;
 
-            // 1. Validate & cập nhật tên sản phẩm
+            // ===== CẬP NHẬT THÔNG TIN CƠ BẢN =====
             if (!string.IsNullOrWhiteSpace(request.TenSanPham) &&
                 !string.Equals(request.TenSanPham.Trim(), product.TenSanPham?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
-                var duplicate = await _db.SanPham
-                    .AnyAsync(x => x.TenSanPham.Trim().ToLower() == request.TenSanPham.Trim().ToLower() &&
-                                   x.NgayXoa == null &&
-                                   x.MaSanPham != id);
+                bool duplicate = await _db.SanPham.AnyAsync(x =>
+                    x.TenSanPham.Trim().ToLower() == request.TenSanPham.Trim().ToLower() &&
+                    x.NgayXoa == null &&
+                    x.MaSanPham != id);
 
                 if (duplicate)
                     throw new InvalidOperationException($"Sản phẩm '{request.TenSanPham}' đã tồn tại.");
@@ -356,17 +357,16 @@ namespace Backend.Services.Product
                 product.Slug = _slugHelper.GenerateSlug(request.TenSanPham);
             }
 
-            // 2. Cập nhật số lượng tồn kho
             if (request.SoLuongTon >= 0)
-            {
                 product.SoLuongTon = request.SoLuongTon;
-            }
 
-            // 3. Cập nhật danh mục & thương hiệu
-            if (request.MaDanhMuc.HasValue) product.MaDanhMuc = request.MaDanhMuc.Value;
-            if (request.MaThuongHieu.HasValue) product.MaThuongHieu = request.MaThuongHieu.Value;
+            if (request.MaDanhMuc.HasValue)
+                product.MaDanhMuc = request.MaDanhMuc.Value;
 
-            // 4. Xóa hình ảnh cũ (hard delete file + entity)
+            if (request.MaThuongHieu.HasValue)
+                product.MaThuongHieu = request.MaThuongHieu.Value;
+
+            // ===== XỬ LÝ XÓA ẢNH =====
             if (request.HinhAnhXoa?.Any() == true)
             {
                 var imagesToDelete = product.HinhAnhSanPham
@@ -375,101 +375,161 @@ namespace Backend.Services.Product
 
                 foreach (var img in imagesToDelete)
                 {
-                    await _fileService.DeleteAsync(img.DuongDanAnh); // Sử dụng FileService để xóa file
-                    _db.HinhAnhSanPham.Remove(img);
+                    await _fileService.DeleteAsync(img.DuongDanAnh);
+                    img.NgayXoa = DateTime.UtcNow;
                 }
             }
 
-            // 5. Thêm hình ảnh mới (sử dụng FileService để sinh tên đẹp)
+            // ===== XỬ LÝ THÊM ẢNH MỚI =====
+            List<HinhAnhSanPham> newlyAddedImages = new List<HinhAnhSanPham>();
+
             if (request.HinhAnhMoi?.Any() == true)
             {
-                int stt = 1; // Thứ tự ảnh bắt đầu từ 1
+                int maxThuTu = product.HinhAnhSanPham
+                    .Where(img => img.NgayXoa == null)
+                    .Select(img => img.ThuTuAnh)
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                int stt = maxThuTu + 1;
+
                 foreach (var file in request.HinhAnhMoi)
                 {
                     if (file == null || file.Length == 0) continue;
 
-                    bool isAnhChinh = (stt == 1); // Ảnh đầu tiên là ảnh chính
-
-                    // Upload và lấy đường dẫn từ FileService
                     var duongDanAnh = await _fileService.UploadProductImageAsync(
                         file,
                         product.TenSanPham ?? "SanPham",
-                        "BienTheMacDinh", // Nếu không có biến thể cụ thể, dùng mặc định
-                        isAnhChinh,
+                        "BienTheMacDinh",
+                        false, // Tạm thời set false, sẽ xử lý sau
                         stt
                     );
 
-                    product.HinhAnhSanPham.Add(new HinhAnhSanPham
+                    var newImage = new HinhAnhSanPham
                     {
                         DuongDanAnh = duongDanAnh,
-                        AnhChinh = isAnhChinh,
+                        AnhChinh = false, // Tạm thời false
                         ThuTuAnh = stt,
                         MaSanPham = product.MaSanPham
-                    });
+                    };
 
+                    product.HinhAnhSanPham.Add(newImage);
+                    newlyAddedImages.Add(newImage);
                     stt++;
                 }
             }
 
-            // 6. Xóa mềm biến thể + xóa thông số kỹ thuật
+            // ===== XỬ LÝ ẢNH CHÍNH - LOGIC QUAN TRỌNG NHẤT =====
+
+            // Bước 1: Reset tất cả ảnh về không phải ảnh chính
+            foreach (var img in product.HinhAnhSanPham.Where(i => i.NgayXoa == null))
+            {
+                img.AnhChinh = false;
+            }
+
+            // Bước 2: Set ảnh chính theo yêu cầu
+            bool mainImageSet = false;
+
+            // Trường hợp 1: Client chỉ định ảnh cũ làm ảnh chính
+            if (request.MaAnhChinh.HasValue && request.MaAnhChinh.Value > 0)
+            {
+                var selectedMainImage = product.HinhAnhSanPham
+                    .FirstOrDefault(img => img.MaHinhAnh == request.MaAnhChinh.Value && img.NgayXoa == null);
+
+                if (selectedMainImage != null)
+                {
+                    selectedMainImage.AnhChinh = true;
+                    mainImageSet = true;
+                    _logger?.LogInformation($"Set ảnh chính: ID = {selectedMainImage.MaHinhAnh} (ảnh cũ được chọn)");
+                }
+            }
+
+            // Trường hợp 2: Client muốn ảnh mới đầu tiên làm ảnh chính
+            if (!mainImageSet && request.AnhMoiDauTienLaAnhChinh && newlyAddedImages.Any())
+            {
+                newlyAddedImages.First().AnhChinh = true;
+                mainImageSet = true;
+                _logger?.LogInformation($"Set ảnh chính: Ảnh mới đầu tiên");
+            }
+
+            // Trường hợp 3: Fallback - Chọn ảnh đầu tiên theo thứ tự
+            if (!mainImageSet)
+            {
+                var firstImage = product.HinhAnhSanPham
+                    .Where(img => img.NgayXoa == null)
+                    .OrderBy(img => img.ThuTuAnh)
+                    .FirstOrDefault();
+
+                if (firstImage != null)
+                {
+                    firstImage.AnhChinh = true;
+                    _logger?.LogInformation($"Set ảnh chính: Fallback - Ảnh ID = {firstImage.MaHinhAnh}");
+                }
+                else
+                {
+                    _logger?.LogWarning("Không có ảnh nào để set làm ảnh chính!");
+                }
+            }
+
+            // ===== LOG DEBUG =====
+            _logger?.LogInformation("=== TRẠNG THÁI ẢNH SAU CẬP NHẬT ===");
+            foreach (var img in product.HinhAnhSanPham.Where(i => i.NgayXoa == null).OrderBy(i => i.ThuTuAnh))
+            {
+                _logger?.LogInformation($"ID: {img.MaHinhAnh}, Thứ tự: {img.ThuTuAnh}, Ảnh chính: {img.AnhChinh}, Đường dẫn: {img.DuongDanAnh}");
+            }
+
+            // ===== XỬ LÝ XÓA BIẾN THỂ =====
             if (request.BienTheXoa?.Any() == true)
             {
                 var now = DateTime.UtcNow;
-                var idsToDelete = request.BienTheXoa.ToHashSet();
+                var ids = request.BienTheXoa.ToHashSet();
 
-                var variantsToDelete = product.BienThe
-                    .Where(bt => idsToDelete.Contains(bt.MaBTSP) && bt.NgayXoa == null)
-                    .ToList();
-
-                foreach (var variant in variantsToDelete)
+                foreach (var bt in product.BienThe.Where(x => ids.Contains(x.MaBTSP) && x.NgayXoa == null))
                 {
-                    variant.NgayXoa = now;
-                    variant.TrangThai = false;
+                    bt.NgayXoa = now;
+                    bt.TrangThai = false;
 
-                    if (variant.thongSoKyThuat != null)
+                    if (bt.thongSoKyThuat != null)
                     {
-                        _db.ThongSoKyThuat.Remove(variant.thongSoKyThuat);
-                        variant.thongSoKyThuat = null;
+                        _db.ThongSoKyThuat.Remove(bt.thongSoKyThuat);
+                        bt.thongSoKyThuat = null;
                     }
                 }
             }
 
-            // 7. Cập nhật / Thêm biến thể
+            // ===== CẬP NHẬT BIẾN THỂ =====
             if (request.BienThe?.Any() == true)
             {
                 foreach (var req in request.BienThe)
                 {
-                    if (req.MaBTSP.HasValue && req.MaBTSP.Value > 0)
+                    if (req.MaBTSP.HasValue && req.MaBTSP > 0)
                     {
-                        // UPDATE biến thể cũ
-                        var existing = product.BienThe
-                            .FirstOrDefault(bt => bt.MaBTSP == req.MaBTSP.Value && bt.NgayXoa == null);
+                        // Cập nhật biến thể cũ
+                        var bt = product.BienThe
+                            .FirstOrDefault(x => x.MaBTSP == req.MaBTSP && x.NgayXoa == null);
 
-                        if (existing == null) continue;
+                        if (bt == null) continue;
 
-                        existing.TenBienThe = req.TenBienThe?.Trim() ?? existing.TenBienThe;
-                        existing.GiaBan = req.GiaBan;
-                        existing.GiaKhuyenMai = req.GiaKhuyenMai;
-                        existing.MauSac = req.MauSac?.Trim() ?? existing.MauSac;
-                        existing.Ram = req.Ram?.Trim() ?? existing.Ram;
-                        existing.OCung = req.OCung?.Trim() ?? existing.OCung;
-                        existing.BoXuLyTrungTam = req.BoXuLyTrungTam?.Trim() ?? existing.BoXuLyTrungTam;
-                        existing.BoXuLyDoHoa = req.BoXuLyDoHoa?.Trim() ?? existing.BoXuLyDoHoa;
-                        existing.SoLuongTon = req.SoLuongTon;
+                        bt.TenBienThe = req.TenBienThe?.Trim() ?? bt.TenBienThe;
+                        bt.GiaBan = req.GiaBan;
+                        bt.GiaKhuyenMai = req.GiaKhuyenMai;
+                        bt.MauSac = req.MauSac?.Trim() ?? bt.MauSac;
+                        bt.Ram = req.Ram?.Trim() ?? bt.Ram;
+                        bt.OCung = req.OCung?.Trim() ?? bt.OCung;
+                        bt.BoXuLyTrungTam = req.BoXuLyTrungTam?.Trim() ?? bt.BoXuLyTrungTam;
+                        bt.BoXuLyDoHoa = req.BoXuLyDoHoa?.Trim() ?? bt.BoXuLyDoHoa;
+                        bt.SoLuongTon = req.SoLuongTon;
 
                         if (req.TrangThai.HasValue)
-                            existing.TrangThai = req.TrangThai.Value;
+                            bt.TrangThai = req.TrangThai.Value;
 
                         if (req.ThongSoKyThuat != null)
                         {
-                            if (existing.thongSoKyThuat == null)
-                            {
-                                existing.thongSoKyThuat = new ThongSoKyThuat { MaBienThe = existing.MaBTSP };
-                            }
+                            bt.thongSoKyThuat ??= new ThongSoKyThuat { MaBienThe = bt.MaBTSP };
 
-                            var ts = existing.thongSoKyThuat;
+                            var ts = bt.thongSoKyThuat;
                             ts.KichThuocManHinh = req.ThongSoKyThuat.KichThuocManHinh?.Trim() ?? ts.KichThuocManHinh;
-                            ts.DungLuongRam = req.ThongSoKyThuat.DungLuongRam?.Trim() ?? existing.Ram ?? "Đang cập nhật";
+                            ts.DungLuongRam = req.ThongSoKyThuat.DungLuongRam?.Trim() ?? bt.Ram ?? "Đang cập nhật";
                             ts.SoKheRam = req.ThongSoKyThuat.SoKheRam?.Trim() ?? ts.SoKheRam;
                             ts.OCung = req.ThongSoKyThuat.OCung?.Trim() ?? ts.OCung;
                             ts.Pin = req.ThongSoKyThuat.Pin?.Trim() ?? ts.Pin;
@@ -482,7 +542,7 @@ namespace Backend.Services.Product
                     }
                     else
                     {
-                        // THÊM biến thể mới
+                        // Thêm biến thể mới
                         var newVariant = new BienThe
                         {
                             MaSanPham = product.MaSanPham,
@@ -495,58 +555,32 @@ namespace Backend.Services.Product
                             BoXuLyTrungTam = req.BoXuLyTrungTam?.Trim() ?? "Đang cập nhật",
                             BoXuLyDoHoa = req.BoXuLyDoHoa?.Trim() ?? "Đang cập nhật",
                             SoLuongTon = req.SoLuongTon,
-                            TrangThai = req.TrangThai ?? true,
-                            NgayXoa = null
+                            TrangThai = req.TrangThai ?? true
                         };
 
-                        newVariant.thongSoKyThuat = req.ThongSoKyThuat != null
-                            ? new ThongSoKyThuat
-                            {
-                                KichThuocManHinh = req.ThongSoKyThuat.KichThuocManHinh?.Trim() ?? "Đang cập nhật",
-                                DungLuongRam = req.ThongSoKyThuat.DungLuongRam?.Trim() ?? newVariant.Ram ?? "Đang cập nhật",
-                                SoKheRam = req.ThongSoKyThuat.SoKheRam?.Trim() ?? "1",
-                                OCung = req.ThongSoKyThuat.OCung?.Trim() ?? newVariant.OCung ?? "Đang cập nhật",
-                                Pin = req.ThongSoKyThuat.Pin?.Trim() ?? "Đang cập nhật",
-                                HeDieuHanh = req.ThongSoKyThuat.HeDieuHanh?.Trim() ?? "Đang cập nhật",
-                                DoPhanGiaiManHinh = req.ThongSoKyThuat.DoPhanGiaiManHinh?.Trim() ?? "Đang cập nhật",
-                                LoaiXuLyTrungTam = req.ThongSoKyThuat.LoaiXuLyTrungTam?.Trim() ?? newVariant.BoXuLyTrungTam ?? "Đang cập nhật",
-                                LoaiXuLyDoHoa = req.ThongSoKyThuat.LoaiXuLyDoHoa?.Trim() ?? newVariant.BoXuLyDoHoa ?? "Đang cập nhật",
-                                CongGiaoTiep = req.ThongSoKyThuat.CongGiaoTiep?.Trim() ?? "Đang cập nhật",
-                                MaBienThe = 0
-                            }
-                            : new ThongSoKyThuat
-                            {
-                                KichThuocManHinh = "Đang cập nhật",
-                                DungLuongRam = newVariant.Ram ?? "Đang cập nhật",
-                                SoKheRam = "1",
-                                OCung = newVariant.OCung ?? "Đang cập nhật",
-                                Pin = "Đang cập nhật",
-                                HeDieuHanh = "Đang cập nhật",
-                                DoPhanGiaiManHinh = "Đang cập nhật",
-                                LoaiXuLyTrungTam = newVariant.BoXuLyTrungTam ?? "Đang cập nhật",
-                                LoaiXuLyDoHoa = newVariant.BoXuLyDoHoa ?? "Đang cập nhật",
-                                CongGiaoTiep = "Đang cập nhật",
-                                MaBienThe = 0
-                            };
+                        newVariant.thongSoKyThuat = new ThongSoKyThuat
+                        {
+                            DungLuongRam = newVariant.Ram,
+                            OCung = newVariant.OCung,
+                            LoaiXuLyTrungTam = newVariant.BoXuLyTrungTam,
+                            LoaiXuLyDoHoa = newVariant.BoXuLyDoHoa,
+                            KichThuocManHinh = req.ThongSoKyThuat?.KichThuocManHinh ?? "Đang cập nhật",
+                            SoKheRam = req.ThongSoKyThuat?.SoKheRam ?? "1",
+                            Pin = req.ThongSoKyThuat?.Pin ?? "Đang cập nhật",
+                            HeDieuHanh = req.ThongSoKyThuat?.HeDieuHanh ?? "Đang cập nhật",
+                            DoPhanGiaiManHinh = req.ThongSoKyThuat?.DoPhanGiaiManHinh ?? "Đang cập nhật",
+                            CongGiaoTiep = req.ThongSoKyThuat?.CongGiaoTiep ?? "Đang cập nhật"
+                        };
 
                         product.BienThe.Add(newVariant);
                     }
                 }
             }
 
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                var errorMsg = ex.InnerException?.Message ?? ex.Message;
-                Console.WriteLine($"Lỗi SaveChanges: {errorMsg}");
-                throw new Exception($"Lỗi lưu database: {errorMsg}", ex);
-            }
-
+            await _db.SaveChangesAsync();
             return await GetByIdAsync(id);
         }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var product = await _db.SanPham

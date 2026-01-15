@@ -15,21 +15,22 @@ const ProductTable = ({ data = [], loading }) => {
             item.slug?.toLowerCase().includes(filterText.toLowerCase()) ||
             item.tenDanhMuc?.toLowerCase().includes(filterText.toLowerCase()) ||
             item.tenThuongHieu?.toLowerCase().includes(filterText.toLowerCase()) ||
-            item.tongSoLuong?.toString().includes(filterText)
+            item.tongSoLuong?.toString().includes(filterText) ||
+            item.trangThai?.toString().includes(filterText).toLowerCase
     );
-    const formatDateTime = (dateString) => {
-        if (!dateString) return "N/A";
-        const date = new Date(dateString);
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
+    // const formatDateTime = (dateString) => {
+    //     if (!dateString) return "N/A";
+    //     const date = new Date(dateString);
 
-        return `${hours}:${minutes} - ${day}/${month}/${year}`;
-    };
+    //     const day = String(date.getDate()).padStart(2, '0');
+    //     const month = String(date.getMonth() + 1).padStart(2, '0');
+    //     const year = date.getFullYear();
+
+    //     const hours = String(date.getHours()).padStart(2, '0');
+    //     const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    //     return `${hours}:${minutes} - ${day}/${month}/${year}`;
+    // };
     const columns = [
         {
             name: "STT",
@@ -41,6 +42,7 @@ const ProductTable = ({ data = [], loading }) => {
             name: "TÊN SẢN PHẨM",
             selector: row => row.tenSanPham,
             sortable: true,
+            width: "150px",
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700">
@@ -52,6 +54,7 @@ const ProductTable = ({ data = [], loading }) => {
             name: "SLUG",
             selector: row => row.slug,
             sortable: true,
+            width: "150px",
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700">
@@ -63,6 +66,7 @@ const ProductTable = ({ data = [], loading }) => {
             name: "DANH MỤC",
             selector: row => row.tenDanhMuc,
             sortable: true,
+            width: "150px",
             cell: row => (
                 <span className="text-gray-600">
                     {row.tenDanhMuc}
@@ -73,6 +77,7 @@ const ProductTable = ({ data = [], loading }) => {
             name: "THƯƠNG HIỆU",
             selector: row => row.tenThuongHieu,
             sortable: true,
+            width: "150px",
             cell: row => (
                 <span className="text-gray-600">
                     {row.tenThuongHieu}
@@ -84,9 +89,40 @@ const ProductTable = ({ data = [], loading }) => {
             selector: row => row.tongSoLuong,
             sortable: true,
             center: true,
+            width: "150px",
             cell: row => (
                 <span className="font-semibold">
                     {row.tongSoLuong}
+                </span>
+            ),
+        },
+        {
+            name: "TRẠNG THÁI",
+            selector: row => row.trangThai,
+            sortable: true,
+            center: true,
+            width: "150px",
+            cell: row => (
+                <span
+                    className={`
+                inline-flex items-center gap-1.5
+                px-3 py-1.5 text-sm font-semibold rounded-full
+                border border-current whitespace-nowrap
+                ${row.trangThai
+                            ? 'text-green-700 bg-green-100 border-green-400'
+                            : 'text-red-700 bg-red-100 border-red-400'
+                        }
+            `}
+                >
+                    {row.trangThai ? (
+                        <>
+                            Còn hàng
+                        </>
+                    ) : (
+                        <>
+                            Hết hàng
+                        </>
+                    )}
                 </span>
             ),
         },
