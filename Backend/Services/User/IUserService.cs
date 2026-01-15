@@ -10,9 +10,10 @@ namespace Backend.Services.User
         Task<IEnumerable<UserResult>> GetUnLockListAsync();
         Task<IEnumerable<UserResult>> GetDeleteListAsync();
         Task<UserResult?> GetUserInfoAsync(int id);
-        Task<UserResult?>UpdateUserAsync(int id,UpdateUserRequest request);
+         Task<UserResult?> UpdateInfoUserAsync(int id, UpdateUserRequest request);
+        Task<UserResult?> ChangePasswordAsync(int id, ChangePasswordRequest request);
+
         Task<UserResult?> CreateAsync(CreateUserRequest request);
-        Task<UserResult?> UpdateAdminAsync(int id, UpdateUserRequest request);
         Task<bool> DeleteAsync(int id);
         Task<bool> RestoreAsync(int id);
         Task<bool> LockAsync(int id);

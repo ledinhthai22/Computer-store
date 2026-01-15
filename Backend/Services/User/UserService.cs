@@ -2,7 +2,6 @@ using Backend.Models;
 using Backend.Data;
 using Backend.DTO.User;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 namespace Backend.Services.User
 {
     public class UserService : IUserService
@@ -108,30 +107,6 @@ namespace Backend.Services.User
                 Message = "Tạo tài khoản thành công"
             };
         }
-        public async Task<UserResult?> UpdateAdminAsync(int id, UpdateUserRequest request)
-        {
-            var user = await _DbContext.NguoiDung.FindAsync(id);
-            if (user == null)
-            {
-                return null;
-            }
-
-            user.HoTen = request.HoTen;
-            user.SoDienThoai = request.SoDienThoai;
-            user.MaVaiTro = request.MaVaiTro;
-            user.NgayCapNhat = DateTime.Now;
-            await _DbContext.SaveChangesAsync();
-            return new UserResult
-            {
-                MaNguoiDung = user.MaNguoiDung,
-                HoTen = user.HoTen,
-                Email = user.Email,
-                SoDienThoai = user.SoDienThoai,
-                VaiTro = user.VaiTro.TenVaiTro,
-                TrangThai = user.TrangThai,
-                Message = "Cập nhật tài khoản thành công"
-            };
-        }
         public async Task<bool> LockAsync(int id)
         {
             var user = await _DbContext.NguoiDung.FindAsync(id);
@@ -193,13 +168,15 @@ namespace Backend.Services.User
                 MaNguoiDung = user.MaNguoiDung,
                 HoTen = user.HoTen,
                 Email = user.Email,
+                GioiTinh = user.GioiTinh,
+                NgaySinh = user.NgaySinh ?? DateTime.MinValue,
                 SoDienThoai = user.SoDienThoai,
                 VaiTro = user.VaiTro.TenVaiTro,
                 TrangThai = user.TrangThai
             };
         }
 
-        public async Task<UserResult?> UpdateUserAsync(int id, UpdateUserRequest request)
+        public async Task<UserResult?> UpdateInfoUserAsync(int id, UpdateUserRequest request)
         {
             var user = await _DbContext.NguoiDung
                 .Include(u => u.VaiTro)
@@ -212,6 +189,8 @@ namespace Backend.Services.User
 
             user.HoTen = request.HoTen;
             user.SoDienThoai = request.SoDienThoai;
+            user.GioiTinh = request.GioiTinh;
+            user.NgaySinh = request.NgaySinh;
             user.NgayCapNhat = DateTime.Now;
             await _DbContext.SaveChangesAsync();
 
@@ -220,9 +199,53 @@ namespace Backend.Services.User
                 HoTen = user.HoTen,
                 Email = user.Email,
                 SoDienThoai = user.SoDienThoai,
+                GioiTinh = user.GioiTinh,  
+                NgaySinh= user.NgayCapNhat,
                 TrangThai = user.TrangThai,
                 Message = "Cập nhật thông tin người dùng thành công"
             };
         }
+        public async Task<UserResult?> ChangePasswordAsync(int id,ChangePasswordRequest request)
+        {
+            var user = await _DbContext.NguoiDung
+                .Include(u => u.VaiTro)
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == id && u.NgayXoa == null);
+
+            if (user == null)
+                return null;
+
+            bool isOldPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.MatKhauCu,user.MatKhauMaHoa);
+
+            if (!isOldPasswordCorrect)
+            {
+                return new UserResult
+                {
+                    Message = "Mật khẩu cũ không đúng"
+                };
+            }
+
+            if (request.MatKhauCu == request.MatKhauMoi)
+            {
+                return new UserResult
+                {
+                    Message = "Mật khẩu mới phải khác mật khẩu cũ"
+                };
+            }
+
+            user.MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(request.MatKhauMoi);
+            user.NgayCapNhat = DateTime.Now;
+
+            await _DbContext.SaveChangesAsync();
+
+            return new UserResult
+            {
+                MaNguoiDung = user.MaNguoiDung,
+                HoTen = user.HoTen,
+                Email = user.Email,
+                TrangThai = user.TrangThai,
+                Message = "Đổi mật khẩu thành công"
+            };
+        }
+
     }
 }

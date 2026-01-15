@@ -67,19 +67,45 @@ namespace Backend.Services.Auth
 
         public async Task<AuthResult> RegisterAsync(RegisterRequest req)
         {
+            
             var existed = await _Dbcontext.NguoiDung
-                .FirstOrDefaultAsync(x => x.Email == req.Email);
+                .FirstOrDefaultAsync(x => x.Email == req.Email && x.NgayXoa == null);
 
             if (existed != null)
-                return new AuthResult { Success = false, Message = "Email đã tồn tại" };
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "Email đã tồn tại"
+                };
+
+         
+            var today = DateTime.Today;
+            int age = today.Year - req.NgaySinh.Year;
+
+            if (req.NgaySinh > today)
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "Ngày sinh không được lớn hơn ngày hiện tại"
+                };
+
+            if (age > 100)
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "Tuổi không được lớn hơn 100"
+                };
 
             string hashPassWord = BCrypt.Net.BCrypt.HashPassword(req.MatKhau);
 
+       
             var user = new NguoiDung
             {
                 HoTen = req.HoTen,
                 Email = req.Email,
                 SoDienThoai = req.SoDienThoai,
+                GioiTinh = req.GioiTinh,
+                NgaySinh = req.NgaySinh,
                 MatKhauMaHoa = hashPassWord,
                 TrangThai = true,
                 MaVaiTro = 2,
@@ -90,11 +116,13 @@ namespace Backend.Services.Auth
             _Dbcontext.NguoiDung.Add(user);
             await _Dbcontext.SaveChangesAsync();
 
+       
             var vaiTro = await _Dbcontext.VaiTro
                 .FirstOrDefaultAsync(r => r.MaVaiTro == user.MaVaiTro);
 
             string tenVaiTro = vaiTro?.TenVaiTro ?? "NguoiDung";
 
+     
             var token = _jwtHelper.GenerateToken(user.MaNguoiDung, tenVaiTro);
 
             return new AuthResult
@@ -105,6 +133,8 @@ namespace Backend.Services.Auth
                 VaiTro = tenVaiTro
             };
         }
+
+
 
         public string GenerateRefreshToken(int userId)
         {
