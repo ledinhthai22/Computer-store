@@ -369,7 +369,7 @@ namespace Backend.Services.Product
             if (request.MaThuongHieu.HasValue)
                 product.MaThuongHieu = request.MaThuongHieu.Value;
 
-            // ===== XỬ LÝ XÓA ẢNH =====
+           
             if (request.HinhAnhXoa?.Any() == true)
             {
                 var imagesToDelete = product.HinhAnhSanPham
@@ -383,7 +383,7 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== XỬ LÝ THÊM ẢNH MỚI =====
+            
             List<HinhAnhSanPham> newlyAddedImages = new List<HinhAnhSanPham>();
 
             if (request.HinhAnhMoi?.Any() == true)
@@ -427,7 +427,7 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== XỬ LÝ ẢNH CHÍNH =====
+
             foreach (var img in product.HinhAnhSanPham.Where(i => i.NgayXoa == null))
             {
                 img.AnhChinh = false;
@@ -468,7 +468,7 @@ namespace Backend.Services.Product
                 if (firstImage != null)
                 {
                     firstImage.AnhChinh = true;
-                    await RenameImageToMainAsync(firstImage, product.TenSanPham);
+                    await RenameImageToMainAsync(firstImage, product.TenSanPham );
                 }
             }
 

@@ -34,7 +34,12 @@ namespace Ecommerce.Controller.Client.Public
         [HttpPut]
         public async Task<IActionResult> UpdateMyInfo(UpdateUserRequest request)
         {
-            return Ok(await _userService.UpdateUserAsync(GetUserId(), request));
+            return Ok(await _userService.UpdateInfoUserAsync(GetUserId(), request));
+        }
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassWord(ChangePasswordRequest request)
+        {
+            return Ok(await _userService.ChangePasswordAsync(GetUserId(), request));
         }
     }
 }

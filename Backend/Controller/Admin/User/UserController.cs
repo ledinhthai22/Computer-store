@@ -53,13 +53,13 @@ namespace Backend.Controllers.Admin
             return Ok(new { message = "Tạo người dùng thành công" });
         }
 
-        // PUT /api/admin/users/{id}
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, UpdateUserRequest request)
-        {
-            await _userService.UpdateAdminAsync(id, request);
-            return Ok(new { message = "Cập nhật thành công" });
-        }
+        //// PUT /api/admin/users/{id}
+        //[HttpPut("{id:int}")]
+        //public async Task<IActionResult> Update(int id, UpdateUserRequest request)
+        //{
+        //    await _userService.UpdateAdminAsync(id, request);
+        //    return Ok(new { message = "Cập nhật thành công" });
+        //}
 
         // PUT /api/admin/users/{id}/lock
         [HttpPut("{id:int}/lock")]
