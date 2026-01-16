@@ -73,7 +73,7 @@ export default function Profile() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-b border-gray-100">
                 <div className="font-semibold text-gray-700">Giới tính:</div>
-                <div className="sm:col-span-2 text-gray-900 font-medium">{profileData.gioiTinh === false ? "Nam" : "Nữ"}</div>
+                <div className="sm:col-span-2 text-gray-900 font-medium">{profileData.gioiTinh === true ? "Nam" : "Nữ"}</div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-b border-gray-100">

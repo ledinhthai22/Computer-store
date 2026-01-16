@@ -21,7 +21,7 @@ export default function UpdateProfileModal({ onClose, user }) {
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     hoTen: user?.hoTen || "",
-    gioiTinh: user?.gioiTinh === false ? "Nam" : "Nữ" || "",
+    gioiTinh: user?.gioiTinh === true ? "Nam" : "Nữ" || "",
     ngaySinh: formatDateForInput(user?.ngaySinh) || "",
     email: user?.email || "",
     soDienThoai: user?.soDienThoai || "",
@@ -49,7 +49,7 @@ export default function UpdateProfileModal({ onClose, user }) {
         soDienThoai: formData.soDienThoai,
         // matKhau: formData.matKhau,
         ngaySinh: formData.ngaySinh,
-        gioiTinh: formData.gioiTinh === "Nam" ? false : true,
+        gioiTinh: formData.gioiTinh === "Nam" ? true : false,
         maVaiTro: user.maVaiTro || 1
       };
 
