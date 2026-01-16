@@ -62,11 +62,6 @@ export default function Profile() {
             <div className="space-y-0">
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-b border-gray-100">
-                <div className="font-semibold text-gray-700">Mã người dùng:</div>
-                <div className="sm:col-span-2 text-gray-900">{profileData.maNguoiDung}</div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-b border-gray-100">
                 <div className="font-semibold text-gray-700">Họ và tên:</div>
                 <div className="sm:col-span-2 text-gray-900 font-medium">{profileData.hoTen}</div>
               </div>

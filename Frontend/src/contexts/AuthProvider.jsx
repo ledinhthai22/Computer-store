@@ -33,19 +33,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (hoTen, email, matKhau, gioiTinh, ngaySinh, soDienThoai, xacNhanMatKhau) => {
+  const register = async (data) => {
     try {
-      await axiosClient.post("/auth/register", {
-        hoTen,
-        email,
-        ngaySinh,
-        gioiTinh,
-        soDienThoai,
-        matKhau,
-        xacNhanMatKhau,
-      });
+      await axiosClient.post("/auth/register", data);
 
-      const loginResult = await login(email, matKhau);
+      const loginResult = await login(data.email, data.matKhau);
 
       if (loginResult.success) {
         return { success: true };
