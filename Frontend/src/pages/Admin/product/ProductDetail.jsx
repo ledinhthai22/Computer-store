@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Toast from '../../../components/admin/Toast';
-import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp,ImageIcon,Package,Settings,DollarSign,AlertCircle } from 'lucide-react';
 import DeleteConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import UpdateConfirmModal from '../../../components/admin/UpdateConfirmModal';
 import { productService } from "../../../services/api/productService";
