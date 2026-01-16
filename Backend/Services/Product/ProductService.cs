@@ -4,6 +4,7 @@ using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
 using Backend.Services.File;
+using Ecommerce.DTO.Common;
 using Ecommerce.DTO.Product;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -581,13 +582,13 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== LƯU VÀO DATABASE =====
+           
             await _db.SaveChangesAsync();
 
             return await GetByIdAsync(id);
         }
 
-        // ===== HÀM HELPER ĐỔI TÊN ẢNH =====
+        
         private async Task RenameImageToMainAsync(HinhAnhSanPham image, string productName)
         {
             await Task.Run(() =>
@@ -953,26 +954,15 @@ namespace Backend.Services.Product
                 .ToListAsync();
         }
 
-        public async Task<List<ProductListItem>> GetProductsByCategoryAsync(int maDanhMuc, int soLuong = 12)
+        public async Task<PagedResult<ProductListItem>> GetProductsByBrandPagingAsync(
+     int maThuongHieu,
+     int page = 1,
+     int pageSize = 12,
+     int? maDanhMuc = null,
+     decimal? giaMin = null,
+     decimal? giaMax = null)
         {
-            return await _db.SanPham
-                .Include(x => x.DanhMuc)
-                .Include(x => x.ThuongHieu)
-                .Include(x => x.HinhAnhSanPham)
-                .Include(x => x.BienThe)
-                .Where(x =>
-                    x.NgayXoa == null &&
-                    x.TrangThai == true &&
-                    x.MaDanhMuc == maDanhMuc
-                )
-                .OrderByDescending(x => x.NgayTao)
-                .Take(soLuong)
-                .Select(x => MapToProductListItem(x))
-                .ToListAsync();
-        }
-        public async Task<List<ProductListItem>> GetProductsByBrandAsync(int maThuongHieu, int soLuong = 12)
-        {
-            return await _db.SanPham
+            var query = _db.SanPham
                 .Include(x => x.DanhMuc)
                 .Include(x => x.ThuongHieu)
                 .Include(x => x.HinhAnhSanPham)
@@ -981,11 +971,95 @@ namespace Backend.Services.Product
                     x.NgayXoa == null &&
                     x.TrangThai == true &&
                     x.MaThuongHieu == maThuongHieu
-                )
+                );
+
+            // Lọc theo danh mục
+            if (maDanhMuc.HasValue)
+            {
+                query = query.Where(x => x.MaDanhMuc == maDanhMuc.Value);
+            }
+
+            // Lọc theo giá
+            if (giaMin.HasValue || giaMax.HasValue)
+            {
+                query = query.Where(x => x.BienThe.Any(bt =>
+                    bt.NgayXoa == null &&
+                    (!giaMin.HasValue || bt.GiaBan >= giaMin.Value) &&
+                    (!giaMax.HasValue || bt.GiaBan <= giaMax.Value)
+                ));
+            }
+
+            var totalItems = await query.CountAsync();
+
+            var items = await query
                 .OrderByDescending(x => x.NgayTao)
-                .Take(soLuong)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(x => MapToProductListItem(x))
                 .ToListAsync();
+
+            return new PagedResult<ProductListItem>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                Items = items
+            };
+        }
+
+        public async Task<PagedResult<ProductListItem>> GetProductsByCategoryPagingAsync(
+            int maDanhMuc,
+            int page = 1,
+            int pageSize = 12,
+            int? maThuongHieu = null,
+            decimal? giaMin = null,
+            decimal? giaMax = null)
+        {
+            var query = _db.SanPham
+                .Include(x => x.DanhMuc)
+                .Include(x => x.ThuongHieu)
+                .Include(x => x.HinhAnhSanPham)
+                .Include(x => x.BienThe)
+                .Where(x =>
+                    x.NgayXoa == null &&
+                    x.TrangThai == true &&
+                    x.MaDanhMuc == maDanhMuc
+                );
+
+            // Lọc theo thương hiệu
+            if (maThuongHieu.HasValue)
+            {
+                query = query.Where(x => x.MaThuongHieu == maThuongHieu.Value);
+            }
+
+            // Lọc theo giá
+            if (giaMin.HasValue || giaMax.HasValue)
+            {
+                query = query.Where(x => x.BienThe.Any(bt =>
+                    bt.NgayXoa == null &&
+                    (!giaMin.HasValue || bt.GiaBan >= giaMin.Value) &&
+                    (!giaMax.HasValue || bt.GiaBan <= giaMax.Value)
+                ));
+            }
+
+            var totalItems = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(x => x.NgayTao)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => MapToProductListItem(x))
+                .ToListAsync();
+
+            return new PagedResult<ProductListItem>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                Items = items
+            };
         }
 
         private ProductResult MapToProductResult(SanPham sp)

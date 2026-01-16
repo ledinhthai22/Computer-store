@@ -26,25 +26,19 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _productService.GetByIdForUserAsync(id);
-
             if (product == null)
                 return NotFound(new { message = "Không tìm thấy sản phẩm" });
-
             return Ok(product);
         }
-
 
         [HttpGet("slug/{slug}")]
         public async Task<IActionResult> GetBySlug(string slug)
         {
             var product = await _productService.GetBySlugAsync(slug);
-
             if (product == null)
                 return NotFound(new { message = "Không tìm thấy sản phẩm" });
-
             return Ok(product);
         }
-
 
         [HttpGet("best-selling")]
         public async Task<IActionResult> GetBestSelling([FromQuery] int soLuong = 10)
@@ -53,7 +47,6 @@ namespace Backend.Controllers
             return Ok(products);
         }
 
-
         [HttpGet("newest")]
         public async Task<IActionResult> GetNewest([FromQuery] int soLuong = 10)
         {
@@ -61,20 +54,32 @@ namespace Backend.Controllers
             return Ok(products);
         }
 
-
         [HttpGet("category/{maDanhMuc:int}")]
-        public async Task<IActionResult> GetByCategory(int maDanhMuc, [FromQuery] int soLuong = 12)
+        public async Task<IActionResult> GetByCategory(
+            int maDanhMuc,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12,
+            [FromQuery] int? maThuongHieu = null, 
+            [FromQuery] decimal? giaMin = null,   
+            [FromQuery] decimal? giaMax = null)    
         {
-            var products = await _productService.GetProductsByCategoryAsync(maDanhMuc, soLuong);
-            return Ok(products);
+            var result = await _productService
+                .GetProductsByCategoryPagingAsync(maDanhMuc, page, pageSize, maThuongHieu, giaMin, giaMax);
+            return Ok(result);
         }
 
-
         [HttpGet("brand/{maThuongHieu:int}")]
-        public async Task<IActionResult> GetByBrand(int maThuongHieu, [FromQuery] int soLuong = 12)
+        public async Task<IActionResult> GetByBrand(
+            int maThuongHieu,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12,
+            [FromQuery] int? maDanhMuc = null,      
+            [FromQuery] decimal? giaMin = null,     
+            [FromQuery] decimal? giaMax = null)    
         {
-            var products = await _productService.GetProductsByBrandAsync(maThuongHieu, soLuong);
-            return Ok(products);
+            var result = await _productService
+                .GetProductsByBrandPagingAsync(maThuongHieu, page, pageSize, maDanhMuc, giaMin, giaMax);
+            return Ok(result);
         }
     }
 }

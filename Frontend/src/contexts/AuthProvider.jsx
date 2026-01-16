@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import axiosClient from "../services/api/axiosClient";
 
