@@ -1,18 +1,19 @@
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthProvider";
 import { useToast } from "../contexts/ToastContext";
+import { useModalLogin } from "../contexts/ModalLoginContext";
 
 export default function useAddToCart(product) {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { showToast } = useToast();
-  const navigate = useNavigate();
+  
+  const { openLogin } = useModalLogin(); 
 
   const handleAddToCart = () => {
     if (!user) {
       showToast("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng", "info");
-      navigate("/login");
+      openLogin(); 
       return;
     }
 

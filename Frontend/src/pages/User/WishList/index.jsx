@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../contexts/AuthProvider";
 import ProductCard from "../../../components/user/product/ProductCard";
-import TopNew from "../../../components/user/product/TopNew"
+import TopNew from "../../../components/user/product/TopNew";
+import { Navigate } from "react-router-dom";
 export default function WishList() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
@@ -30,8 +31,9 @@ export default function WishList() {
     }, [user]);
 
     if (!user) {
-        return <p className="text-center mt-10">Vui lòng đăng nhập</p>;
+        return <Navigate to="/dang-nhap"/>;
     }
+    if( user.vaiTro === "QuanTriVien") return <Navigate to="/quan-ly" />;
 
     return (
         <div className="max-w-6xl mx-auto px-4">

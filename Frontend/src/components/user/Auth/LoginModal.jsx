@@ -1,12 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../contexts/AuthProvider";
-import { useToast } from "../../../contexts/ToastContext";
 import { useState } from "react";
+import { useAuth } from "../../../contexts/AuthProvider"; // Đảm bảo đường dẫn đúng
+import { useToast } from "../../../contexts/ToastContext"; // Đảm bảo đường dẫn đúng
+import { IoClose } from "react-icons/io5";
 
-export default function Login() {
+export default function LoginModal({ onClose, onSwitchToRegister }) {
   const { login } = useAuth();
   const { showToast } = useToast();
-  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (event) => {
@@ -24,40 +23,35 @@ export default function Login() {
       const result = await login(email, matKhau);
       if (result.success) {
         showToast("Đăng nhập thành công", "success");
-        navigate("/");
+        onClose(); // Đóng modal thay vì navigate
       } else {
-        setErrorMessage(
-          result.message || "Đăng nhập thất bại. Vui lòng thử lại."
-        );
+        setErrorMessage(result.message || "Đăng nhập thất bại.");
       }
     } catch (err) {
-      console.log(err)
-      setErrorMessage("Lỗi kết nối mạng. Vui lòng kiểm tra console.");
+      console.log(err);
+      setErrorMessage("Lỗi kết nối mạng.");
     }
   };
 
   return (
-    // THÊM 'py-12' VÀO DÒNG DƯỚI ĐÂY ĐỂ TẠO KHOẢNG CÁCH TRÊN DƯỚI
-    <div className="flex items-center justify-center px-4 py-12"> 
-      
-      {/* Container chính: Card đổ bóng, bo góc */}
-      <div className="flex bg-white shadow-lg rounded-2xl overflow-hidden max-w-4xl w-full">
+    // Overlay nền đen mờ
+    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+      {/* Modal Container: Chỉ giữ lại form, bỏ ảnh, max-w nhỏ hơn */}
+      <div className="relative bg-white shadow-2xl rounded-2xl overflow-hidden w-full max-w-md animate-fade-in">
         
-        {/* Cột trái: Ảnh (Ẩn trên mobile) */}
-        <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center p-8">
-          <img
-            className="w-full max-w-xs object-contain mix-blend-multiply"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3Mclb0NdAfReSwkqWDtxIh2Oc4vEyPMYzeg&s"
-            alt="Login Illustration"
-          />
-        </div>
+        {/* Nút đóng Modal */}
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 text-stone-400 hover:text-red-500 transition-colors"
+        >
+          <IoClose size={24} />
+        </button>
 
-        {/* Cột phải: Form đăng nhập */}
-        <div className="w-full md:w-1/2 p-8 md:p-12">
+        <div className="p-8 md:p-10">
           <h2 className="text-3xl font-bold text-[#2f9ea0] text-center mb-2">
-            CHÀO MỪNG TRỞ LẠI !
+            ĐĂNG NHẬP
           </h2>
-          <p className="text-stone-400 text-center mb-6">Đăng nhập để tiếp tục</p>
+          <p className="text-stone-400 text-center mb-6">Chào mừng bạn trở lại!</p>
 
           {errorMessage && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-center text-sm">
@@ -87,12 +81,9 @@ export default function Login() {
             </div>
 
             <div className="text-right">
-              <Link
-                className="text-sm text-stone-500 hover:text-[#2f9ea0]"
-                to="/quen-mat-khau"
-              >
+              <a href="/quen-mat-khau" className="text-sm text-stone-500 hover:text-[#2f9ea0]">
                 Quên mật khẩu?
-              </Link>
+              </a>
             </div>
 
             <button
@@ -105,9 +96,13 @@ export default function Login() {
 
           <p className="mt-6 text-center text-stone-500">
             Bạn là người mới?{" "}
-            <Link className="text-[#2f9ea0] font-bold hover:underline" to="/dang-ky">
+            <button 
+              type="button"
+              className="text-[#2f9ea0] font-bold hover:underline" 
+              onClick={onSwitchToRegister}
+            >
               ĐĂNG KÝ NGAY
-            </Link>
+            </button>
           </p>
         </div>
       </div>

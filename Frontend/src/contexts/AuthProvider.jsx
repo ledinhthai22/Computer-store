@@ -25,7 +25,9 @@ export function AuthProvider({ children }) {
 
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
-
+      if(data.vaiTro === "QuanTriVien"){
+        window.location.href = "/quan-ly";
+      }
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
@@ -66,7 +68,7 @@ export function AuthProvider({ children }) {
     } finally {
       localStorage.removeItem("user");
       setUser(null);
-      window.location.href = "/dang-nhap";
+      window.location.href = "/";
     }
   }, []);
 

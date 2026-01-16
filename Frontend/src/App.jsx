@@ -35,6 +35,7 @@ import {
   WishList,
   CategoryProduct,
   BrandProduct,
+  UpdatePassword,
   NotFound,
 } from "./pages/User";
 
@@ -58,7 +59,7 @@ function App() {
           <Route path="/yeu-thich" element={<WishList />} />
           <Route element={<ProfileLayout/>}>
             <Route path="/thong-tin-ca-nhan" element={<Profile />} />
-            {/* <Route path="/doi-mat-khau" element={<UpdatePassword />} /> */}
+            <Route path="/doi-mat-khau" element={<UpdatePassword />} />
           </Route>
         </Route>
 
