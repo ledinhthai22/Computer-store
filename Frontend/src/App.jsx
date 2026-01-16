@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
 import UserLayout from "./layouts/UserLayout";
+import ProfileLayout from "./layouts/ProfileLayout";
 import ProtectedRoute from "./components/user/ui/ProtectedRoute";
 
 import {
@@ -53,8 +54,11 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} />
-          <Route path="/thong-tin-ca-nhan" element={<Profile />} />
           <Route path="/yeu-thich" element={<WishList />} />
+          <Route element={<ProfileLayout/>}>
+            <Route path="/thong-tin-ca-nhan" element={<Profile />} />
+            {/* <Route path="/doi-mat-khau" element={<UpdatePassword />} /> */}
+          </Route>
         </Route>
 
         {/* ---------- ADMIN ROUTES ---------- */}
