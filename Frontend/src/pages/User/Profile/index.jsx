@@ -1,32 +1,38 @@
 import { useAuth } from "../../../contexts/AuthProvider";
-import { Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
 import axiosClient from "../../../services/api/axiosClient";
 import UpdateProfileModal from "./UpdateProfileModal";
+import {useModalLogin} from "../../../contexts/ModalLoginContext";
 
 export default function Profile() {
 
   const { user } = useAuth();
+  const { openLogin } = useModalLogin();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosClient.get("/me");
-        setProfileData(response.data);
-      } catch (error) {
-        console.error("Lỗi khi tải thông tin:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) {
-      fetchProfile();
+  const fetchProfile = useCallback(async () => {
+    try {
+      const response = await axiosClient.get("/me");
+      setProfileData(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải thông tin:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      openLogin(); 
+      navigate("/", { replace: true });
+      return;
+    }
+    fetchProfile();
+  }, [user, openLogin, navigate, fetchProfile]);
 
   const formatDateDisplay = (dateString) => {
     if (!dateString) return "Chưa cập nhật";
@@ -42,7 +48,8 @@ export default function Profile() {
     return `${day}/${month}/${year}`;
   };
 
-  if (!user) return <Navigate to="/dang-nhap" />;
+  if (!user) return null;
+  if( user.vaiTro === "QuanTriVien") return <Navigate to="/quan-ly" />;
 
   return (
     <div className="w-full py-6 px-4"> 
@@ -114,6 +121,7 @@ export default function Profile() {
         <UpdateProfileModal
           user={profileData}
           onClose={() => setShowProfileModal(false)}
+          onUpdateSuccess={fetchProfile}
         />
       )}
     </div>
