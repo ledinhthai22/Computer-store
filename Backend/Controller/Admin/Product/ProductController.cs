@@ -7,7 +7,7 @@ namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/admin/products")]
-    // [Authorize(Roles = "QuanTriVien")]
+    [Authorize(Roles = "QuanTriVien")]
     public class AdminProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -94,7 +94,7 @@ namespace Backend.Controllers
             return Ok(new { message = "Xóa sản phẩm thành công" });
         }
         
-        [HttpPost("{id:int}/restore")]
+        [HttpPut("restore/{id:int}")]
         public async Task<IActionResult> Restore(int id)
         {
             var success = await _productService.RestoreAsync(id);
