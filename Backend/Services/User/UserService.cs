@@ -98,10 +98,9 @@ namespace Backend.Services.User
 
             _DbContext.NguoiDung.Add(user);
             await _DbContext.SaveChangesAsync();
-            var tenVaiTro = await _DbContext.VaiTro // lấy vai trò trước khi tạo 
-                .Where(v => v.MaVaiTro == user.MaVaiTro)
-                .Select(v => v.TenVaiTro)
-                .FirstAsync();
+            await _DbContext.Entry(user)
+                .Reference(u => u.VaiTro)
+                .LoadAsync();
             return new UserResult
             {
                 MaNguoiDung = user.MaNguoiDung,
