@@ -16,7 +16,8 @@ import {
   WebInfoRecover,
   User,
   UserRecover,
-  Order
+  Order,
+  Dashboard
 } from "./pages/Admin";
 
 import {
@@ -60,7 +61,8 @@ function App() {
         {/* ---------- ADMIN ROUTES ---------- */}
         <Route element={<ProtectedRoute />}>
           <Route path="/quan-ly" element={<AdminLayout />}>
-            <Route index element={<Product />} /> {/* /quan-ly */}
+            <Route index element={<Dashboard />} />
+            <Route path="thong-ke" element={<Dashboard />} />
             <Route path="san-pham" element={<Product />} />
             <Route path="san-pham/them-san-pham" element={<AddProduct />} />
             <Route path="san-pham/:maSanPham" element={<ProductDetail />} />
