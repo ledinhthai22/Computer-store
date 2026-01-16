@@ -30,9 +30,7 @@ namespace Backend.DTO.Product
 
         [Required(ErrorMessage = "Bộ xử lý trung tâm không được để trống")]
         public string BoXuLyTrungTam { get; set; } = null!;
-
-        [Required(ErrorMessage = "Bộ xử lý đồ họa không được để trống")]
-        public string BoXuLyDoHoa { get; set; } = null!;
+        public string? BoXuLyDoHoa { get; set; } = null!;
 
         [Required(ErrorMessage = "Số lượng tồn không được để trống")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn phải lớn hơn hoặc bằng 0")]

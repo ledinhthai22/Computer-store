@@ -1,4 +1,3 @@
-// AddProductFixed.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -26,7 +25,7 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
     <input
       type={type}
-      value={value || ''}
+      value={value ?? ''}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
@@ -46,47 +45,45 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
   </div>
 );
 
-const SelectField = ({ label, value, onChange, options, valueKey, labelKey, placeholder, error = "", onAdd }) => {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
-      <div className="flex gap-2">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none ${
-            error 
-              ? 'border-2 border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' 
-              : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-          }`}
+const SelectField = ({ label, value, onChange, options, valueKey, labelKey, placeholder, error = "", onAdd }) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
+    <div className="flex gap-2">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none ${
+          error 
+            ? 'border-2 border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' 
+            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+        }`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt[valueKey]} value={String(opt[valueKey])}>
+            {opt[labelKey]}
+          </option>
+        ))}
+      </select>
+      {onAdd && (
+        <button 
+          type="button" 
+          onClick={onAdd} 
+          className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-sm"
         >
-          <option value="">{placeholder}</option>
-          {options.map((opt) => (
-            <option key={opt[valueKey]} value={String(opt[valueKey])}>
-              {opt[labelKey]}
-            </option>
-          ))}
-        </select>
-        {onAdd && (
-          <button 
-            type="button" 
-            onClick={onAdd} 
-            className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-sm"
-          >
-            <Plus size={20} />
-          </button>
-        )}
-      </div>
-      {error && (
-        <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
-          <AlertCircle size={12} /> {error}
-        </p>
+          <Plus size={20} />
+        </button>
       )}
     </div>
-  );
-};
+    {error && (
+      <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+        <AlertCircle size={12} /> {error}
+      </p>
+    )}
+  </div>
+);
 
-const AddProductFixed = () => {
+const AddProduct = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -102,7 +99,6 @@ const AddProductFixed = () => {
     maThuongHieu: '',
   });
 
-  // null = vị trí trống, {file, preview} = ảnh hợp lệ
   const [productImages, setProductImages] = useState([]);
 
   const [variants, setVariants] = useState([
@@ -110,7 +106,8 @@ const AddProductFixed = () => {
       id: Math.random().toString(36).substr(2, 9),
       tenBienThe: '',
       giaBan: '',
-      giaKhuyenMai: '',
+      phanTramGiam: '',       // Thêm trường %
+      giaKhuyenMai: '',       // Tự tính
       mauSac: '',
       ram: '',
       oCung: '',
@@ -151,7 +148,7 @@ const AddProductFixed = () => {
     fetchMetadata();
   }, []);
 
-  // Cleanup memory
+  // Cleanup preview URLs
   useEffect(() => {
     return () => {
       productImages.forEach(img => {
@@ -166,35 +163,34 @@ const AddProductFixed = () => {
   };
 
   const validateImageFile = (file) => {
-    const validExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const valid = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     const maxSize = 5 * 1024 * 1024;
-    if (!validExtensions.includes(file.type)) return 'Chỉ chấp nhận file ảnh định dạng JPG, PNG, GIF, WEBP';
-    if (file.size > maxSize) return 'Kích thước ảnh không được vượt quá 5MB';
+    if (!valid.includes(file.type)) return 'Chỉ chấp nhận JPG, PNG, GIF, WEBP';
+    if (file.size > maxSize) return 'Ảnh không được vượt quá 5MB';
     return null;
   };
 
   const handleAddOrReplaceImage = (file, targetIndex = null) => {
     const err = validateImageFile(file);
-    if (err) {
-      showToast(err, 'error');
-      return;
-    }
+    if (err) return showToast(err, 'error');
 
-    const newImg = { file, preview: URL.createObjectURL(file) };
+    const newImg = {
+      id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      preview: URL.createObjectURL(file),
+      isNew: true,
+    };
 
     setProductImages(prev => {
       if (targetIndex !== null) {
-        // Thay thế tại vị trí
         const updated = [...prev];
         if (updated[targetIndex]?.preview) {
           URL.revokeObjectURL(updated[targetIndex].preview);
         }
         updated[targetIndex] = newImg;
         return updated;
-      } else {
-        // Thêm mới vào cuối
-        return [...prev, newImg];
       }
+      return [...prev, newImg];
     });
 
     setErrors(prev => ({ ...prev, hinhAnh: '' }));
@@ -208,29 +204,54 @@ const AddProductFixed = () => {
 
   const handleReplaceImage = (e, index) => {
     const file = e.target.files?.[0];
-    if (file) {
-      handleAddOrReplaceImage(file, index);
-    }
+    if (file) handleAddOrReplaceImage(file, index);
     e.target.value = '';
   };
 
   const removeProductImage = (index) => {
     setProductImages(prev => {
-      const updated = [...prev];
-      if (updated[index]?.preview) {
-        URL.revokeObjectURL(updated[index].preview);
+      const imgToRemove = prev[index];
+      if (imgToRemove?.preview) {
+        URL.revokeObjectURL(imgToRemove.preview);
       }
-      updated[index] = null;
-      return updated;
+
+      if (index === 0) {
+        const updated = [...prev];
+        updated[0] = null;
+        return updated;
+      } else {
+        return prev.filter((_, i) => i !== index);
+      }
     });
   };
 
+  // Tự động tính giá khuyến mãi khi thay đổi giaBan hoặc phanTramGiam
   const handleVariantChange = (id, field, value) => {
-    setVariants((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+    setVariants(prev =>
+      prev.map(v => {
+        if (v.id !== id) return v;
+
+        let updated = { ...v, [field]: value };
+
+        // Nếu thay đổi giaBan hoặc phanTramGiam → tính lại giaKhuyenMai
+        if (field === 'giaBan' || field === 'phanTramGiam') {
+          const giaBan = Number(updated.giaBan) || 0;
+          const phanTram = Number(updated.phanTramGiam) || 0;
+
+          if (giaBan > 0 && phanTram > 0 && phanTram <= 100) {
+            updated.giaKhuyenMai = Math.round(giaBan * (1 - phanTram / 100));
+          } else {
+            updated.giaKhuyenMai = '';
+          }
+        }
+
+        return updated;
+      })
     );
-    setErrors((prev) => {
-      const idx = variants.findIndex((v) => v.id === id);
+
+    // Xóa lỗi khi người dùng sửa
+    setErrors(prev => {
+      const idx = variants.findIndex(v => v.id === id);
       const key = `variant_${idx}_${field}`;
       if (prev[key]) {
         const newErrors = { ...prev };
@@ -242,8 +263,8 @@ const AddProductFixed = () => {
   };
 
   const handleVariantSpecChange = (id, field, value) => {
-    setVariants((prev) =>
-      prev.map((v) =>
+    setVariants(prev =>
+      prev.map(v =>
         v.id === id ? { ...v, thongSoKyThuat: { ...v.thongSoKyThuat, [field]: value } } : v
       )
     );
@@ -251,12 +272,13 @@ const AddProductFixed = () => {
 
   const addVariant = () => {
     const newId = Math.random().toString(36).substr(2, 9);
-    setVariants((prev) => [
+    setVariants(prev => [
       ...prev,
       {
         id: newId,
         tenBienThe: '',
         giaBan: '',
+        phanTramGiam: '',
         giaKhuyenMai: '',
         mauSac: '',
         ram: '',
@@ -278,7 +300,7 @@ const AddProductFixed = () => {
         },
       },
     ]);
-    setOpenVariant((prev) => ({ ...prev, [newId]: true }));
+    setOpenVariant(prev => ({ ...prev, [newId]: true }));
   };
 
   const removeVariant = (id) => {
@@ -286,8 +308,8 @@ const AddProductFixed = () => {
       showToast('Sản phẩm phải có ít nhất một biến thể', 'error');
       return;
     }
-    setVariants((prev) => prev.filter((v) => v.id !== id));
-    setOpenVariant((prev) => {
+    setVariants(prev => prev.filter(v => v.id !== id));
+    setOpenVariant(prev => {
       const newOpen = { ...prev };
       delete newOpen[id];
       return newOpen;
@@ -295,7 +317,7 @@ const AddProductFixed = () => {
   };
 
   const toggleVariant = (id) => {
-    setOpenVariant((prev) => ({ ...prev, [id]: !prev[id] }));
+    setOpenVariant(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const validateForm = () => {
@@ -310,7 +332,15 @@ const AddProductFixed = () => {
 
     variants.forEach((v, index) => {
       if (!v.tenBienThe.trim()) newErrors[`variant_${index}_tenBienThe`] = 'Vui lòng nhập tên biến thể';
+      if (!v.soLuongTon || Number(v.soLuongTon) < 0) newErrors[`variant_${index}_soLuongTon`] = 'Số lượng tồn không hợp lệ';
       if (!v.giaBan || Number(v.giaBan) <= 0) newErrors[`variant_${index}_giaBan`] = 'Giá bán phải lớn hơn 0';
+
+      const phanTram = Number(v.phanTramGiam);
+      if (v.phanTramGiam !== '' && (phanTram < 0 || phanTram > 100)) {
+        newErrors[`variant_${index}_phanTramGiam`] = 'Phần trăm giảm phải từ 0 đến 100';
+      }
+
+      // Nếu có % giảm thì giá KM phải nhỏ hơn giá bán (đã tính tự động)
       if (v.giaKhuyenMai && Number(v.giaKhuyenMai) >= Number(v.giaBan)) {
         newErrors[`variant_${index}_giaKhuyenMai`] = 'Giá khuyến mãi phải nhỏ hơn giá bán';
       }
@@ -344,7 +374,7 @@ const AddProductFixed = () => {
       variants.forEach((v, index) => {
         formDataToSend.append(`BienThe[${index}].TenBienThe`, v.tenBienThe.trim() || 'Đang cập nhật');
         formDataToSend.append(`BienThe[${index}].GiaBan`, Number(v.giaBan) || 0);
-        formDataToSend.append(`BienThe[${index}].GiaKhuyenMai`, Number(v.giaKhuyenMai) || 0);
+        formDataToSend.append(`BienThe[${index}].GiaKhuyenMai`, Number(v.giaKhuyenMai) || 0); // Gửi giá đã tính
         formDataToSend.append(`BienThe[${index}].MauSac`, v.mauSac || 'Đang cập nhật');
         formDataToSend.append(`BienThe[${index}].Ram`, v.ram || 'Đang cập nhật');
         formDataToSend.append(`BienThe[${index}].OCung`, v.oCung || 'Đang cập nhật');
@@ -365,7 +395,6 @@ const AddProductFixed = () => {
         formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || 'Đang cập nhật');
       });
 
-      // Chỉ gửi ảnh thật
       productImages.forEach(img => {
         if (img?.file) {
           formDataToSend.append('HinhAnh', img.file);
@@ -388,7 +417,7 @@ const AddProductFixed = () => {
     try {
       const catRes = await categoryService.getAll();
       setCategories(catRes);
-      if (newCategoryId) setFormData((prev) => ({ ...prev, maDanhMuc: String(newCategoryId) }));
+      if (newCategoryId) setFormData(prev => ({ ...prev, maDanhMuc: String(newCategoryId) }));
       showToast('Thêm danh mục thành công!', 'success');
     } catch {
       showToast('Không thể tải lại danh mục', 'error');
@@ -399,7 +428,7 @@ const AddProductFixed = () => {
     try {
       const brandRes = await brandService.getAll();
       setBrands(brandRes);
-      if (newBrandId) setFormData((prev) => ({ ...prev, maThuongHieu: String(newBrandId) }));
+      if (newBrandId) setFormData(prev => ({ ...prev, maThuongHieu: String(newBrandId) }));
       showToast('Thêm thương hiệu thành công!', 'success');
     } catch {
       showToast('Không thể tải lại thương hiệu', 'error');
@@ -445,7 +474,7 @@ const AddProductFixed = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Images - Phần đã sửa hoàn chỉnh */}
+            {/* Images - giữ nguyên */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon size={20} className="text-blue-600" />
@@ -463,7 +492,7 @@ const AddProductFixed = () => {
               <div className="grid grid-cols-4 gap-4">
                 {productImages.map((imgObj, index) => (
                   <div
-                    key={index}
+                    key={imgObj?.id || `empty-${index}`}
                     className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       imgObj
                         ? 'border-gray-200 hover:border-blue-500'
@@ -504,7 +533,6 @@ const AddProductFixed = () => {
                   </div>
                 ))}
 
-                {/* Nút thêm ảnh mới */}
                 <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                   <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
                   <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors">Thêm ảnh</span>
@@ -519,7 +547,7 @@ const AddProductFixed = () => {
               </div>
             </div>
 
-            {/* Thông Tin Cơ Bản */}
+            {/* Thông Tin Cơ Bản - giữ nguyên */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Package size={20} className="text-blue-600" />
@@ -531,8 +559,8 @@ const AddProductFixed = () => {
                   label="Tên sản phẩm *"
                   value={formData.tenSanPham}
                   onChange={(v) => {
-                    setFormData((prev) => ({ ...prev, tenSanPham: v }));
-                    setErrors((prev) => ({ ...prev, tenSanPham: '' }));
+                    setFormData(prev => ({ ...prev, tenSanPham: v }));
+                    setErrors(prev => ({ ...prev, tenSanPham: '' }));
                   }}
                   error={errors.tenSanPham}
                   placeholder="VD: Dell XPS 15 9520"
@@ -543,8 +571,8 @@ const AddProductFixed = () => {
                     label="Danh mục *"
                     value={formData.maDanhMuc}
                     onChange={(v) => {
-                      setFormData((prev) => ({ ...prev, maDanhMuc: v }));
-                      setErrors((prev) => ({ ...prev, maDanhMuc: '' }));
+                      setFormData(prev => ({ ...prev, maDanhMuc: v }));
+                      setErrors(prev => ({ ...prev, maDanhMuc: '' }));
                     }}
                     options={categories}
                     valueKey="maDanhMuc"
@@ -557,8 +585,8 @@ const AddProductFixed = () => {
                     label="Thương hiệu *"
                     value={formData.maThuongHieu}
                     onChange={(v) => {
-                      setFormData((prev) => ({ ...prev, maThuongHieu: v }));
-                      setErrors((prev) => ({ ...prev, maThuongHieu: '' }));
+                      setFormData(prev => ({ ...prev, maThuongHieu: v }));
+                      setErrors(prev => ({ ...prev, maThuongHieu: '' }));
                     }}
                     options={brands}
                     valueKey="maThuongHieu"
@@ -588,6 +616,13 @@ const AddProductFixed = () => {
 
               {variants.map((variant, index) => {
                 const isOpen = openVariant[variant.id];
+
+                // Tính giá KM để hiển thị (nếu chưa có thì để trống)
+                const giaBanNum = Number(variant.giaBan) || 0;
+                const phanTramNum = Number(variant.phanTramGiam) || 0;
+                const giaKMHienThi = (giaBanNum > 0 && phanTramNum > 0 && phanTramNum <= 100)
+                  ? Math.round(giaBanNum * (1 - phanTramNum / 100)).toLocaleString('vi-VN')
+                  : '';
 
                 return (
                   <div key={variant.id} className="border border-gray-200 rounded-2xl mb-6 overflow-hidden shadow-sm">
@@ -640,18 +675,39 @@ const AddProductFixed = () => {
                             value={variant.giaBan}
                             onChange={(v) => handleVariantChange(variant.id, 'giaBan', v)}
                             error={errors[`variant_${index}_giaBan`]}
-                            placeholder="0"
+                            placeholder="10000000"
                           />
-                          <InputField
-                            label="Giá khuyến mãi (VNĐ)"
-                            type="number"
-                            value={variant.giaKhuyenMai}
-                            onChange={(v) => handleVariantChange(variant.id, 'giaKhuyenMai', v)}
-                            error={errors[`variant_${index}_giaKhuyenMai`]}
-                            placeholder="0"
-                          />
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                              Phần trăm giảm (%)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={variant.phanTramGiam ?? ''}
+                              onChange={(e) => handleVariantChange(variant.id, 'phanTramGiam', e.target.value)}
+                              placeholder="0 - 100"
+                              className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+                                errors[`variant_${index}_phanTramGiam`]
+                                  ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+                                  : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+                              }`}
+                            />
+                            {errors[`variant_${index}_phanTramGiam`] && (
+                              <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+                                <AlertCircle size={12} /> {errors[`variant_${index}_phanTramGiam`]}
+                              </p>
+                            )}
+                            {giaKMHienThi && (
+                              <p className="text-sm text-green-600 mt-1">
+                                Giá KM: <strong>{giaKMHienThi} VNĐ</strong>
+                              </p>
+                            )}
+                          </div>
                         </div>
 
+                        {/* Phần còn lại giữ nguyên */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <InputField 
                             label="Màu sắc" 
@@ -687,10 +743,11 @@ const AddProductFixed = () => {
                             placeholder="VD: NVIDIA RTX 3060"
                           />
                           <InputField
-                            label="Số lượng tồn"
+                            label="Số lượng tồn *"
                             type="number"
                             value={variant.soLuongTon}
                             onChange={(v) => handleVariantChange(variant.id, 'soLuongTon', v)}
+                            error={errors[`variant_${index}_soLuongTon`]}
                             placeholder="0"
                           />
                         </div>
@@ -717,7 +774,7 @@ const AddProductFixed = () => {
                               placeholder="VD: Windows 11 Home"
                             />
                             <InputField
-                              label="Dung lượng pin"
+                              label="Pin"
                               value={variant.thongSoKyThuat.pin}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'pin', v)}
                               placeholder="VD: 56Wh"
@@ -744,7 +801,7 @@ const AddProductFixed = () => {
             </div>
           </div>
 
-          {/* Right - Overview */}
+          {/* Right - Tổng Quan */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
               <div className="flex items-center gap-2 mb-4">
@@ -771,7 +828,7 @@ const AddProductFixed = () => {
                 <div className="pt-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-xs text-blue-800 leading-relaxed">
-                      <strong>Lưu ý:</strong> Ảnh đầu tiên sẽ là ảnh chính của sản phẩm. Chỉ chấp nhận file ảnh ≤ 5MB.
+                      <strong>Lưu ý:</strong> Ảnh đầu tiên sẽ là ảnh chính. Chỉ chấp nhận file ảnh ≤ 5MB.
                     </p>
                   </div>
                 </div>
@@ -802,4 +859,4 @@ const AddProductFixed = () => {
   );
 };
 
-export default AddProductFixed;
+export default AddProduct;

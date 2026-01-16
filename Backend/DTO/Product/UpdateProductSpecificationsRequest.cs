@@ -9,32 +9,32 @@ namespace Backend.DTO.Product
     public class UpdateProductSpecificationsRequest
     {
         [MaxLength(50)]
-        public string KichThuocManHinh { get; set; } = null!;
+        public string? KichThuocManHinh { get; set; }
         [MaxLength(50)]
-        public string DungLuongRam { get; set; } = null!;
-
-        [MaxLength(50)]
-        public string SoKheRam { get; set; } = null!;
-
-        [MaxLength(100)]
-        public string OCung { get; set; }= null!;
+        public string? DungLuongRam { get; set; } 
 
         [MaxLength(50)]
-        public string Pin { get; set; }= null!;
+        public string? SoKheRam { get; set; }
 
         [MaxLength(100)]
-        public string HeDieuHanh { get; set; }= null!;
+        public string? OCung { get; set; }
 
         [MaxLength(50)]
-        public string DoPhanGiaiManHinh { get; set; }= null!;
+        public string? Pin { get; set; }
 
         [MaxLength(100)]
-        public string LoaiXuLyTrungTam { get; set; }= null!;
+        public string? HeDieuHanh { get; set; }
+
+        [MaxLength(50)]
+        public string? DoPhanGiaiManHinh { get; set; }
 
         [MaxLength(100)]
-        public string LoaiXuLyDoHoa { get; set; }= null!;
+        public string? LoaiXuLyTrungTam { get; set; }
+
+        [MaxLength(100)]
+        public string? LoaiXuLyDoHoa { get; set; }
 
         [MaxLength(255)]
-        public string CongGiaoTiep { get; set; }= null!;
+        public string? CongGiaoTiep { get; set; }
     }
 }
