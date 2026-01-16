@@ -1,21 +1,39 @@
 import { Link } from "react-router-dom";
 import { FaFacebook, FaYoutube, FaInstagramSquare, FaTiktok, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from "react-icons/fa";
 import { SiZalo } from "react-icons/si";
-import { useState } from "react";
-// Đảm bảo đường dẫn import đúng với cấu trúc dự án của bạn
+import { useState, useEffect } from "react";
+
 import { useToast } from "../../../contexts/ToastContext";
 import { contactService, handleApiError } from "../../../services/api/contactService";
+import { WebInfoService } from "../../../services/api/webInfoService";
 
 export default function LienHe() {
-    // Logic state giống Footer
     const [email, setEmail] = useState("");
     const [noiDung, setNoiDung] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // Thêm trạng thái loading để UX tốt hơn
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [webInfo, setWebInfo] = useState(null);
+
     const { showToast } = useToast();
+
+    useEffect(() => {
+        const fetchWebInfo = async () => {
+            try {
+                const data = await WebInfoService.getAll();
+                if (Array.isArray(data) && data.length > 0) {
+                    setWebInfo(data[0]);
+                } else {
+                    setWebInfo(data);
+                }
+            } catch (error) {
+                console.error("Lỗi lấy thông tin web:", error);
+            }
+        };
+        fetchWebInfo();
+    }, []);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Logic xử lý submit giữ nguyên từ Footer
     const handleSubmit = async (e) => {
         e.preventDefault(); // Ngăn reload trang form
 
@@ -41,6 +59,37 @@ export default function LienHe() {
             setIsLoading(false);
         }
     };
+    const renderSocialIcons = () => {
+        if (!webInfo) return null;
+
+        const socials = [
+            { key: 'fb', url: webInfo.duongDanFacebook, icon: FaFacebook, color: 'bg-blue-600' },
+            { key: 'yt', url: webInfo.duongDanYoutube, icon: FaYoutube, color: 'bg-red-600' },
+            { key: 'ins', url: webInfo.duongDanInstagram, icon: FaInstagramSquare, color: 'bg-pink-600' },
+            { key: 'tik', url: webInfo.duongDanTiktok, icon: FaTiktok, color: 'bg-black' },
+            { key: 'zalo', url: webInfo.duongDanZalo, icon: SiZalo, color: 'bg-blue-500' },
+        ];
+
+        return socials.map((item) => {
+            // Kiểm tra: Chỉ hiển thị nếu có link (không null/rỗng)
+            if (!item.url) return null; 
+
+            return (
+                <a 
+                    key={item.key} 
+                    href={item.url} // Gán trực tiếp URL từ API (đã có https)
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    title={item.key} 
+                    className="group"
+                >
+                    <div className={`${item.color} text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform`}>
+                        <item.icon size={24} />
+                    </div>
+                </a>
+            );
+        });
+    };
 
     return (
         <div className="bg-stone-100 min-h-screen">
@@ -48,7 +97,7 @@ export default function LienHe() {
             <div className="bg-[#2f9ea0] py-16 text-center shadow-md">
                 <div className="container mx-auto px-4">
                     <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                        Liên hệ với chúng tôi
+                        Liên hệ với {webInfo?.tenTrang || 'chúng tôi'}
                     </h1>
                     <p className="text-white/90 text-lg md:text-xl font-medium">
                         Gửi liên hệ cho chúng tôi, chúng tôi sẽ trả lời bạn ngay.
@@ -113,46 +162,52 @@ export default function LienHe() {
                                 Thông tin liên lạc
                             </h2>
                             <p className="text-gray-600 mb-8 leading-relaxed">
-                                Computer Store luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi qua các kênh dưới đây hoặc ghé thăm trực tiếp cửa hàng.
+                            {webInfo?.tenTrang || 'Cửa hàng'} luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi qua các kênh dưới đây hoặc ghé thăm trực tiếp cửa hàng.
                             </p>
 
                             <div className="space-y-6">
                                 {/* Địa chỉ */}
-                                <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
-                                    <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
-                                        <FaMapMarkerAlt size={20} />
+                                {webInfo?.diaChi && (
+                                    <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
+                                        <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
+                                            <FaMapMarkerAlt size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-800">Địa chỉ cửa hàng</h4>
+                                            <p className="text-gray-600 text-sm mt-1">{webInfo.diaChi}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-800">Địa chỉ cửa hàng</h4>
-                                        <p className="text-gray-600 text-sm mt-1">350-352 Võ Văn Kiệt, TP.Hồ Chí Minh</p>
-                                    </div>
-                                </div>
+                                )}
 
                                 {/* Hotline */}
-                                <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
-                                    <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
-                                        <FaPhoneAlt size={20} />
+                                {webInfo?.soDienThoai && (
+                                    <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
+                                        <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
+                                            <FaPhoneAlt size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-800">Hotline hỗ trợ (8:00 - 21:00)</h4>
+                                            <a href={`tel:${webInfo.soDienThoai}`} className="text-lg font-bold text-[#2f9ea0] hover:underline block mt-1">
+                                                {webInfo.soDienThoai}
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-800">Hotline hỗ trợ (8:00 - 21:00)</h4>
-                                        <a href="tel:18006601" className="text-lg font-bold text-[#2f9ea0] hover:underline block mt-1">
-                                            1800.6601
-                                        </a>
-                                    </div>
-                                </div>
+                                )}
 
-                                {/* Email (Bổ sung thêm cho đầy đủ) */}
-                                <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
-                                    <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
-                                        <FaEnvelope size={20} />
+                                {/* Email (Chỉ hiện nếu có trong API) */}
+                                {webInfo?.email && (
+                                    <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#2f9ea0]/30 transition-colors">
+                                        <div className="bg-[#2f9ea0]/10 p-3 rounded-full text-[#2f9ea0]">
+                                            <FaEnvelope size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-800">Email hợp tác</h4>
+                                            <a href={`mailto:${webInfo.email}`} className="text-gray-600 text-sm mt-1 hover:text-[#2f9ea0]">
+                                                {webInfo.email}
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-800">Email hợp tác</h4>
-                                        <a href="mailto:contact@computerstore.vn" className="text-gray-600 text-sm mt-1 hover:text-[#2f9ea0]">
-                                            contact@computerstore.vn
-                                        </a>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
@@ -161,36 +216,11 @@ export default function LienHe() {
                             <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-[#2f9ea0] pl-4">
                                 Kết nối mạng xã hội
                             </h2>
-                            <div className="flex gap-6">
-                                <a href="#" title="Facebook" className="group">
-                                    <div className="bg-blue-600 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                        <FaFacebook size={24} />
-                                    </div>
-                                </a>
-                                <a href="#" title="Youtube" className="group">
-                                    <div className="bg-red-600 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                        <FaYoutube size={24} />
-                                    </div>
-                                </a>
-                                <a href="#" title="Instagram" className="group">
-                                    <div className="bg-pink-600 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                        <FaInstagramSquare size={24} />
-                                    </div>
-                                </a>
-                                <a href="#" title="Tiktok" className="group">
-                                    <div className="bg-black text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                        <FaTiktok size={24} />
-                                    </div>
-                                </a>
-                                <a href="#" title="Zalo" className="group">
-                                    <div className="bg-blue-500 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                        <SiZalo size={24} />
-                                    </div>
-                                </a>
+                            <div className="flex gap-6 flex-wrap">
+                                {renderSocialIcons()}
                             </div>
                         </div>
 
-                        {/* Map Embed (Tùy chọn thêm để trang đẹp hơn) */}
                         <div className="rounded-xl overflow-hidden shadow-md h-64 w-full border border-gray-200">
                         <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1959.756966934177!2d106.70060596955592!3d10.771894099336052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f40a3b49e59%3A0xa1bd14e483a602db!2zVHLGsOG7nW5nIENhbyDEkeG6s25nIEvhu7kgdGh14bqtdCBDYW8gVGjhuq9uZw!5e0!3m2!1svi!2sus!4v1768556871481!5m2!1svi!2sus" width="100%" height="100%" style={{ border: 0 }} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                         </div>
