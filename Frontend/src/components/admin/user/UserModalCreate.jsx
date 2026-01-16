@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react"; // Thêm icon mắt
-import { userService, handleApiError } from "../../../services/api/userService";
+import { userService } from "../../../services/api/userService";
 import Toast from '../Toast';
 
 const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-    const [showPassword, setShowPassword] = useState(false); // Trạng thái ẩn/hiện pass
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         hoTen: "",
         email: "",
         soDienThoai: "",
+        ngaySinh: "",
         matKhau: "",
         xacNhanMatKhau: "",
+        trangThai: true,
     });
 
     const [errors, setErrors] = useState({});
@@ -45,7 +47,7 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
         if (!formData.hoTen.trim()) newErrors.hoTen = "Họ tên không được để trống";
-        
+        if (!formData.ngaySinh) newErrors.ngaySinh = "Vui lòng chọn ngày sinh";
         if (!formData.email.trim()) {
             newErrors.email = "Email không được để trống";
         } else if (!emailRegex.test(formData.email)) {
@@ -79,22 +81,29 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
         }
 
         setLoading(true);
-        try {
-            await userService.create(formData);
-            
-            showToast("Thêm người dùng thành công!", "success");
+        setErrorMessage("");
 
-            // Cách xử lý tốt hơn: báo thành công cho cha trước, đóng modal sau
-            if (onSuccess) onSuccess("Thêm thành công");
+        try {
+            const birthDate = new Date(formData.ngaySinh);
+            birthDate.setHours(0, 0, 0, 0);
+
+            const submitData = {
+                hoTen: (formData.hoTen || "").trim(),
+                email: (formData.email || "").trim(),
+                matKhau: formData.matKhau || "",
+                trangThai: true,
+                ngaySinh: birthDate.toISOString(),
+                soDienThoai: (formData.soDienThoai || "").trim(),
+            };
             
-            setTimeout(() => {
-                handleClose();
-            }, 1000);
-            
+            console.log("Dữ liệu gửi đi:", submitData);
+            await userService.create(submitData);
+            if (onSuccess) onSuccess("Thêm người dùng thành công");          
+            handleClose();
         } catch (err) {
-            const errorMsg = handleApiError(err, "Thêm người dùng thất bại");
-            setErrorMessage(errorMsg);
-            showToast(errorMsg, "error");
+            console.error("Lỗi API:", err);
+            setErrorMessage(err);
+            showToast("Thêm người dùng thất bại", "error");
         } finally {
             setLoading(false);
         }
@@ -102,8 +111,8 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
 
     const handleClose = () => {
         setFormData({
-            hoTen: "", email: "", soDienThoai: "",
-            matKhau: "", xacNhanMatKhau: "",
+            hoTen: "", email: "", soDienThoai: "", ngaySinh: "",
+            matKhau: "", xacNhanMatKhau: "", trangThai: true,
         });
         setErrors({});
         setErrorMessage("");
@@ -143,7 +152,15 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
                                 />
                                 {errors.hoTen && <p className="text-red-500 text-xs mt-1">{errors.hoTen}</p>}
                             </div>
-
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Ngày sinh *</label>
+                                <input
+                                    type="date"
+                                    name="ngaySinh" value={formData.ngaySinh} onChange={handleChange}
+                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.ngaySinh ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
+                                />
+                                {errors.ngaySinh && <p className="text-red-500 text-xs mt-1">{errors.ngaySinh}</p>}
+                            </div>
                             {/* Email */}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
