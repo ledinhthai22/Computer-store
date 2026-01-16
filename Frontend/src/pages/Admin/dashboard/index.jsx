@@ -12,15 +12,6 @@ const Dashboard = () => {
     const getOrderStats = () => 150;
     const getRevenueStats = () => 45000000;
 
-    const chartData = [
-        { name: 'Tháng 1', users: 40, orders: 24, revenue: 2400 },
-        { name: 'Tháng 2', users: 30, orders: 13, revenue: 2210 },
-        { name: 'Tháng 3', users: 20, orders: 98, revenue: 2290 },
-        { name: 'Tháng 4', users: 27, orders: 39, revenue: 2000 },
-        { name: 'Tháng 5', users: 18, orders: 48, revenue: 2181 },
-        { name: 'Tháng 6', users: 23, orders: 38, revenue: 2500 },
-    ];
-
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -35,6 +26,14 @@ const Dashboard = () => {
         fetchUserData();
     }, []);
 
+    const chartData = [
+        { name: 'Tháng 1', users: totalUsers, orders: 24, revenue: 2400 },
+        { name: 'Tháng 2', users: totalUsers, orders: 13, revenue: 2210 },
+        { name: 'Tháng 3', users: totalUsers, orders: 98, revenue: 2290 },
+        { name: 'Tháng 4', users: totalUsers, orders: 39, revenue: 2000 },
+        { name: 'Tháng 5', users: totalUsers, orders: 48, revenue: 2181 },
+        { name: 'Tháng 6', users: totalUsers, orders: 38, revenue: 2500 },
+    ];
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -54,7 +53,7 @@ const Dashboard = () => {
                 />
                 <StatCard 
                     title="Doanh thu" 
-                    value={`${getRevenueStats().toLocaleString()}đ`} 
+                    value={`${getRevenueStats().toLocaleString()} VNĐ`} 
                     icon={<DollarSign className="text-green-600" />}
                     trend="Ổn định"
                     trendColor="text-blue-500"
