@@ -954,13 +954,7 @@ namespace Backend.Services.Product
                 .ToListAsync();
         }
 
-        public async Task<PagedResult<ProductListItem>> GetProductsByBrandPagingAsync(
-     int maThuongHieu,
-     int page = 1,
-     int pageSize = 12,
-     int? maDanhMuc = null,
-     decimal? giaMin = null,
-     decimal? giaMax = null)
+        public async Task<PagedResult<ProductListItem>> GetProductsByBrandPagingAsync(int maThuongHieu,int page = 1,int pageSize = 12,int? maDanhMuc = null,decimal? giaMin = null,decimal? giaMax = null)
         {
             var query = _db.SanPham
                 .Include(x => x.DanhMuc)
@@ -1008,13 +1002,7 @@ namespace Backend.Services.Product
             };
         }
 
-        public async Task<PagedResult<ProductListItem>> GetProductsByCategoryPagingAsync(
-            int maDanhMuc,
-            int page = 1,
-            int pageSize = 12,
-            int? maThuongHieu = null,
-            decimal? giaMin = null,
-            decimal? giaMax = null)
+        public async Task<PagedResult<ProductListItem>> GetProductsByCategoryPagingAsync(int maDanhMuc,int page = 1,int pageSize = 12,int? maThuongHieu = null, decimal? giaMin = null,decimal? giaMax = null)
         {
             var query = _db.SanPham
                 .Include(x => x.DanhMuc)

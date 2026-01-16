@@ -20,20 +20,8 @@ namespace Backend.Services.Product
         Task<List<ProductListItem>> GetBestSellingProductsAsync(int soLuong = 10);
         Task<List<ProductListItem>> GetNewestProductsAsync(int soLuong = 10);
 
-        Task<PagedResult<ProductListItem>> GetProductsByCategoryPagingAsync(
-            int maDanhMuc,
-            int page = 1,
-            int pageSize = 12,
-            int? maThuongHieu = null,
-            decimal? giaMin = null,
-            decimal? giaMax = null);
+        Task<PagedResult<ProductListItem>> GetProductsByCategoryPagingAsync(int maDanhMuc,int page = 1,int pageSize = 12,int? maThuongHieu = null,decimal? giaMin = null,decimal? giaMax = null);
 
-        Task<PagedResult<ProductListItem>> GetProductsByBrandPagingAsync(
-            int maThuongHieu,
-            int page = 1,
-            int pageSize = 12,
-            int? maDanhMuc = null,
-            decimal? giaMin = null,
-            decimal? giaMax = null);
+        Task<PagedResult<ProductListItem>> GetProductsByBrandPagingAsync(int maThuongHieu,int page = 1,int pageSize = 12,int? maDanhMuc = null,decimal? giaMin = null,decimal? giaMax = null);
     }
 }
