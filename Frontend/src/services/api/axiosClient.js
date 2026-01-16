@@ -20,14 +20,15 @@ axiosClient.interceptors.response.use(
       const noRedirectUrls = [
         '/auth/login', 
         '/auth/register', 
-        '/auth/refresh-token'
+        '/auth/refresh-token',
+        '/me/ChangePassword'
       ];
 
       const isAuthApi = noRedirectUrls.some(url => config.url.includes(url));
 
       if (!isAuthApi) {
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = '/dang-nhap';
       }
     }
 
