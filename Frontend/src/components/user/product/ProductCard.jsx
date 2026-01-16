@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Wishlist from "../Wishlist";
-import { FaCartPlus } from "react-icons/fa";
+import { FaCartPlus, FaStar} from "react-icons/fa";
 import useAddToCart from "../../../hooks/useAddToCart";
 
-const API_BASE_URL = "https://localhost:7012"; 
+const API_BASE_URL = "https://localhost:7012";  
 
 export default function ProductCard({ product }) {
     if (!product) return null;
@@ -28,6 +28,9 @@ export default function ProductCard({ product }) {
     if (giaGoc > giaHienTai && giaGoc > 0) {
         phanTramGiam = Math.round(((giaGoc - giaHienTai) / giaGoc) * 100);
     }
+
+    const rawRating = product.danhGiaTrungBinh || 0;
+    const formattedRating = rawRating.toFixed(1).replace('.', ',');
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -76,6 +79,23 @@ export default function ProductCard({ product }) {
                             {product.tenSanPham}
                         </h2>
                     </Link>
+                    <div className="flex items-center justify-between mb-3 text-xs">
+                        {/* Hiển thị số điểm (VD: 4,5 *) */}
+                        {rawRating > 0 ? (
+                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                <span className="font-semibold text-gray-700">{formattedRating}</span>
+                                <FaStar className="text-yellow-400 text-[10px] mb-0.5" />
+                            </div>
+                        ) : (
+                            // Nếu chưa có đánh giá thì để trống hoặc hiển thị text khác
+                            <span className="text-gray-400 text-[11px]">Chưa có đánh giá</span>
+                        )}
+
+                        {/* Lượt xem */}
+                        <div className="flex items-center gap-1 text-gray-400" title={`đã bán ${product.luotMua}`}>
+                            <span>Đã bán {product.luotMua}</span>
+                        </div>
+                    </div>
                     
                     <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
                         <div className="flex flex-col">
