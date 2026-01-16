@@ -40,7 +40,7 @@ export default function UserDropdown() {
       {open && (
         <div className="absolute right-0 mt-2 w-52 bg-white border rounded-xl shadow-lg z-50">
           {user.vaiTro === "QuanTriVien" && (
-            <Link to="/quan-ly" className="block px-4 py-2 hover:text-blue-500">
+            <Link to="/quan-ly/thong-ke" className="block px-4 py-2 hover:text-blue-500">
             Trang quản trị
           </Link>
           )}

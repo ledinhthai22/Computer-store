@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       if(data.vaiTro === "QuanTriVien"){
-        window.location.href = "/quan-ly";
+        window.location.href = "/quan-ly/thong-ke";
       }
       return { success: true };
     } catch (error) {
