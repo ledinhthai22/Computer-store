@@ -51,7 +51,7 @@ function App() {
           <Route path="/san-pham/danh-muc/:maDanhMuc" element={<CategoryProduct />} />
           <Route path="/san-pham/thuong-hieu/:maThuongHieu" element={<BrandProduct />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<LienHe />} />
+          <Route path="/gui-lien-he" element={<LienHe />} />
           <Route path="/gio-hang" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/dang-nhap" element={<Login />} />

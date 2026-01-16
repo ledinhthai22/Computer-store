@@ -13,7 +13,6 @@ import RegisterModal from "../Auth/RegisterModal";
 export default function NavBar() {
     const { user } = useAuth();
     
-    // 1. Thay thế useState cục bộ bằng hook từ ModalLoginContext
     const { activeModal, openLogin, openRegister, closeModal } = useModalLogin();
     
     const [openDanhMuc, setOpenDanhMuc] = useState(false);
@@ -39,6 +38,9 @@ export default function NavBar() {
                             <IoMenu className="text-2xl" />
                             {openDanhMuc && <MenuCategory onClose={() => setOpenDanhMuc(false)} />}
                         </div>
+                        <Link to="/gui-lien-he" className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 group" title="Liên hệ">
+                            <span className="lg:inline font-medium">Liên hệ</span>
+                        </Link>
                     </div>
 
                     {/* --- Giỏ hàng & User --- */}
@@ -79,8 +81,6 @@ export default function NavBar() {
                 </div>
             </nav>
 
-            {/* --- Render Modal dựa trên state Global (Context) --- */}
-            
             {activeModal === 'login' && (
                 <LoginModal 
                     onClose={closeModal} 
