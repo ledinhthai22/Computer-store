@@ -13,7 +13,7 @@ export const userService = {
     axiosClient.get("/admin/users/deleted").then((res) => res.data),
 
   create: (data) =>
-    axiosClient.post("/admin/users/", data).then((res) => res.data),
+    axiosClient.post("/admin/users", data).then((res) => res.data),
 
   update: (id, data) =>
     axiosClient.put(`/admin/users/${id}`, data).then((res) => res.data),
