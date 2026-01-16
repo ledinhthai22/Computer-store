@@ -1,14 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Toast from '../../../components/admin/Toast';
-import { Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp,ImageIcon,Package,Settings,DollarSign,AlertCircle } from 'lucide-react';
+import { 
+  Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp, 
+  Image as ImageIcon, Package, Settings, DollarSign, AlertCircle 
+} from 'lucide-react';
 import DeleteConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import UpdateConfirmModal from '../../../components/admin/UpdateConfirmModal';
 import { productService } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
 import { brandService } from "../../../services/api/brandService";
 
-const InputField = ({ label, value, onChange, type = "text", disabled, placeholder }) => (
+const InputField = ({ label, value, onChange, type = "text", disabled, placeholder, error }) => (
   <div className="flex flex-col gap-1.5 w-full text-left">
     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
     <input
@@ -18,11 +21,18 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
-        disabled
+        error
+          ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+          : disabled
           ? 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'
           : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
       }`}
     />
+    {error && (
+      <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+        <AlertCircle size={12} /> {error}
+      </p>
+    )}
   </div>
 );
 
@@ -30,9 +40,6 @@ const ProductDetail = () => {
   const { maSanPham } = useParams();
   const navigate = useNavigate();
 
-  const [images, setImages] = useState([]);
-  const [deletedImageIds, setDeletedImageIds] = useState([]);
-  const [deletedVariantIds, setDeletedVariantIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
@@ -55,6 +62,11 @@ const ProductDetail = () => {
   });
 
   const [variants, setVariants] = useState([]);
+  const [deletedVariantIds, setDeletedVariantIds] = useState([]);
+
+  // Logic ảnh giống AddProduct: null = trống, object = ảnh (cũ hoặc mới)
+  const [productImages, setProductImages] = useState([]);
+  const [deletedImageIds, setDeletedImageIds] = useState([]);
 
   const formatImageUrl = (rawPath) => {
     if (!rawPath) return '';
@@ -67,14 +79,14 @@ const ProductDetail = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [product, categoriesData, brandsData] = await Promise.all([
+        const [product, catData, brandData] = await Promise.all([
           productService.getDetailProduct(maSanPham),
           categoryService.getAll(),
           brandService.getAll(),
         ]);
 
-        setCategories(categoriesData);
-        setBrands(brandsData);
+        setCategories(catData);
+        setBrands(brandData);
 
         setBasicInfo({
           maSanPham: product.maSanPham,
@@ -85,12 +97,14 @@ const ProductDetail = () => {
           soLuongTon: product.soLuongTon || 0,
         });
 
-        if (product.hinhAnh) {
+        // Ảnh cũ từ server
+        if (product.hinhAnh?.length) {
           const formatted = product.hinhAnh.map(img => ({
-            ...img,
             duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+            maHinhAnh: img.maHinhAnh,
+            anhChinh: img.anhChinh || false,
           }));
-          setImages(formatted);
+          setProductImages(formatted);
         }
 
         if (product.bienThe) {
@@ -103,7 +117,7 @@ const ProductDetail = () => {
           );
         }
       } catch (error) {
-        showToast("Không thể tải dữ liệu sản phẩm", error);
+        showToast("Không thể tải dữ liệu sản phẩm", 'error');
       } finally {
         setLoading(false);
       }
@@ -111,9 +125,72 @@ const ProductDetail = () => {
     fetchData();
   }, [maSanPham]);
 
+  // Cleanup preview cho ảnh mới
+  useEffect(() => {
+    return () => {
+      productImages.forEach(img => {
+        if (img?.preview) URL.revokeObjectURL(img.preview);
+      });
+    };
+  }, [productImages]);
+
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
+  const validateImageFile = (file) => {
+    const valid = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024;
+    if (!valid.includes(file.type)) return 'Chỉ chấp nhận JPG, PNG, GIF, WEBP';
+    if (file.size > maxSize) return 'Ảnh không được vượt quá 5MB';
+    return null;
+  };
+
+  const handleAddOrReplaceImage = (file, targetIndex = null) => {
+    const err = validateImageFile(file);
+    if (err) return showToast(err, 'error');
+
+    const newImg = {
+      file,
+      preview: URL.createObjectURL(file),
+      isNew: true,
+      anhChinh: targetIndex === 0,
+    };
+
+    setProductImages(prev => {
+      if (targetIndex !== null) {
+        const updated = [...prev];
+        if (updated[targetIndex]?.preview) URL.revokeObjectURL(updated[targetIndex].preview);
+        updated[targetIndex] = newImg;
+        return updated;
+      }
+      return [...prev, newImg];
+    });
+  };
+
+  const handleProductImageUpload = (e) => {
+    Array.from(e.target.files || []).forEach(file => handleAddOrReplaceImage(file));
+    e.target.value = '';
+  };
+
+  const handleReplaceImage = (e, index) => {
+    const file = e.target.files?.[0];
+    if (file) handleAddOrReplaceImage(file, index);
+    e.target.value = '';
+  };
+
+  const removeImage = (index) => {
+    setProductImages(prev => {
+      const updated = [...prev];
+      if (updated[index]?.preview) URL.revokeObjectURL(updated[index].preview);
+      const img = updated[index];
+      if (img?.maHinhAnh && !img.isNew) {
+        setDeletedImageIds(ids => [...new Set([...ids, img.maHinhAnh])]);
+      }
+      updated[index] = null;
+      return updated;
+    });
   };
 
   const addVariant = () => {
@@ -171,47 +248,6 @@ const ProductDetail = () => {
 
   const toggleSpecs = (id) => setOpenSpecs(prev => ({ ...prev, [id]: !prev[id] }));
 
-  const handleImageUpload = (e, isMain = false) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-
-    setImages(prev => {
-      let updated = [...prev];
-
-      if (isMain) {
-        updated = updated.map(img => ({ ...img, anhChinh: false }));
-
-        const newImage = {
-          duongDan: URL.createObjectURL(files[0]),
-          file: files[0],
-          isNew: true,
-          anhChinh: true,
-        };
-
-        return [newImage, ...updated];
-      }
-
-      const newImages = files.map(f => ({
-        duongDan: URL.createObjectURL(f),
-        file: f,
-        isNew: true,
-        anhChinh: false,
-      }));
-
-      return [...updated, ...newImages];
-    });
-  };
-
-  const removeImage = (index) => {
-    const imgToRemove = images[index];
-    if (imgToRemove?.maHinhAnh && !imgToRemove.isNew) {
-      setDeletedImageIds(prev =>
-        prev.includes(imgToRemove.maHinhAnh) ? prev : [...prev, imgToRemove.maHinhAnh]
-      );
-    }
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
-
   const handleUpdateClick = () => {
     if (!basicInfo.tenSanPham?.trim()) {
       showToast("Vui lòng nhập tên sản phẩm", "error");
@@ -230,32 +266,31 @@ const ProductDetail = () => {
       formData.append('TenSanPham', basicInfo.tenSanPham.trim());
       formData.append('MaDanhMuc', basicInfo.maDanhMuc);
       formData.append('MaThuongHieu', basicInfo.maThuongHieu);
+      formData.append('SoLuongTon', variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0));
 
-      const totalStock = variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
-      formData.append('SoLuongTon', totalStock);
-
+      // Ảnh xóa
       deletedImageIds.forEach(id => formData.append('HinhAnhXoa', id));
 
-      const mainImage = images.find(i => i.anhChinh);
+      // Ảnh mới
+      productImages.forEach(img => {
+        if (img?.file) formData.append('HinhAnhMoi', img.file);
+      });
 
-      if (mainImage?.isNew) {
+      // Ảnh chính
+      const mainImg = productImages[0];
+      if (mainImg?.isNew) {
         formData.append('AnhMoiDauTienLaAnhChinh', 'true');
-      } else if (mainImage?.maHinhAnh) {
-        formData.append('MaAnhChinh', mainImage.maHinhAnh);
+      } else if (mainImg?.maHinhAnh) {
+        formData.append('MaAnhChinh', mainImg.maHinhAnh);
         formData.append('AnhMoiDauTienLaAnhChinh', 'false');
       }
 
-      const newImages = images.filter(img => img.isNew && img.file);
-      newImages.forEach(img => {
-        formData.append('HinhAnhMoi', img.file);
-      });
-
+      // Biến thể xóa
       deletedVariantIds.forEach(id => formData.append('BienTheXoa', id));
 
+      // Biến thể
       variants.forEach((v, i) => {
-        if (Number.isInteger(v.maBTSP) && v.maBTSP > 0) {
-          formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
-        }
+        if (v.maBTSP > 0) formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
         formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe || fallback);
         formData.append(`BienThe[${i}].GiaBan`, v.giaBan || 0);
         formData.append(`BienThe[${i}].GiaKhuyenMai`, v.giaKhuyenMai || 0);
@@ -280,34 +315,37 @@ const ProductDetail = () => {
         formData.append(`BienThe[${i}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || fallback);
       });
 
-      const response = await productService.updateProduct(maSanPham, formData);
+      await productService.updateProduct(maSanPham, formData);
 
       showToast("Cập nhật thành công!", "success");
 
       setDeletedImageIds([]);
       setDeletedVariantIds([]);
 
-      if (response) {
+      // Reload dữ liệu
+      const refreshed = await productService.getDetailProduct(maSanPham);
+      if (refreshed) {
         setBasicInfo({
-          maSanPham: response.maSanPham,
-          tenSanPham: response.tenSanPham || basicInfo.tenSanPham,
-          slug: response.slug || basicInfo.slug,
-          maDanhMuc: String(response.maDanhMuc || basicInfo.maDanhMuc),
-          maThuongHieu: String(response.maThuongHieu || basicInfo.maThuongHieu),
-          soLuongTon: response.soLuongTon || basicInfo.soLuongTon,
+          maSanPham: refreshed.maSanPham,
+          tenSanPham: refreshed.tenSanPham || basicInfo.tenSanPham,
+          slug: refreshed.slug || basicInfo.slug,
+          maDanhMuc: String(refreshed.maDanhMuc || basicInfo.maDanhMuc),
+          maThuongHieu: String(refreshed.maThuongHieu || basicInfo.maThuongHieu),
+          soLuongTon: refreshed.soLuongTon || basicInfo.soLuongTon,
         });
 
-        if (response.hinhAnh?.length) {
-          const formatted = response.hinhAnh.map(img => ({
-            ...img,
+        if (refreshed.hinhAnh?.length) {
+          const formatted = refreshed.hinhAnh.map(img => ({
             duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+            maHinhAnh: img.maHinhAnh,
+            anhChinh: img.anhChinh || false,
           }));
-          setImages(formatted);
+          setProductImages(formatted);
         }
 
-        if (response.bienThe) {
+        if (refreshed.bienThe) {
           setVariants(
-            response.bienThe.map(bt => ({
+            refreshed.bienThe.map(bt => ({
               ...bt,
               id: bt.maBTSP,
               thongSoKyThuat: bt.thongSoKyThuat || {},
@@ -317,27 +355,8 @@ const ProductDetail = () => {
       }
 
       setIsEditing(false);
-
-      setTimeout(async () => {
-        try {
-          const refreshed = await productService.getDetailProduct(maSanPham);
-          if (refreshed?.hinhAnh?.length) {
-            const formatted = refreshed.hinhAnh.map(img => ({
-              ...img,
-              duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
-            }));
-            setImages(formatted);
-          }
-        } catch (error) {
-          showToast("Lỗi tải lại dữ liệu", error);
-        }
-      }, 800);
-
     } catch (error) {
-      showToast(
-        "Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"),
-        "error"
-      );
+      showToast("Lỗi cập nhật: " + (error.response?.data?.message || error.message || "Không rõ"), "error");
     } finally {
       setIsUpdating(false);
       setIsConfirmUpdateOpen(false);
@@ -351,14 +370,14 @@ const ProductDetail = () => {
       showToast("Xóa thành công");
       setTimeout(() => navigate('/quan-ly/san-pham'), 1200);
     } catch (error) {
-      showToast("Xóa thất bại", error);
+      showToast("Xóa thất bại", 'error');
     } finally {
       setIsDeleting(false);
       setIsConfirmDeleteOpen(false);
     }
   };
 
-  if (loading && !isEditing) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -372,7 +391,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
 
-        {/* Header giống AddProduct */}
+        {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -434,12 +453,12 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Nội dung chính */}
+          {/* Left - Nội dung chính */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* Product Images */}
+            {/* Hình Ảnh Sản Phẩm - Logic giống AddProduct */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon size={20} className="text-blue-600" />
@@ -447,49 +466,68 @@ const ProductDetail = () => {
               </div>
 
               <div className="grid grid-cols-4 gap-4">
-                {images.map((img, index) => (
-                  <div 
-                    key={index} 
-                    className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group"
+                {productImages.map((imgObj, index) => (
+                  <div
+                    key={index}
+                    className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      imgObj
+                        ? 'border-gray-200 hover:border-blue-500'
+                        : 'border-dashed border-gray-300 hover:border-blue-500 bg-gray-50'
+                    }`}
                   >
-                    <img
-                      src={img.duongDan}
-                      alt={`Product image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {index === 0 && (
-                      <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                        Ảnh chính
-                      </div>
-                    )}
-                    {isEditing && (
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
+                    {imgObj ? (
+                      <>
+                        <img
+                          src={imgObj.preview || imgObj.duongDan}
+                          alt={`Ảnh ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold shadow-sm">
+                            Ảnh chính
+                          </div>
+                        )}
+                        {isEditing && (
+                          <button
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </>
+                    ) : isEditing ? (
+                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors text-gray-400 hover:text-blue-500">
+                        <Camera size={24} className="mb-2" />
+                        <span className="text-xs font-medium">Thay ảnh</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleReplaceImage(e, index)}
+                        />
+                      </label>
+                    ) : null}
                   </div>
                 ))}
 
                 {isEditing && (
                   <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                    <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2" />
-                    <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium">Thêm ảnh</span>
+                    <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
+                    <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors">Thêm ảnh</span>
                     <input
                       type="file"
                       className="hidden"
-                      accept="image/*"
                       multiple
-                      onChange={handleImageUpload}
+                      accept="image/*"
+                      onChange={handleProductImageUpload}
                     />
                   </label>
                 )}
               </div>
             </div>
 
-            {/* Basic Info */}
+            {/* Thông Tin Cơ Bản */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Package size={20} className="text-blue-600" />
@@ -508,63 +546,52 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-semibold text-gray-700">Danh Mục *</label>
-                    <div className="relative">
-                      <select
-                        value={basicInfo.maDanhMuc}
-                        onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
-                        disabled={!isEditing}
-                        className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all appearance-none pr-10 ${
-                          !isEditing
-                            ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
-                            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                        }`}
-                      >
-                        <option value="">Chọn danh mục</option>
-                        {categories.map(cat => (
-                          <option key={cat.maDanhMuc} value={String(cat.maDanhMuc)}>
-                            {cat.tenDanhMuc}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    </div>
+                    <select
+                      value={basicInfo.maDanhMuc}
+                      onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
+                      disabled={!isEditing}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${
+                        !isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'
+                      }`}
+                    >
+                      <option value="">Chọn danh mục</option>
+                      {categories.map(cat => (
+                        <option key={cat.maDanhMuc} value={String(cat.maDanhMuc)}>
+                          {cat.tenDanhMuc}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-semibold text-gray-700">Thương Hiệu *</label>
-                    <div className="relative">
-                      <select
-                        value={basicInfo.maThuongHieu}
-                        onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
-                        disabled={!isEditing}
-                        className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all appearance-none pr-10 ${
-                          !isEditing
-                            ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
-                            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                        }`}
-                      >
-                        <option value="">Chọn thương hiệu</option>
-                        {brands.map(brand => (
-                          <option key={brand.maThuongHieu} value={String(brand.maThuongHieu)}>
-                            {brand.tenThuongHieu}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    </div>
+                    <select
+                      value={basicInfo.maThuongHieu}
+                      onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
+                      disabled={!isEditing}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${
+                        !isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'
+                      }`}
+                    >
+                      <option value="">Chọn thương hiệu</option>
+                      {brands.map(brand => (
+                        <option key={brand.maThuongHieu} value={String(brand.maThuongHieu)}>
+                          {brand.tenThuongHieu}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <InputField
                   label="Slug"
                   value={basicInfo.slug}
-                  onChange={(v) => setBasicInfo({ ...basicInfo, slug: v })}
                   disabled={true}
                 />
               </div>
             </div>
 
-            {/* Variants Section */}
+            {/* Biến Thể */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -592,9 +619,7 @@ const ProductDetail = () => {
                 return (
                   <div 
                     key={id} 
-                    className={`border border-gray-200 rounded-lg p-4 mb-4 ${
-                      isOpen ? 'bg-blue-50/30' : ''
-                    }`}
+                    className={`border border-gray-200 rounded-lg p-4 mb-4 ${isOpen ? 'bg-blue-50/30' : ''}`}
                   >
                     <div 
                       className="flex justify-between items-center cursor-pointer"
@@ -632,7 +657,6 @@ const ProductDetail = () => {
                           value={variant.tenBienThe}
                           onChange={(val) => updateVariant(id, 'tenBienThe', val)}
                           disabled={!isEditing}
-                          placeholder="VD: i7-16GB-512GB"
                         />
                         <InputField
                           label="Giá bán (VNĐ)"
@@ -686,7 +710,6 @@ const ProductDetail = () => {
                           disabled={!isEditing}
                         />
 
-                        {/* Technical specs - collapsible nếu muốn, nhưng hiện tại để phẳng */}
                         <div className="md:col-span-3 mt-4 pt-4 border-t border-gray-200">
                           <h4 className="text-md font-semibold mb-3">Thông số kỹ thuật</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -736,7 +759,7 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Right Column - Summary */}
+          {/* Right - Tổng Quan */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
               <div className="flex items-center gap-2 mb-4">
@@ -745,19 +768,19 @@ const ProductDetail = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Tổng biến thể:</span>
                   <span className="font-bold text-gray-900">{variants.length}</span>
                 </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Tổng số lượng tồn:</span>
                   <span className="font-bold text-blue-600">{totalStock.toLocaleString()}</span>
                 </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Số lượng ảnh:</span>
-                  <span className="font-bold text-gray-900">{images.length}</span>
+                  <span className="font-bold text-gray-900">
+                    {productImages.filter(img => img !== null).length}
+                  </span>
                 </div>
 
                 <div className="pt-4">
@@ -777,9 +800,7 @@ const ProductDetail = () => {
       {toast.show && (
         <div className="fixed bottom-6 right-6 z-50">
           <div className={`px-6 py-4 rounded-lg shadow-lg border-l-4 ${
-            toast.type === 'success' 
-              ? 'bg-green-50 border-green-500 text-green-800' 
-              : 'bg-red-50 border-red-500 text-red-800'
+            toast.type === 'success' ? 'bg-green-50 border-green-500 text-green-800' : 'bg-red-50 border-red-500 text-red-800'
           }`}>
             <div className="flex items-center gap-3">
               <AlertCircle size={20} />
@@ -789,7 +810,6 @@ const ProductDetail = () => {
         </div>
       )}
 
-      {/* Modal xác nhận xóa */}
       <DeleteConfirmModal
         isOpen={isConfirmDeleteOpen}
         message="Dữ liệu bị xóa sẽ không thể khôi phục. Bạn chắc chắn muốn xóa sản phẩm này?"
@@ -798,7 +818,6 @@ const ProductDetail = () => {
         isLoading={isDeleting}
       />
 
-      {/* Modal xác nhận cập nhật */}
       <UpdateConfirmModal
         isOpen={isConfirmUpdateOpen}
         message="Bạn có chắc chắn muốn lưu các thay đổi này?"

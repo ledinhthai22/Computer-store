@@ -1,3 +1,4 @@
+// AddProductFixed.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,7 +20,8 @@ import AddBrandModal from '../../../components/admin/product/AddBrandModal';
 import { productService } from '../../../services/api/productService';
 import { categoryService } from '../../../services/api/categoryService';
 import { brandService } from '../../../services/api/brandService';
-const InputField = ({ label, value, onChange, type = "text", disabled, placeholder }) => (
+
+const InputField = ({ label, value, onChange, type = "text", disabled, placeholder, error }) => (
   <div className="flex flex-col gap-1.5 w-full text-left">
     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
     <input
@@ -29,11 +31,18 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
-        disabled
+        error
+          ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+          : disabled
           ? 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'
           : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
       }`}
     />
+    {error && (
+      <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+        <AlertCircle size={12} /> {error}
+      </p>
+    )}
   </div>
 );
 
@@ -45,8 +54,10 @@ const SelectField = ({ label, value, onChange, options, valueKey, labelKey, plac
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`flex-1 px-4 py-3 rounded-xl text-base transition-all ${
-            error ? 'border-2 border-red-500 bg-red-50' : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+          className={`flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none ${
+            error 
+              ? 'border-2 border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' 
+              : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
           }`}
         >
           <option value="">{placeholder}</option>
@@ -57,13 +68,17 @@ const SelectField = ({ label, value, onChange, options, valueKey, labelKey, plac
           ))}
         </select>
         {onAdd && (
-          <button type="button" onClick={onAdd} className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all">
+          <button 
+            type="button" 
+            onClick={onAdd} 
+            className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-sm"
+          >
             <Plus size={20} />
           </button>
         )}
       </div>
       {error && (
-        <p className="text-xs text-red-600 flex items-center gap-1">
+        <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
           <AlertCircle size={12} /> {error}
         </p>
       )}
@@ -71,7 +86,7 @@ const SelectField = ({ label, value, onChange, options, valueKey, labelKey, plac
   );
 };
 
-const AddProduct = () => {
+const AddProductFixed = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -87,7 +102,9 @@ const AddProduct = () => {
     maThuongHieu: '',
   });
 
+  // null = vị trí trống, {file, preview} = ảnh hợp lệ
   const [productImages, setProductImages] = useState([]);
+
   const [variants, setVariants] = useState([
     {
       id: Math.random().toString(36).substr(2, 9),
@@ -128,11 +145,20 @@ const AddProduct = () => {
         setCategories(catRes);
         setBrands(brandRes);
       } catch (error) {
-        showToast('Không thể tải danh mục/thương hiệu', error);
+        showToast('Không thể tải danh mục/thương hiệu', 'error');
       }
     };
     fetchMetadata();
   }, []);
+
+  // Cleanup memory
+  useEffect(() => {
+    return () => {
+      productImages.forEach(img => {
+        if (img?.preview) URL.revokeObjectURL(img.preview);
+      });
+    };
+  }, [productImages]);
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -141,42 +167,78 @@ const AddProduct = () => {
 
   const validateImageFile = (file) => {
     const validExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (!validExtensions.includes(file.type)) return 'Chỉ chấp nhận file ảnh định dạng JPG, PNG, GIF, WEBP';
     if (file.size > maxSize) return 'Kích thước ảnh không được vượt quá 5MB';
     return null;
   };
 
-  const handleProductImageUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const validFiles = [];
-    const invalidFiles = [];
-
-    files.forEach((file) => {
-      const err = validateImageFile(file);
-      if (err) invalidFiles.push({ name: file.name, error: err });
-      else validFiles.push(file);
-    });
-
-    if (invalidFiles.length > 0) {
-      showToast(invalidFiles[0].error, 'error');
+  const handleAddOrReplaceImage = (file, targetIndex = null) => {
+    const err = validateImageFile(file);
+    if (err) {
+      showToast(err, 'error');
       return;
     }
 
-    setProductImages((prev) => [...prev, ...validFiles]);
-    setErrors((prev) => ({ ...prev, hinhAnh: '' }));
+    const newImg = { file, preview: URL.createObjectURL(file) };
+
+    setProductImages(prev => {
+      if (targetIndex !== null) {
+        // Thay thế tại vị trí
+        const updated = [...prev];
+        if (updated[targetIndex]?.preview) {
+          URL.revokeObjectURL(updated[targetIndex].preview);
+        }
+        updated[targetIndex] = newImg;
+        return updated;
+      } else {
+        // Thêm mới vào cuối
+        return [...prev, newImg];
+      }
+    });
+
+    setErrors(prev => ({ ...prev, hinhAnh: '' }));
+  };
+
+  const handleProductImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => handleAddOrReplaceImage(file));
+    e.target.value = '';
+  };
+
+  const handleReplaceImage = (e, index) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleAddOrReplaceImage(file, index);
+    }
+    e.target.value = '';
   };
 
   const removeProductImage = (index) => {
-    setProductImages((prev) => prev.filter((_, i) => i !== index));
+    setProductImages(prev => {
+      const updated = [...prev];
+      if (updated[index]?.preview) {
+        URL.revokeObjectURL(updated[index].preview);
+      }
+      updated[index] = null;
+      return updated;
+    });
   };
 
   const handleVariantChange = (id, field, value) => {
     setVariants((prev) =>
       prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
     );
+    setErrors((prev) => {
+      const idx = variants.findIndex((v) => v.id === id);
+      const key = `variant_${idx}_${field}`;
+      if (prev[key]) {
+        const newErrors = { ...prev };
+        delete newErrors[key];
+        return newErrors;
+      }
+      return prev;
+    });
   };
 
   const handleVariantSpecChange = (id, field, value) => {
@@ -242,7 +304,9 @@ const AddProduct = () => {
     if (!formData.tenSanPham.trim()) newErrors.tenSanPham = 'Vui lòng nhập tên sản phẩm';
     if (!formData.maDanhMuc) newErrors.maDanhMuc = 'Vui lòng chọn danh mục';
     if (!formData.maThuongHieu) newErrors.maThuongHieu = 'Vui lòng chọn thương hiệu';
-    if (productImages.length === 0) newErrors.hinhAnh = 'Vui lòng thêm ít nhất 1 ảnh';
+
+    const activeImages = productImages.filter(img => img !== null);
+    if (activeImages.length === 0) newErrors.hinhAnh = 'Vui lòng thêm ít nhất 1 ảnh';
 
     variants.forEach((v, index) => {
       if (!v.tenBienThe.trim()) newErrors[`variant_${index}_tenBienThe`] = 'Vui lòng nhập tên biến thể';
@@ -260,6 +324,11 @@ const AddProduct = () => {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       showToast('Vui lòng kiểm tra lại các trường bắt buộc', 'error');
+      
+      const firstErrorElement = document.querySelector('[class*="border-red"]');
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
@@ -296,7 +365,12 @@ const AddProduct = () => {
         formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || 'Đang cập nhật');
       });
 
-      productImages.forEach((file) => formDataToSend.append('HinhAnh', file));
+      // Chỉ gửi ảnh thật
+      productImages.forEach(img => {
+        if (img?.file) {
+          formDataToSend.append('HinhAnh', img.file);
+        }
+      });
 
       await productService.AddProduct(formDataToSend);
 
@@ -350,7 +424,7 @@ const AddProduct = () => {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-all flex items-center gap-2 shadow-sm"
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-sm"
             >
               {loading ? (
                 <>
@@ -369,9 +443,9 @@ const AddProduct = () => {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left - Nội dung chính */}
+          {/* Left - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Images */}
+            {/* Images - Phần đã sửa hoàn chỉnh */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon size={20} className="text-blue-600" />
@@ -387,32 +461,65 @@ const AddProduct = () => {
               )}
 
               <div className="grid grid-cols-4 gap-4">
-                {productImages.map((file, index) => (
-                  <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-all">
-                    <img src={URL.createObjectURL(file)} alt={`Ảnh ${index + 1}`} className="w-full h-full object-cover" />
-                    {index === 0 && (
-                      <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                        Ảnh chính
-                      </div>
+                {productImages.map((imgObj, index) => (
+                  <div
+                    key={index}
+                    className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      imgObj
+                        ? 'border-gray-200 hover:border-blue-500'
+                        : 'border-dashed border-gray-300 hover:border-blue-500 bg-gray-50'
+                    }`}
+                  >
+                    {imgObj ? (
+                      <>
+                        <img
+                          src={imgObj.preview}
+                          alt={`Ảnh ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold shadow-sm">
+                            Ảnh chính
+                          </div>
+                        )}
+                        <button
+                          onClick={() => removeProductImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                        >
+                          <X size={14} />
+                        </button>
+                      </>
+                    ) : (
+                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors text-gray-400 hover:text-blue-500">
+                        <Camera size={24} className="mb-2" />
+                        <span className="text-xs font-medium">Thay ảnh</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleReplaceImage(e, index)}
+                        />
+                      </label>
                     )}
-                    <button
-                      onClick={() => removeProductImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    >
-                      <X size={14} />
-                    </button>
                   </div>
                 ))}
 
+                {/* Nút thêm ảnh mới */}
                 <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                  <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2" />
-                  <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium">Thêm ảnh</span>
-                  <input type="file" className="hidden" multiple accept="image/*" onChange={handleProductImageUpload} />
+                  <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
+                  <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors">Thêm ảnh</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    accept="image/*"
+                    onChange={handleProductImageUpload}
+                  />
                 </label>
               </div>
             </div>
 
-            {/* Thông tin cơ bản */}
+            {/* Thông Tin Cơ Bản */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Package size={20} className="text-blue-600" />
@@ -423,7 +530,10 @@ const AddProduct = () => {
                 <InputField
                   label="Tên sản phẩm *"
                   value={formData.tenSanPham}
-                  onChange={(v) => setFormData((prev) => ({ ...prev, tenSanPham: v }))}
+                  onChange={(v) => {
+                    setFormData((prev) => ({ ...prev, tenSanPham: v }));
+                    setErrors((prev) => ({ ...prev, tenSanPham: '' }));
+                  }}
                   error={errors.tenSanPham}
                   placeholder="VD: Dell XPS 15 9520"
                 />
@@ -432,7 +542,10 @@ const AddProduct = () => {
                   <SelectField
                     label="Danh mục *"
                     value={formData.maDanhMuc}
-                    onChange={(v) => setFormData((prev) => ({ ...prev, maDanhMuc: v }))}
+                    onChange={(v) => {
+                      setFormData((prev) => ({ ...prev, maDanhMuc: v }));
+                      setErrors((prev) => ({ ...prev, maDanhMuc: '' }));
+                    }}
                     options={categories}
                     valueKey="maDanhMuc"
                     labelKey="tenDanhMuc"
@@ -443,7 +556,10 @@ const AddProduct = () => {
                   <SelectField
                     label="Thương hiệu *"
                     value={formData.maThuongHieu}
-                    onChange={(v) => setFormData((prev) => ({ ...prev, maThuongHieu: v }))}
+                    onChange={(v) => {
+                      setFormData((prev) => ({ ...prev, maThuongHieu: v }));
+                      setErrors((prev) => ({ ...prev, maThuongHieu: '' }));
+                    }}
                     options={brands}
                     valueKey="maThuongHieu"
                     labelKey="tenThuongHieu"
@@ -455,7 +571,7 @@ const AddProduct = () => {
               </div>
             </div>
 
-            {/* Biến thể */}
+            {/* Biến Thể */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
@@ -475,7 +591,6 @@ const AddProduct = () => {
 
                 return (
                   <div key={variant.id} className="border border-gray-200 rounded-2xl mb-6 overflow-hidden shadow-sm">
-                    {/* Header collapsible */}
                     <div
                       className="p-4 bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
                       onClick={() => toggleVariant(variant.id)}
@@ -500,7 +615,7 @@ const AddProduct = () => {
                               e.stopPropagation();
                               removeVariant(variant.id);
                             }}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 transition-colors"
                           >
                             <Trash2 size={20} />
                           </button>
@@ -509,16 +624,15 @@ const AddProduct = () => {
                       </div>
                     </div>
 
-                    {/* Nội dung khi mở */}
                     {isOpen && (
                       <div className="p-6 space-y-8">
-                        {/* Dòng 1: Tên - Giá bán - Giá KM */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <InputField
                             label="Tên biến thể *"
                             value={variant.tenBienThe}
                             onChange={(v) => handleVariantChange(variant.id, 'tenBienThe', v)}
                             error={errors[`variant_${index}_tenBienThe`]}
+                            placeholder="VD: Core i7, 16GB RAM"
                           />
                           <InputField
                             label="Giá bán (VNĐ) *"
@@ -526,6 +640,7 @@ const AddProduct = () => {
                             value={variant.giaBan}
                             onChange={(v) => handleVariantChange(variant.id, 'giaBan', v)}
                             error={errors[`variant_${index}_giaBan`]}
+                            placeholder="0"
                           />
                           <InputField
                             label="Giá khuyến mãi (VNĐ)"
@@ -533,29 +648,53 @@ const AddProduct = () => {
                             value={variant.giaKhuyenMai}
                             onChange={(v) => handleVariantChange(variant.id, 'giaKhuyenMai', v)}
                             error={errors[`variant_${index}_giaKhuyenMai`]}
+                            placeholder="0"
                           />
                         </div>
 
-                        {/* Dòng 2: Màu - RAM - Ổ cứng */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <InputField label="Màu sắc" value={variant.mauSac} onChange={(v) => handleVariantChange(variant.id, 'mauSac', v)} />
-                          <InputField label="RAM" value={variant.ram} onChange={(v) => handleVariantChange(variant.id, 'ram', v)} />
-                          <InputField label="Ổ cứng" value={variant.oCung} onChange={(v) => handleVariantChange(variant.id, 'oCung', v)} />
+                          <InputField 
+                            label="Màu sắc" 
+                            value={variant.mauSac} 
+                            onChange={(v) => handleVariantChange(variant.id, 'mauSac', v)} 
+                            placeholder="VD: Đen"
+                          />
+                          <InputField 
+                            label="RAM" 
+                            value={variant.ram} 
+                            onChange={(v) => handleVariantChange(variant.id, 'ram', v)} 
+                            placeholder="VD: 16GB"
+                          />
+                          <InputField 
+                            label="Ổ cứng" 
+                            value={variant.oCung} 
+                            onChange={(v) => handleVariantChange(variant.id, 'oCung', v)} 
+                            placeholder="VD: 512GB SSD"
+                          />
                         </div>
 
-                        {/* Dòng 3: CPU - GPU - Số lượng tồn */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <InputField label="CPU" value={variant.boXuLyTrungTam} onChange={(v) => handleVariantChange(variant.id, 'boXuLyTrungTam', v)} />
-                          <InputField label="GPU" value={variant.boXuLyDoHoa} onChange={(v) => handleVariantChange(variant.id, 'boXuLyDoHoa', v)} />
+                          <InputField 
+                            label="CPU" 
+                            value={variant.boXuLyTrungTam} 
+                            onChange={(v) => handleVariantChange(variant.id, 'boXuLyTrungTam', v)} 
+                            placeholder="VD: Intel Core i7-12700H"
+                          />
+                          <InputField 
+                            label="GPU" 
+                            value={variant.boXuLyDoHoa} 
+                            onChange={(v) => handleVariantChange(variant.id, 'boXuLyDoHoa', v)} 
+                            placeholder="VD: NVIDIA RTX 3060"
+                          />
                           <InputField
                             label="Số lượng tồn"
                             type="number"
                             value={variant.soLuongTon}
                             onChange={(v) => handleVariantChange(variant.id, 'soLuongTon', v)}
+                            placeholder="0"
                           />
                         </div>
 
-                        {/* Thông số kỹ thuật */}
                         <div className="border-t pt-6">
                           <h4 className="text-lg font-bold text-gray-800 mb-4">Thông số kỹ thuật</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -563,31 +702,37 @@ const AddProduct = () => {
                               label="Kích thước màn hình"
                               value={variant.thongSoKyThuat.kichThuocManHinh}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'kichThuocManHinh', v)}
+                              placeholder='VD: 15.6"'
                             />
                             <InputField
                               label="Độ phân giải"
                               value={variant.thongSoKyThuat.doPhanGiaiManHinh}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'doPhanGiaiManHinh', v)}
+                              placeholder="VD: 1920x1080 (Full HD)"
                             />
                             <InputField
                               label="Hệ điều hành"
                               value={variant.thongSoKyThuat.heDieuHanh}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'heDieuHanh', v)}
+                              placeholder="VD: Windows 11 Home"
                             />
                             <InputField
                               label="Dung lượng pin"
                               value={variant.thongSoKyThuat.pin}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'pin', v)}
+                              placeholder="VD: 56Wh"
                             />
                             <InputField
                               label="Số khe RAM"
                               value={variant.thongSoKyThuat.soKheRam}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'soKheRam', v)}
+                              placeholder="VD: 2"
                             />
                             <InputField
                               label="Cổng giao tiếp"
                               value={variant.thongSoKyThuat.congGiaoTiep}
                               onChange={(v) => handleVariantSpecChange(variant.id, 'congGiaoTiep', v)}
+                              placeholder="VD: USB-C, HDMI, USB 3.0"
                             />
                           </div>
                         </div>
@@ -599,7 +744,7 @@ const AddProduct = () => {
             </div>
           </div>
 
-          {/* Right - Tổng quan */}
+          {/* Right - Overview */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
               <div className="flex items-center gap-2 mb-4">
@@ -618,7 +763,9 @@ const AddProduct = () => {
                 </div>
                 <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Số lượng ảnh:</span>
-                  <span className="font-bold text-gray-900">{productImages.length}</span>
+                  <span className="font-bold text-gray-900">
+                    {productImages.filter(img => img !== null).length}
+                  </span>
                 </div>
 
                 <div className="pt-4">
@@ -634,13 +781,11 @@ const AddProduct = () => {
         </div>
       </div>
 
-      {/* Modals */}
       <AddCategoryModal isOpen={isCategoryModalOpen} onClose={() => setIsCategoryModalOpen(false)} onSuccess={handleCategoryAdded} />
       <AddBrandModal isOpen={isBrandModalOpen} onClose={() => setIsBrandModalOpen(false)} onSuccess={handleBrandAdded} />
 
-      {/* Toast */}
       {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
           <div
             className={`px-6 py-4 rounded-lg shadow-lg border-l-4 ${
               toast.type === 'success' ? 'bg-green-50 border-green-500 text-green-800' : 'bg-red-50 border-red-500 text-red-800'
@@ -657,4 +802,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default AddProductFixed;
