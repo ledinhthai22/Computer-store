@@ -45,8 +45,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/san-pham" element={<UserProduct />} />
           <Route path="/chi-tiet-san-pham/:slug" element={<Details />} />
-          <Route path="/san-pham/danh-muc/:id" element={<CategoryProduct />} />
-          <Route path="/san-pham/thuong-hieu/:id" element={<BrandProduct />} />
+          <Route path="/san-pham/danh-muc/:maDanhMuc" element={<CategoryProduct />} />
+          <Route path="/san-pham/thuong-hieu/:maThuongHieu" element={<BrandProduct />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<LienHe />} />
           <Route path="/gio-hang" element={<Cart />} />
