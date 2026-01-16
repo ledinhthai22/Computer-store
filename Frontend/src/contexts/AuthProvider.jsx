@@ -33,11 +33,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (hoTen, email, matKhau, soDienThoai, xacNhanMatKhau) => {
+  const register = async (hoTen, email, matKhau, gioiTinh, ngaySinh, soDienThoai, xacNhanMatKhau) => {
     try {
       await axiosClient.post("/auth/register", {
         hoTen,
         email,
+        ngaySinh,
+        gioiTinh,
         soDienThoai,
         matKhau,
         xacNhanMatKhau,

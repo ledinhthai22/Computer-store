@@ -9,6 +9,8 @@ export default function Register() {
   const [formData, setFormData] = useState({
     hoTen: "",
     email: "",
+    ngaySinh: "",
+    gioiTinh: "",
     soDienThoai: "",
     matKhau: "",
     xacNhanMatKhau: "",
@@ -76,6 +78,8 @@ export default function Register() {
       const result = await register(
         formData.hoTen,
         formData.email,
+        formData.ngaySinh,
+        formData.gioiTinh,
         formData.matKhau,
         formData.soDienThoai,
         formData.xacNhanMatKhau
@@ -161,6 +165,48 @@ export default function Register() {
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
+
+            <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
+            {/* Wrapper này giả lập style giống hệt thẻ input text */}
+            <div className="w-full p-3 border-2 border-gray-200 rounded-xl flex items-center gap-6">
+                <label className="flex items-center gap-2 cursor-pointer hover:text-[#2f9ea0] transition-colors">
+                    <input 
+                        type="radio" 
+                        name="gioiTinh" 
+                        value="Nam"
+                        checked={formData.gioiTinh === "Nam"}
+                        onChange={handleChange}
+                        className="w-5 h-5 accent-[#2f9ea0] cursor-pointer"
+                    />
+                    <span className="font-medium">Nam</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer hover:text-[#2f9ea0] transition-colors">
+                    <input 
+                        type="radio" 
+                        name="gioiTinh" 
+                        value="Nữ"
+                        checked={formData.gioiTinh === "Nữ"}
+                        onChange={handleChange}
+                        className="w-5 h-5 accent-[#2f9ea0] cursor-pointer"
+                    />
+                    <span className="font-medium">Nữ</span>
+                </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">Ngày Sinh</label>
+            <input
+                type="date"
+                name="ngaySinh"
+                value={formData.ngaySinh}
+                onChange={handleChange}
+                className="w-full p-3 border-2 border-gray-200  rounded-xl mt-1"
+                required
+              />
+          </div>
 
             <div>
               <label className="block text-stone-600 font-medium mb-1">
