@@ -1,16 +1,25 @@
 import { useAuth } from "../../../contexts/AuthProvider";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axiosClient from "../../../services/api/axiosClient";
 import ChangePasswordModal from "./ChangePasswordModal";
+import {useModalLogin} from "../../../contexts/ModalLoginContext";
 
 export default function UpdatePassword() {
   const { user } = useAuth();
+  const { openLogin } = useModalLogin();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      openLogin();
+      navigate("/");
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
         const response = await axiosClient.get("/me");
@@ -22,12 +31,11 @@ export default function UpdatePassword() {
       }
     };
 
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
-
-  if (!user) return <Navigate to="/dang-nhap" />;
+    fetchProfile();
+  }, [user, navigate, openLogin]);
+  
+  if (!user) return null;
+  if (user.vaiTro === "QuanTriVien") return <Navigate to="/quan-ly" />;
 
   return (
     <div className="w-full py-6 px-4"> 
