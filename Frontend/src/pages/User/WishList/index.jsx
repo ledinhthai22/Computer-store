@@ -29,8 +29,16 @@ export default function WishList() {
     };
 
     useEffect(() => {
-        fetchWishlistProducts();
-    }, [user]);
+    const handleWishlistUpdate = (e) => {
+        // Chỉ cập nhật nếu vẫn còn user đang đăng nhập
+            if (user?.id) {
+                fetchWishlistProducts();
+            }
+        };
+        
+        window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+        return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    }, [user?.maNguoiDung]);
 
     // Lắng nghe sự kiện cập nhật wishlist
     useEffect(() => {
