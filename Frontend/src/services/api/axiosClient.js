@@ -15,7 +15,7 @@ axiosClient.interceptors.response.use(
   (error) => {
     const { response, config } = error;
 
-    if (response && response.status === 401) {
+    if (response && response.status === 403) {
 
       const noRedirectUrls = [
         '/auth/login', 
