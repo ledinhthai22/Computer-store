@@ -22,8 +22,7 @@ namespace Backend.Data
         public DbSet<DiaChiNhanHang> DiaChiNhanHang { get; set; } = null!;
         public DbSet<DanhGia> DanhGia { get; set; } = null!;
         public DbSet<DonHang> DonHang { get; set; } = null!;
-        
-      
+        public DbSet<ChiTietDonHang> ChiTietDonHang { get; set; } = null!;
         public DbSet<LienHe> LienHe { get; set; } = null!;
         public DbSet<TrinhChieu> TrinhChieu { get; set; } = null!;
         public DbSet<ThongTinTrang> ThongTinTrang { get; set; } = null!;
@@ -124,6 +123,19 @@ namespace Backend.Data
 
             modelBuilder.Entity<ChiTietDonHang>()
                 .HasKey(ct => new { ct.MaDonHang, ct.MaBienThe });
+
+            modelBuilder.Entity<ChiTietDonHang>()
+                .HasOne(ct => ct.DonHang)
+                .WithMany(dh => dh.ChiTietDonHang) 
+                .HasForeignKey(ct => ct.MaDonHang)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            
+            modelBuilder.Entity<ChiTietDonHang>()
+                .HasOne(ct => ct.BienThe)
+                .WithMany() 
+                .HasForeignKey(ct => ct.MaBienThe)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<VaiTro>().HasData(
                 new VaiTro { MaVaiTro = 1, TenVaiTro = "QuanTriVien" },

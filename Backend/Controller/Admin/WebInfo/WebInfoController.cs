@@ -6,22 +6,32 @@ using Ecommerce.DTO.WebInfo;
 
 namespace Ecommerce.Controller.Admin.WebInfo
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
-    public class WebInfoController: ControllerBase
+    public class WebInfoAdminController : ControllerBase
     {
         private readonly IWebInfoService _webInfoService;
-        public WebInfoController(IWebInfoService webInfoService)
+        public WebInfoAdminController(IWebInfoService webInfoService)
         {
             _webInfoService = webInfoService;
         }
+
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllAsync()
         {
-            var result = await _webInfoService.GetAsync();
+            var result = await _webInfoService.GetAllAsync();
             return Ok(result);
         }
         
+        [HttpPut("update-status/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            var result = await _webInfoService.UpdateStatus(id);
+            if (!result) return NotFound(new { message = "Không tìm thấy thông tin trang hoặc đã bị xóa" });
+            return Ok(new { message = "Cập nhật trạng thái thành công" });
+        }
         [HttpGet("deleted")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetHidenAsync()
@@ -29,7 +39,7 @@ namespace Ecommerce.Controller.Admin.WebInfo
             var result = await _webInfoService.GetAllHidenAsync();
             return Ok(result);
         }
-        
+
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateWebInfo(WebInfoItemRequest request)
@@ -54,8 +64,8 @@ namespace Ecommerce.Controller.Admin.WebInfo
             var result = await _webInfoService.RestoreWebInfo(id);
             if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
             return Ok(result);
-        } 
-        
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SoftDelete(int id)
@@ -70,6 +80,14 @@ namespace Ecommerce.Controller.Admin.WebInfo
             {
                 return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
             }
+        }
+        [HttpGet("detail/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetDetailAsync(int id)
+        {
+            var result = await _webInfoService.GetDetailAsync(id);
+            if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
+            return Ok(result);
         }
     }
 }
