@@ -17,6 +17,7 @@ import {
   Airplay,
   Plug2
 } from "lucide-react";
+import RelatedProduct from "../../../components/user/product/RelatedProduct";
 
 const API_BASE_URL = "https://localhost:7012"; 
 
@@ -184,13 +185,13 @@ export default function Details() {
                 </div>
                 <button 
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -239,10 +240,10 @@ export default function Details() {
               <h1 className="text-3xl font-bold text-gray-900 mb-6">{product.tenSanPham}</h1>
               {/* Stock Status Badge */}
               <div className="mb-6">
-                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                <span className={`inline-flex items-center gap-2 rounded-full font-semibold ${
                   selectedVariant.trangThai && selectedVariant.soLuongTon > 0
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
+                    ? "text-green-700"
+                    : "text-red-700"
                 }`}>
                   <CheckCircle size={16} />
                   {selectedVariant.trangThai && selectedVariant.soLuongTon > 0 ? "Còn hàng" : "Hết hàng"}
@@ -378,7 +379,6 @@ export default function Details() {
         <div className="mt-8">
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <Cpu className="text-[#2f9ea0]" size={24} />
               <h3 className="text-xl font-bold text-gray-900">THÔNG SỐ KỸ THUẬT</h3>
             </div>
             
@@ -474,6 +474,8 @@ export default function Details() {
               </button>
             </div>
           </div>
+          
+       <RelatedProduct/>
         </div>
        </div>
     </div>
