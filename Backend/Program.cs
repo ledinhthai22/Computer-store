@@ -13,7 +13,7 @@ using Backend.Services.WebInfo;
 using Backend.Services.Cart;
 //using Backend.Services.Product;
 using Backend.Services.User;
-
+using Backend.Services.Order;
 namespace Backend
 {
     public class Program
@@ -29,9 +29,10 @@ namespace Backend
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IWebInfoService, WebInfoService>();
-            builder.Services.AddScoped<ICartService, CartService>();
+            //builder.Services.AddScoped<ICartService, CartService>();
             //builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
