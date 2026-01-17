@@ -8,6 +8,16 @@ export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
+  const priceRanges = [
+    { label: 'Dưới 5 triệu', min: 0, max: 5000000 },
+    { label: '5 - 10 triệu', min: 5000000, max: 10000000 },
+    { label: '10 - 15 triệu', min: 10000000, max: 15000000 },
+    { label: '15 - 20 triệu', min: 15000000, max: 20000000 },
+    { label: '20 - 25 triệu', min: 20000000, max: 25000000 },
+    { label: '25 - 30 triệu', min: 25000000, max: 30000000 },
+    { label: 'Trên 30 triệu', min: 30000000, max: null },
+  ];
+
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -116,14 +126,19 @@ export default function MenuCategory({ onClose }) {
             <div className="">
                 <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Khoảng giá</h4>
                 <ul className="space-y-2 lg:space-y-3 text-sm">
-                    {['Dưới 5 triệu', '5 - 10 triệu', '10 - 15 triệu', '15 - 20 triệu', '20 - 25 triệu', '25 - 30 triệu', 'Trên 30 triệu'].map((price, index) => (
+                    {priceRanges.map((range, index) => (
                         <li key={index}>
-                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">{price}</Link>
+                            <Link 
+                                to={`/san-pham/loc-theo-gia?min=${range.min}${range.max ? `&max=${range.max}` : ''}`} 
+                                onClick={onClose} 
+                                className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
+                            >
+                                {range.label}
+                            </Link>
                         </li>
                     ))}
                 </ul>
             </div>
-
         </div>
       </div>
     </>

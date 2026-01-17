@@ -13,3 +13,4 @@ export {default as WishList} from './WishList';
 export {default as CategoryProduct} from './CategoryProduct';
 export {default as BrandProduct} from './BrandProduct';
 export {default as UpdatePassword} from './UpdatePassword';
+export {default as PriceProduct} from './PriceProduct';
