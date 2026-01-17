@@ -1,7 +1,8 @@
 // Order.jsx - Main Page
 import { useState, useEffect, useCallback } from 'react';
 import OrderTable from '../../../components/admin/order/OrderTable';
-import { OrderDetailModal, OrderUpdateModal } from '../../../components/admin/order/OrderDetailModal';
+import OrderDetailModal from '../../../components/admin/order/OrderDetailModal';
+import OrderUpdateModal from '../../../components/admin/order/OrderUpdateModal';
 import Toast from '../../../components/admin/Toast';
 // import { orderService } from '../../../services/api/orderService'; // TODO: Import service khi API ready
 
