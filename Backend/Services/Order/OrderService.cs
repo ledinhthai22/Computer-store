@@ -287,7 +287,7 @@ namespace Backend.Services.Order
             {
                 throw new InvalidOperationException("Tổng tiền thanh toán không được lớn hơn tổng tiền gốc!");
             }
-            if (!(await _DbContext.NguoiDung.AnyAsync(ng => ng.MaNguoiDung == request.MaKH && ng.Delete_At == null)))
+            if (!(await _DbContext.NguoiDung.AnyAsync(ng => ng.MaNguoiDung == request.MaKH && ng.NgayXoa == null)))
             {
                 throw new InvalidOperationException($"Người dùng mã:{request.MaKH} không tồn tại!");
             }
@@ -422,7 +422,7 @@ namespace Backend.Services.Order
         private async Task<(NguoiDung User, DiaChiNhanHang Address, List<ChiTietGioHang> CartItems, decimal TienGoc, decimal ThanhToan)> ValidateAndPrepareData(int userId, CheckoutCartRequest request)
         {
             var user = await _DbContext.NguoiDung
-                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.Delete_At == null);
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
 
             if (user == null)
                 throw new InvalidOperationException($"Người dùng ID {userId} không tồn tại.");
@@ -566,7 +566,7 @@ namespace Backend.Services.Order
                                 .FirstOrDefaultAsync(o => o.MaDH == MaDH);
             var user = await _DbContext.NguoiDung
                                 .Include(u=> u.VaiTro)
-                                .FirstOrDefaultAsync(u => u.MaNguoiDung == MaND && u.Delete_At == null);
+                                .FirstOrDefaultAsync(u => u.MaNguoiDung == MaND && u.NgayXoa == null);
             if (order == null)
             {
                 throw new InvalidOperationException($"Khong tim thay Hoa Don {MaDH}!");
