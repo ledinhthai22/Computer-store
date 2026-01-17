@@ -43,6 +43,11 @@ export default function Details() {
       setSelectedImage((prev) => (prev - 1 + product.hinhAnh.length) % product.hinhAnh.length);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
   useEffect(() => {
     if (!loading && product?.hinhAnh?.length > 1) {
       const timer = setInterval(nextImage, 3000);
@@ -58,7 +63,10 @@ export default function Details() {
         
         if (res && res.bienThe && res.bienThe.length > 0) {
           setProduct(res);
-          setSelectedVariant(res.bienThe[0]);
+          setQuantity(1);
+          if (res.bienThe && res.bienThe.length > 0) {
+            setSelectedVariant(res.bienThe[0]);
+          }
         }
       } catch (err) {
         console.log(err);
@@ -474,8 +482,7 @@ export default function Details() {
               </button>
             </div>
           </div>
-          
-       <RelatedProduct/>
+          <RelatedProduct productId={product.maSanPham} />
         </div>
        </div>
     </div>

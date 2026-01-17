@@ -32,30 +32,33 @@ export const productService = {
   usergetBySlug: (slug) =>
     axiosClient.get(`/products/slug/${slug}`).then((res) => res.data),
 
+  usergetRelated: (id) =>
+    axiosClient.get(`/products/${id}/related`).then((res) => res.data),
+
   // ADMIN
   getAdminList: async () => {
     const res = await axiosClient.get("/admin/products");
     return res.data; // API trả mảng
   },
   getDetailProduct: async (id) => {
-    const res = await axiosClient.get(`/admin/products/${id}`)
+    const res = await axiosClient.get(`/admin/products/${id}`);
     return res.data;
   },
   // services/api/ProductService.js
   updateProduct: async (id, formData) => {
     const res = await axiosClient.put(`/admin/products/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
   AddProduct: async (formData) => {
     const res = await axiosClient.post(`/admin/products`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
   deleteProduct: async (id) => {
-    const res = await axiosClient.delete(`/admin/products/${id}`)
+    const res = await axiosClient.delete(`/admin/products/${id}`);
     return res.data;
   },
   delete: (id) =>
