@@ -76,5 +76,22 @@ namespace Backend.Controllers
             var products = await _productService.GetProductsByBrandAsync(maThuongHieu, soLuong);
             return Ok(products);
         }
+        [HttpGet("{id}/related")]
+        public async Task<IActionResult> GetRelatedProducts(int maSanPham,[FromQuery] int limit = 10)
+        {
+            
+            var product = await _productService.GetByIdAsync(maSanPham);
+            if (product == null)
+                return NotFound("Sản phẩm không tồn tại");
+
+            var relatedProducts = await _productService.GetRelatedProductsAsync(
+                maSanPham,
+                product.MaDanhMuc,
+                product.MaThuongHieu,
+                limit
+            );
+
+            return Ok(relatedProducts);
+        }
     }
 }
