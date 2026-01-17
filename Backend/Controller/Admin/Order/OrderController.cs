@@ -7,7 +7,7 @@ namespace Backend.Controller.Admin.Order
 {
     [ApiController]
     [Route("api/admin/order")]
-    [Authorize(Roles = "AdminOnly")]
+    [Authorize(Roles = "QuanTriVien")]
     public class OrderAdminController : ControllerBase
     {
         private readonly IOrderService _orderService;
