@@ -9,7 +9,7 @@ using Microsoft.Identity.Client;
 using Backend.Services.Order;
 namespace Backend.Services.Statistics
 {
-    public class StatisticsService
+    public class StatisticsService : IStatisticsService
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IOrderService _orderService;

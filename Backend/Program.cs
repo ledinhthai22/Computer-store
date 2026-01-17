@@ -15,6 +15,7 @@ using Backend.Services.File;
 using Backend.Services.Product;
 using Backend.Services.User;
 using Backend.Services.Order;
+using Backend.Services.Statistics;
 namespace Backend
 {
     public class Program
@@ -36,6 +37,7 @@ namespace Backend
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IStatisticsService, StatisticsService>();
             builder.Services.AddControllers();
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
