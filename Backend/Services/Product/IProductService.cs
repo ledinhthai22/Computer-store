@@ -20,5 +20,6 @@ namespace Backend.Services.Product
         Task<List<ProductListItem>> GetNewestProductsAsync(int soLuong = 10);
         Task<List<ProductListItem>> GetProductsByCategoryAsync(int maDanhMuc, int soLuong = 12);
         Task<List<ProductListItem>> GetProductsByBrandAsync(int maThuongHieu, int soLuong = 12);
+        Task<List<ProductListItem>> GetRelatedProductsAsync(int maSanPham,int maDanhMuc,int maThuongHieu,int soLuong = 10);
     }
 }
