@@ -1,35 +1,56 @@
 import { useState } from "react";
 import DataTable from "react-data-table-component";
-import { Eye, Trash2, ArrowUpIcon, Filter } from "lucide-react";
+import { Eye, ArrowUpIcon, Filter, Edit } from "lucide-react";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const OrderTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeChange }) => { 
+const OrderTable = ({ 
+    data, 
+    loading,
+    onView, 
+    onUpdate, 
+    filterType, 
+    onFilterTypeChange,
+    updatingOrderId 
+}) => { 
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.email && item.email.toLowerCase().includes(filterText.toLowerCase()) ||
-                item.noiDung && item.noiDung.toLowerCase().includes(filterText.toLowerCase())
+        item => item.maHoaDon && item.maHoaDon.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.tenKhachHang && item.tenKhachHang.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.email && item.email.toLowerCase().includes(filterText.toLowerCase())
     );
-    const truncateText = (text, wordLimit) => {     
-        if (!text) return "";
-        const words = text.split(" ");
-        if (words.length > wordLimit) {
-            return words.slice(0, wordLimit).join(" ") + "...";
-        }
-        return text;
+
+    // ✅ Map trạng thái số sang text và màu sắc
+    const getStatusInfo = (status) => {
+        const statusMap = {
+            1: { text: "Chưa duyệt", color: "bg-gray-400 text-white border-gray-500" },
+            2: { text: "Đã duyệt", color: "bg-orange-500 text-white border-orange-600" },
+            3: { text: "Đang xử lý", color: "bg-orange-300 text-gray-800 border-orange-400" },
+            4: { text: "Đang giao", color: "bg-yellow-400 text-gray-800 border-yellow-500" },
+            5: { text: "Đã giao", color: "bg-green-600 text-white border-green-700" },
+            6: { text: "Hoàn thành", color: "bg-green-400 text-white border-green-500" },
+            7: { text: "Đã hủy", color: "bg-red-400 text-white border-red-500" },
+            8: { text: "Trả hàng", color: "bg-red-600 text-white border-red-700" }
+        };
+        return statusMap[status] || { text: "Không xác định", color: "bg-gray-200 text-gray-600" };
+    };
+
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(price);
     };
 
     const formatDateTime = (dateString) => {
         if (!dateString) return "N/A";
         const date = new Date(dateString);
         
-        // Định dạng Ngày/Tháng/Năm
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         
-        // Định dạng Giờ:Phút
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
 
@@ -45,52 +66,62 @@ const OrderTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeC
         },
         {
             name: 'MÃ HÓA ĐƠN',
-            selector: row => row.email,
+            selector: row => row.maHoaDon,
             sortable: true,
-            grow: 2,
+            width: '150px',
             cell: row => (
-                <span className="font-semibold text-gray-700 capitalize">
-                    {row.email}
+                <span className="font-bold text-blue-600">
+                    {row.maHoaDon}
                 </span>
             ),
         },
         {
-            name: 'NỘI DUNG',
-            selector: row => row.noiDung,
+            name: 'KHÁCH HÀNG',
+            selector: row => row.tenKhachHang,
             sortable: true,
             grow: 2,
+            minWidth: '180px',
             cell: row => (
-                <span className="text-gray-700" title={row.noiDung}>
-                {truncateText(row.noiDung, 6)}
-        </span>
+                <div>
+                    <div className="font-semibold text-gray-800">{row.tenKhachHang}</div>
+                    <div className="text-xs text-gray-500">{row.email}</div>
+                </div>
             ),
         },
         {
-            name: 'NGÀY',
-            selector: row => row.ngayGui,
+            name: 'TỔNG TIỀN',
+            selector: row => row.tongTien,
             sortable: true,
-            grow: 2,
+            width: '150px',
             cell: row => (
-                <span className="text-gray-700" title={row.ngayGui}>
-                    {formatDateTime(row.ngayGui)}
+                <span className="font-bold text-green-600">
+                    {formatPrice(row.tongTien)}
+                </span>
+            ),
+        },
+        {
+            name: 'NGÀY ĐẶT',
+            selector: row => row.ngayDatHang,
+            sortable: true,
+            width: '180px',
+            cell: row => (
+                <span className="text-sm text-gray-600">
+                    {formatDateTime(row.ngayDatHang)}
                 </span>
             ),
         },
         {
             name: 'TRẠNG THÁI',
-            selector: row => row.message,
+            selector: row => row.trangThai,
             sortable: true,
             width: '160px',
+            center: true,
             cell: row => {
-                const isRead = row.message?.toLowerCase() === "đã đọc";
+                const statusInfo = getStatusInfo(row.trangThai);
                 
                 return (
-                    <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
-                        isRead 
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : "bg-red-100 text-red-700 border-red-200"
-                    }`}>
-                        {row.message}
+                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border whitespace-nowrap ${statusInfo.color}`}>
+                        {statusInfo.text}
                     </span>
                 );
             },
@@ -98,83 +129,99 @@ const OrderTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeC
         {
             name: 'HÀNH ĐỘNG',
             center: true,
-            width: '200px',
-            cell: row => (
-                <div className="flex items-center gap-2">
-                    <button 
-                        onClick={() => onView(row)}
-                        className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Xem"
-                    >
-                        <Eye size={18} /> Xem
-                    </button>
-                    <button 
-                        onClick={() => onDelete(row.maLienHe)}
-                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Xóa"
-                    >
-                        <Trash2 size={18} /> Xóa
-                    </button>
-                </div>
-            ),
+            width: '280px',
+            cell: row => {
+                const isUpdating = updatingOrderId === row.maHoaDon;
+                
+                return (
+                    <div className="flex items-center gap-2 justify-center">
+                        <button 
+                            onClick={() => onView(row)}
+                            className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Xem chi tiết"
+                        >
+                            <Eye size={18} /> 
+                            <span className="hidden sm:inline">Xem</span>
+                        </button>
+                        <button 
+                            onClick={() => onUpdate(row)}
+                            disabled={updatingOrderId && !isUpdating}
+                            className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                                isUpdating
+                                    ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                    : updatingOrderId
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : 'text-amber-500 hover:bg-amber-100 cursor-pointer'
+                            }`}
+                            title={isUpdating ? "Đang cập nhật..." : "Cập nhật trạng thái"}
+                        >
+                            <Edit size={18} /> 
+                            <span className="hidden sm:inline">
+                                {isUpdating ? "Đang..." : "Cập nhật"}
+                            </span>
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
-    return(
-        <>
-            <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <TableSearch 
-                    filterText={filterText} 
-                    onFilter={e => setFilterText(e.target.value)} 
-                    placeholder="Tìm kiếm..."
-                />
+
+    return (
+        <div className="space-y-4">
+            {/* HEADER */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex-1 max-w-md">
+                    <TableSearch 
+                        filterText={filterText} 
+                        onFilter={e => setFilterText(e.target.value)} 
+                        placeholder="Tìm kiếm đơn hàng..."
+                    />
+                </div>
                 
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter size={18} className="text-gray-400" />
-                        <select 
-                            className="border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-                            value={filterType}
-                            onChange={(e) => onFilterTypeChange(e.target.value)}
-                        >
-                            <option value="all">Tất cả</option>
-                            <option value="unread">Chưa duyệt</option>
-                            <option value="read">Đã duyệt</option>
-                            <option value="#">Đang xử lý</option>
-                            <option value="#">Đang giao</option>
-                            <option value="#">Đã giao</option>
-                            <option value="#">Hoàn thành</option>
-                            <option value="#">Đã hủy</option> 
-                            <option value="#">Trả hàng</option>
-                        </select>
-                    </div>
+                <div className="flex items-center gap-2">
+                    <Filter size={18} className="text-gray-400 flex-shrink-0" />
+                    <span className="text-sm text-gray-600 whitespace-nowrap hidden sm:inline">Lọc theo</span>
+                    <select 
+                        className="flex-1 sm:w-56 border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                        value={filterType}
+                        onChange={(e) => onFilterTypeChange(e.target.value)}
+                    >
+                        <option value="all">Tất cả</option>
+                        <option value="unread">Chưa duyệt</option>
+                        <option value="approved">Đã duyệt</option>
+                        <option value="processing">Đang xử lý</option>
+                        <option value="shipping">Đang giao</option>
+                        <option value="delivered">Đã giao</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="cancelled">Đã hủy</option>
+                        <option value="returned">Trả hàng</option>
+                    </select>
                 </div>
             </div>
 
+            {/* TABLE */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    progressPending={loading}
-                    pagination
-                    paginationComponent={Pagination}
-                    paginationPerPage={5}
-                    paginationRowsPerPageOptions={[5, 10, 15, 20]}
-                    persistTableHead
-                    className="custom-datatable"
-                    sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
-                    highlightOnHover
-                    responsive
-                    noDataComponent={
-                        <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy liên hệ nào.
-                        </div>
-                    }
-                />
+                    <DataTable
+                        columns={columns}
+                        data={filteredItems}
+                        progressPending={loading}
+                        pagination
+                        paginationComponent={Pagination}
+                        paginationPerPage={5}
+                        persistTableHead
+                        className="custom-datatable"
+                        sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
+                        highlightOnHover
+                        responsive
+                        noDataComponent={
+                            <div className="p-12 text-center text-gray-400 font-medium">
+                                Không tìm thấy đơn hàng nào.
+                            </div>
+                        }
+                    />
             </div>
         </div>
-        </>
-    )
-}
+    );
+};
 
 export default OrderTable;
