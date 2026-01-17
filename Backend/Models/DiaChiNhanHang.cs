@@ -26,7 +26,7 @@ namespace Backend.Models
 
         public bool DiaChiMacDinh { get; set; }
 
-        public DateTime NgayXoa {get;set; }
+        public DateTime? NgayXoa {get;set; }
         public int MaNguoiDung { get; set; }
         [ForeignKey(nameof(MaNguoiDung))]
         public NguoiDung NguoiDung { get; set; } = null!;
