@@ -1,95 +1,122 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Toast from '../../../components/admin/Toast';
-import { Trash2, Camera, X, ArrowLeft, Plus } from 'lucide-react';
+import {
+  Trash2,
+  Camera,
+  X,
+  ArrowLeft,
+  Plus,
+  AlertCircle,
+  Package,
+  Image as ImageIcon,
+  Settings,
+  DollarSign,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import AddCategoryModal from '../../../components/admin/product/AddCategoryModal';
 import AddBrandModal from '../../../components/admin/product/AddBrandModal';
+import { productService } from '../../../services/api/productService';
+import { categoryService } from '../../../services/api/categoryService';
+import { brandService } from '../../../services/api/brandService';
 
-const InputField = ({ label, value, onChange, type = "text", disabled = false, error = "" }) => {
-    const [touched, setTouched] = useState(false);
+const InputField = ({ label, value, onChange, type = "text", disabled, placeholder, error }) => (
+  <div className="flex flex-col gap-1.5 w-full text-left">
+    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
+    <input
+      type={type}
+      value={value ?? ''}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+        error
+          ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+          : disabled
+          ? 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'
+          : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+      }`}
+    />
+    {error && (
+      <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+        <AlertCircle size={12} /> {error}
+      </p>
+    )}
+  </div>
+);
 
-    const handleBlur = () => {
-        setTouched(true);
-    };
-
-    return (
-        <div className="flex flex-col gap-2 w-full text-left">
-            <label className="text-[14px] font-medium text-gray-700 ml-1">{label}</label>
-            <input
-                type={type}
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                onBlur={handleBlur}
-                disabled={disabled}
-                className={`w-full px-4 py-3 rounded-xl outline-none transition-all ${
-                    error && touched
-                        ? 'border-2 border-red-500 bg-red-50' 
-                        : disabled 
-                        ? 'bg-[#F1F4F9] text-gray-500 border-transparent' 
-                        : 'bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-900 shadow-sm'
-                }`}
-            />
-            {error && touched && <p className="text-red-500 text-sm mt-1 ml-1">{error}</p>}
-        </div>
-    );
-};
-
-const SelectField = ({ label, value, onChange, options, valueKey, labelKey, placeholder, error = "", onAdd }) => {
-    return (
-        <div className="flex flex-col gap-2">
-            <label className="text-[14px] font-medium text-gray-700 ml-1">{label}</label>
-            <div className="flex gap-2">
-                <select
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className={`flex-1 px-4 py-3 rounded-xl outline-none shadow-sm transition-all ${
-                        error 
-                            ? 'border-2 border-red-500 bg-red-50' 
-                            : 'bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500'
-                    }`}
-                >
-                    <option value="">{placeholder}</option>
-                    {options.map(opt => (
-                        <option key={opt[valueKey]} value={String(opt[valueKey])}>
-                            {opt[labelKey]}
-                        </option>
-                    ))}
-                </select>
-                {onAdd && (
-                    <button
-                        type="button"
-                        onClick={onAdd}
-                        className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all flex items-center gap-1 font-medium shadow-sm"
-                    >
-                        <Plus size={18} />
-                    </button>
-                )}
-            </div>
-            {error && <p className="text-red-500 text-sm mt-1 ml-1">{error}</p>}
-        </div>
-    );
-};
+const SelectField = ({ label, value, onChange, options, valueKey, labelKey, placeholder, error = "", onAdd }) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
+    <div className="flex gap-2">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none ${
+          error 
+            ? 'border-2 border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' 
+            : 'bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+        }`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt[valueKey]} value={String(opt[valueKey])}>
+            {opt[labelKey]}
+          </option>
+        ))}
+      </select>
+      {onAdd && (
+        <button 
+          type="button" 
+          onClick={onAdd} 
+          className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-sm"
+        >
+          <Plus size={20} />
+        </button>
+      )}
+    </div>
+    {error && (
+      <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+        <AlertCircle size={12} /> {error}
+      </p>
+    )}
+  </div>
+);
 
 const AddProduct = () => {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-    const [errors, setErrors] = useState({});
-    const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [errors, setErrors] = useState({});
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
 
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-    const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    tenSanPham: '',
+    maDanhMuc: '',
+    maThuongHieu: '',
+  });
 
-    const [formData, setFormData] = useState({
-        tenSanPham: '',
-        giaCoBan: '',
-        khuyenMai: '',
-        maDanhMuc: '',
-        maThuongHieu: '',
+  const [productImages, setProductImages] = useState([]);
+
+  const [variants, setVariants] = useState([
+    {
+      id: Math.random().toString(36).substr(2, 9),
+      tenBienThe: '',
+      giaBan: '',
+      phanTramGiam: '',       // Thêm trường %
+      giaKhuyenMai: '',       // Tự tính
+      mauSac: '',
+      ram: '',
+      oCung: '',
+      boXuLyTrungTam: '',
+      boXuLyDoHoa: '',
+      soLuongTon: 0,
+      thongSoKyThuat: {
         kichThuocManHinh: '',
+        dungLuongRam: '',
         soKheRam: '',
         oCung: '',
         pin: '',
@@ -97,538 +124,739 @@ const AddProduct = () => {
         doPhanGiaiManHinh: '',
         loaiXuLyTrungTam: '',
         loaiXuLyDoHoa: '',
-        congGiaoTiep: ''
+        congGiaoTiep: '',
+      },
+    },
+  ]);
+
+  const [openVariant, setOpenVariant] = useState({});
+
+  const totalStock = useMemo(() => {
+    return variants.reduce((sum, v) => sum + (Number(v.soLuongTon) || 0), 0);
+  }, [variants]);
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const [catRes, brandRes] = await Promise.all([categoryService.getAll(), brandService.getAll()]);
+        setCategories(catRes);
+        setBrands(brandRes);
+      } catch (error) {
+        showToast('Không thể tải danh mục/thương hiệu', 'error');
+      }
+    };
+    fetchMetadata();
+  }, []);
+
+  // Cleanup preview URLs
+  useEffect(() => {
+    return () => {
+      productImages.forEach(img => {
+        if (img?.preview) URL.revokeObjectURL(img.preview);
+      });
+    };
+  }, [productImages]);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
+  const validateImageFile = (file) => {
+    const valid = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024;
+    if (!valid.includes(file.type)) return 'Chỉ chấp nhận JPG, PNG, GIF, WEBP';
+    if (file.size > maxSize) return 'Ảnh không được vượt quá 5MB';
+    return null;
+  };
+
+  const handleAddOrReplaceImage = (file, targetIndex = null) => {
+    const err = validateImageFile(file);
+    if (err) return showToast(err, 'error');
+
+    const newImg = {
+      id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      preview: URL.createObjectURL(file),
+      isNew: true,
+    };
+
+    setProductImages(prev => {
+      if (targetIndex !== null) {
+        const updated = [...prev];
+        if (updated[targetIndex]?.preview) {
+          URL.revokeObjectURL(updated[targetIndex].preview);
+        }
+        updated[targetIndex] = newImg;
+        return updated;
+      }
+      return [...prev, newImg];
     });
 
-    const [variants, setVariants] = useState([{
-        id: Math.random().toString(36).substr(2, 9),
+    setErrors(prev => ({ ...prev, hinhAnh: '' }));
+  };
+
+  const handleProductImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => handleAddOrReplaceImage(file));
+    e.target.value = '';
+  };
+
+  const handleReplaceImage = (e, index) => {
+    const file = e.target.files?.[0];
+    if (file) handleAddOrReplaceImage(file, index);
+    e.target.value = '';
+  };
+
+  const removeProductImage = (index) => {
+    setProductImages(prev => {
+      const imgToRemove = prev[index];
+      if (imgToRemove?.preview) {
+        URL.revokeObjectURL(imgToRemove.preview);
+      }
+
+      if (index === 0) {
+        const updated = [...prev];
+        updated[0] = null;
+        return updated;
+      } else {
+        return prev.filter((_, i) => i !== index);
+      }
+    });
+  };
+
+  // Tự động tính giá khuyến mãi khi thay đổi giaBan hoặc phanTramGiam
+  const handleVariantChange = (id, field, value) => {
+    setVariants(prev =>
+      prev.map(v => {
+        if (v.id !== id) return v;
+
+        let updated = { ...v, [field]: value };
+
+        // Nếu thay đổi giaBan hoặc phanTramGiam → tính lại giaKhuyenMai
+        if (field === 'giaBan' || field === 'phanTramGiam') {
+          const giaBan = Number(updated.giaBan) || 0;
+          const phanTram = Number(updated.phanTramGiam) || 0;
+
+          if (giaBan > 0 && phanTram > 0 && phanTram <= 100) {
+            updated.giaKhuyenMai = Math.round(giaBan * (1 - phanTram / 100));
+          } else {
+            updated.giaKhuyenMai = '';
+          }
+        }
+
+        return updated;
+      })
+    );
+
+    // Xóa lỗi khi người dùng sửa
+    setErrors(prev => {
+      const idx = variants.findIndex(v => v.id === id);
+      const key = `variant_${idx}_${field}`;
+      if (prev[key]) {
+        const newErrors = { ...prev };
+        delete newErrors[key];
+        return newErrors;
+      }
+      return prev;
+    });
+  };
+
+  const handleVariantSpecChange = (id, field, value) => {
+    setVariants(prev =>
+      prev.map(v =>
+        v.id === id ? { ...v, thongSoKyThuat: { ...v.thongSoKyThuat, [field]: value } } : v
+      )
+    );
+  };
+
+  const addVariant = () => {
+    const newId = Math.random().toString(36).substr(2, 9);
+    setVariants(prev => [
+      ...prev,
+      {
+        id: newId,
         tenBienThe: '',
         giaBan: '',
+        phanTramGiam: '',
         giaKhuyenMai: '',
         mauSac: '',
         ram: '',
         oCung: '',
-        manHinh: '',
-        boXuLyDoHoa: '',
         boXuLyTrungTam: '',
-        soLuongTon: '',
-        hinhAnh: []
-    }]);
+        boXuLyDoHoa: '',
+        soLuongTon: 0,
+        thongSoKyThuat: {
+          kichThuocManHinh: '',
+          dungLuongRam: '',
+          soKheRam: '',
+          oCung: '',
+          pin: '',
+          heDieuHanh: '',
+          doPhanGiaiManHinh: '',
+          loaiXuLyTrungTam: '',
+          loaiXuLyDoHoa: '',
+          congGiaoTiep: '',
+        },
+      },
+    ]);
+    setOpenVariant(prev => ({ ...prev, [newId]: true }));
+  };
 
-    const totalStock = useMemo(() => {
-        return variants.reduce((total, variant) => {
-            const qty = Number(variant.soLuongTon) || 0;
-            return total + qty;
-        }, 0);
-    }, [variants]);
+  const removeVariant = (id) => {
+    if (variants.length <= 1) {
+      showToast('Sản phẩm phải có ít nhất một biến thể', 'error');
+      return;
+    }
+    setVariants(prev => prev.filter(v => v.id !== id));
+    setOpenVariant(prev => {
+      const newOpen = { ...prev };
+      delete newOpen[id];
+      return newOpen;
+    });
+  };
 
-    const fetchMetadata = async () => {
-        try {
-            const [catRes, brandRes] = await Promise.all([
-                axios.get(`https://localhost:7012/api/Category`),
-                axios.get(`https://localhost:7012/api/Brand`)
-            ]);
-            console.log("Dữ liệu Brand từ API:", brandRes.data);
-            console.log("Dữ liệu Category từ API:", catRes.data);
-            setCategories(catRes.data);
-            setBrands(brandRes.data);
-        } catch (error) {
-            console.error("Lỗi khi tải metadata:", error);
-            showToast("Không thể tải dữ liệu danh mục và thương hiệu", "error");
+  const toggleVariant = (id) => {
+    setOpenVariant(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.tenSanPham.trim()) newErrors.tenSanPham = 'Vui lòng nhập tên sản phẩm';
+    if (!formData.maDanhMuc) newErrors.maDanhMuc = 'Vui lòng chọn danh mục';
+    if (!formData.maThuongHieu) newErrors.maThuongHieu = 'Vui lòng chọn thương hiệu';
+
+    const activeImages = productImages.filter(img => img !== null);
+    if (activeImages.length === 0) newErrors.hinhAnh = 'Vui lòng thêm ít nhất 1 ảnh';
+
+    variants.forEach((v, index) => {
+      if (!v.tenBienThe.trim()) newErrors[`variant_${index}_tenBienThe`] = 'Vui lòng nhập tên biến thể';
+      if (!v.soLuongTon || Number(v.soLuongTon) < 0) newErrors[`variant_${index}_soLuongTon`] = 'Số lượng tồn không hợp lệ';
+      if (!v.giaBan || Number(v.giaBan) <= 0) newErrors[`variant_${index}_giaBan`] = 'Giá bán phải lớn hơn 0';
+
+      const phanTram = Number(v.phanTramGiam);
+      if (v.phanTramGiam !== '' && (phanTram < 0 || phanTram > 100)) {
+        newErrors[`variant_${index}_phanTramGiam`] = 'Phần trăm giảm phải từ 0 đến 100';
+      }
+
+      // Nếu có % giảm thì giá KM phải nhỏ hơn giá bán (đã tính tự động)
+      if (v.giaKhuyenMai && Number(v.giaKhuyenMai) >= Number(v.giaBan)) {
+        newErrors[`variant_${index}_giaKhuyenMai`] = 'Giá khuyến mãi phải nhỏ hơn giá bán';
+      }
+    });
+
+    return newErrors;
+  };
+
+  const handleSave = async () => {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      showToast('Vui lòng kiểm tra lại các trường bắt buộc', 'error');
+      
+      const firstErrorElement = document.querySelector('[class*="border-red"]');
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formDataToSend = new FormData();
+
+      formDataToSend.append('TenSanPham', formData.tenSanPham.trim());
+      formDataToSend.append('MaDanhMuc', formData.maDanhMuc);
+      formDataToSend.append('MaThuongHieu', formData.maThuongHieu);
+      formDataToSend.append('SoLuongTon', totalStock);
+
+      variants.forEach((v, index) => {
+        formDataToSend.append(`BienThe[${index}].TenBienThe`, v.tenBienThe.trim() || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].GiaBan`, Number(v.giaBan) || 0);
+        formDataToSend.append(`BienThe[${index}].GiaKhuyenMai`, Number(v.giaKhuyenMai) || 0); // Gửi giá đã tính
+        formDataToSend.append(`BienThe[${index}].MauSac`, v.mauSac || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].Ram`, v.ram || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].OCung`, v.oCung || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].BoXuLyTrungTam`, v.boXuLyTrungTam || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].BoXuLyDoHoa`, v.boXuLyDoHoa || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].SoLuongTon`, Number(v.soLuongTon) || 0);
+
+        const ts = v.thongSoKyThuat;
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.KichThuocManHinh`, ts.kichThuocManHinh || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.DungLuongRam`, ts.dungLuongRam || v.ram || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.SoKheRam`, ts.soKheRam || '1');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.OCung`, ts.oCung || v.oCung || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.Pin`, ts.pin || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.HeDieuHanh`, ts.heDieuHanh || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.DoPhanGiaiManHinh`, ts.doPhanGiaiManHinh || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.LoaiXuLyTrungTam`, ts.loaiXuLyTrungTam || v.boXuLyTrungTam || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.LoaiXuLyDoHoa`, ts.loaiXuLyDoHoa || v.boXuLyDoHoa || 'Đang cập nhật');
+        formDataToSend.append(`BienThe[${index}].ThongSoKyThuat.CongGiaoTiep`, ts.congGiaoTiep || 'Đang cập nhật');
+      });
+
+      productImages.forEach(img => {
+        if (img?.file) {
+          formDataToSend.append('HinhAnh', img.file);
         }
-    };
+      });
 
-    useEffect(() => {
-        fetchMetadata();
-    }, []);
+      await productService.AddProduct(formDataToSend);
 
-    const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
-    };
+      showToast('Thêm sản phẩm thành công!', 'success');
+      setTimeout(() => navigate('/quan-ly/san-pham'), 1500);
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Thêm sản phẩm thất bại';
+      showToast(errMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Validate real-time
-    const validateField = (field, value) => {
-        switch(field) {
-            case 'tenSanPham':
-                return !value.trim() ? "Tên sản phẩm không được để trống" : "";
-            case 'giaCoBan':
-                return !value || value <= 0 ? "Giá gốc phải lớn hơn 0" : "";
-            case 'khuyenMai':
-                return value && (value < 0 || value > 100) ? "Khuyến mãi phải từ 0-100%" : "";
-            case 'maDanhMuc':
-                return !value ? "Vui lòng chọn danh mục" : "";
-            case 'maThuongHieu':
-                return !value ? "Vui lòng chọn thương hiệu" : "";
-            default:
-                return "";
-        }
-    };
+  const handleCategoryAdded = async (newCategoryId) => {
+    try {
+      const catRes = await categoryService.getAll();
+      setCategories(catRes);
+      if (newCategoryId) setFormData(prev => ({ ...prev, maDanhMuc: String(newCategoryId) }));
+      showToast('Thêm danh mục thành công!', 'success');
+    } catch {
+      showToast('Không thể tải lại danh mục', 'error');
+    }
+  };
 
-    const handleChange = (field, value) => {
-        setFormData({ ...formData, [field]: value });
-        const error = validateField(field, value);
-        setErrors({ ...errors, [field]: error });
-        if (errorMessage) setErrorMessage("");
-    };
+  const handleBrandAdded = async (newBrandId) => {
+    try {
+      const brandRes = await brandService.getAll();
+      setBrands(brandRes);
+      if (newBrandId) setFormData(prev => ({ ...prev, maThuongHieu: String(newBrandId) }));
+      showToast('Thêm thương hiệu thành công!', 'success');
+    } catch {
+      showToast('Không thể tải lại thương hiệu', 'error');
+    }
+  };
 
-    const validateForm = () => {
-        const newErrors = {};
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg transition-all">
+                <ArrowLeft size={20} className="text-gray-700" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Thêm Sản Phẩm Mới</h1>
+                <p className="text-sm text-gray-500 mt-0.5">Điền đầy đủ thông tin sản phẩm bên dưới</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-sm"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Plus size={18} />
+                  Lưu sản phẩm
+                </>
+              )}
+            </button>
+          </div>
+        </div>
 
-        if (!formData.tenSanPham.trim()) {
-            newErrors.tenSanPham = "Tên sản phẩm không được để trống";
-        }
-        if (!formData.giaCoBan || formData.giaCoBan <= 0) {
-            newErrors.giaCoBan = "Giá gốc phải lớn hơn 0";
-        }
-        if (formData.khuyenMai && (formData.khuyenMai < 0 || formData.khuyenMai > 100)) {
-            newErrors.khuyenMai = "Khuyến mãi phải từ 0-100%";
-        }
-        if (!formData.maDanhMuc) {
-            newErrors.maDanhMuc = "Vui lòng chọn danh mục";
-        }
-        if (!formData.maThuongHieu) {
-            newErrors.maThuongHieu = "Vui lòng chọn thương hiệu";
-        }
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left - Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Images - giữ nguyên */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ImageIcon size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Hình Ảnh Sản Phẩm</h2>
+              </div>
 
-        variants.forEach((variant, index) => {
-            if (!variant.tenBienThe.trim()) {
-                newErrors[`variant_${index}_tenBienThe`] = "Tên biến thể không được để trống";
-            }
-            if (!variant.giaBan || variant.giaBan <= 0) {
-                newErrors[`variant_${index}_giaBan`] = "Giá bán phải lớn hơn 0";
-            }
-            if (!variant.soLuongTon || variant.soLuongTon < 0) {
-                newErrors[`variant_${index}_soLuongTon`] = "Số lượng tồn không hợp lệ";
-            }
-            if (variant.hinhAnh.length === 0) {
-                newErrors[`variant_${index}_hinhAnh`] = "Vui lòng thêm ít nhất một hình ảnh cho biến thể";
-            }
-        });
+              {errors.hinhAnh && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 flex items-center gap-2">
+                    <AlertCircle size={16} /> {errors.hinhAnh}
+                  </p>
+                </div>
+              )}
 
-        return newErrors;
-    };
+              <div className="grid grid-cols-4 gap-4">
+                {productImages.map((imgObj, index) => (
+                  <div
+                    key={imgObj?.id || `empty-${index}`}
+                    className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      imgObj
+                        ? 'border-gray-200 hover:border-blue-500'
+                        : 'border-dashed border-gray-300 hover:border-blue-500 bg-gray-50'
+                    }`}
+                  >
+                    {imgObj ? (
+                      <>
+                        <img
+                          src={imgObj.preview}
+                          alt={`Ảnh ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-semibold shadow-sm">
+                            Ảnh chính
+                          </div>
+                        )}
+                        <button
+                          onClick={() => removeProductImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                        >
+                          <X size={14} />
+                        </button>
+                      </>
+                    ) : (
+                      <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors text-gray-400 hover:text-blue-500">
+                        <Camera size={24} className="mb-2" />
+                        <span className="text-xs font-medium">Thay ảnh</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleReplaceImage(e, index)}
+                        />
+                      </label>
+                    )}
+                  </div>
+                ))}
 
-    const handleVariantImageUpload = (variantId, e) => {
-        const files = e.target.files;
-        if (files) {
-            const readers = Array.from(files).map((file) => {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(file);
-                });
-            });
-            Promise.all(readers).then((newImages) => {
-                setVariants(variants.map(v => 
-                    v.id === variantId 
-                        ? { ...v, hinhAnh: [...v.hinhAnh, ...newImages] }
-                        : v
-                ));
-                
-                const variantIndex = variants.findIndex(v => v.id === variantId);
-                const errorKey = `variant_${variantIndex}_hinhAnh`;
-                if (errors[errorKey]) {
-                    setErrors({ ...errors, [errorKey]: "" });
-                }
-            });
-        }
-    };
-
-    const removeVariantImage = (variantId, imageIndex) => {
-        setVariants(variants.map(v => 
-            v.id === variantId 
-                ? { ...v, hinhAnh: v.hinhAnh.filter((_, i) => i !== imageIndex) }
-                : v
-        ));
-    };
-
-    const addVariant = () => {
-        setVariants([...variants, {
-            id: Math.random().toString(36).substr(2, 9),
-            tenBienThe: '',
-            giaBan: '',
-            giaKhuyenMai: '',
-            mauSac: '',
-            ram: '',
-            oCung: '',
-            manHinh: '',
-            boXuLyDoHoa: '',
-            boXuLyTrungTam: '',
-            soLuongTon: '',
-            hinhAnh: []
-        }]);
-    };
-
-    const updateVariant = (id, field, value) => {
-        setVariants(variants.map(v => v.id === id ? { ...v, [field]: value } : v));
-        
-        const variantIndex = variants.findIndex(v => v.id === id);
-        const errorKey = `variant_${variantIndex}_${field}`;
-        if (errors[errorKey]) {
-            setErrors({ ...errors, [errorKey]: "" });
-        }
-    };
-
-    const removeVariant = (id) => {
-        if (variants.length > 1) {
-            setVariants(variants.filter(v => v.id !== id));
-        } else {
-            showToast("Sản phẩm phải có ít nhất một biến thể.", "error");
-        }
-    };
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        setErrorMessage("");
-        setErrors({});
-
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            setErrorMessage("Vui lòng kiểm tra lại thông tin đã nhập!");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
-
-        try {
-            setLoading(true);
-            
-            const payload = {
-                tenSanPham: formData.tenSanPham.trim(),
-                giaCoBan: Number(formData.giaCoBan),
-                khuyenMai: Number(formData.khuyenMai) || 0,
-                soLuongTon: totalStock,
-                maDanhMuc: Number(formData.maDanhMuc),
-                maThuongHieu: Number(formData.maThuongHieu),
-                thongSoKyThuat: {
-                    kichThuocManHinh: formData.kichThuocManHinh || '',
-                    soKheRam: formData.soKheRam || '',
-                    oCung: formData.oCung || '',
-                    pin: formData.pin || '',
-                    heDieuHanh: formData.heDieuHanh || '',
-                    doPhanGiaiManHinh: formData.doPhanGiaiManHinh || '',
-                    loaiXuLyTrungTam: formData.loaiXuLyTrungTam || '',
-                    loaiXuLyDoHoa: formData.loaiXuLyDoHoa || '',
-                    congGiaoTiep: formData.congGiaoTiep || ''
-                },
-                bienThe: variants.map(v => ({
-                    tenBienThe: v.tenBienThe.trim(),
-                    giaBan: Number(v.giaBan),
-                    giaKhuyenMai: Number(v.giaKhuyenMai) || 0,
-                    mauSac: v.mauSac || '',
-                    ram: v.ram || '',
-                    oCung: v.oCung || '',
-                    manHinh: v.manHinh || '',
-                    boXuLyDoHoa: v.boXuLyDoHoa || '',
-                    boXuLyTrungTam: v.boXuLyTrungTam || '',
-                    soLuongTon: Number(v.soLuongTon),
-                    hinhAnh: v.hinhAnh || []
-                }))
-            };
-            
-            console.log('📦 Payload gửi đi:', JSON.stringify(payload, null, 2));
-            console.log('📊 Kiểm tra:');
-            console.log('- Tên sản phẩm:', payload.tenSanPham);
-            console.log('- Giá gốc:', payload.giaCoBan);
-            console.log('- Danh mục ID:', payload.maDanhMuc);
-            console.log('- Thương hiệu ID:', payload.maThuongHieu);
-            console.log('- Số biến thể:', payload.bienThe.length);
-            console.log('- Biến thể đầu tiên:', payload.bienThe[0]);
-
-            const response = await axios.post(`https://localhost:7012/api/Product/`, payload);
-            console.log('✅ Response từ API:', response.data);
-            
-            showToast("Thêm sản phẩm thành công!", "success");
-            
-            setTimeout(() => {
-                navigate('/quan-ly/san-pham');
-            }, 1500);
-        } catch (error) {
-            console.error("❌ Lỗi API:", error);
-            console.error("❌ Response data:", error.response?.data);
-            console.error("❌ Status:", error.response?.status);
-            
-            const errorMsg = error.response?.data?.message 
-                || error.response?.data?.title
-                || error.response?.data?.errors 
-                || "Thêm sản phẩm thất bại. Vui lòng thử lại!";
-            
-            setErrorMessage(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-            showToast("Lỗi: Kiểm tra Console để xem chi tiết", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCategoryAdded = async (newCategoryId) => {
-        await fetchMetadata();
-        if (newCategoryId) {
-            setFormData({ ...formData, maDanhMuc: String(newCategoryId) });
-        }
-        showToast("Thêm danh mục thành công!", "success");
-    };
-
-    const handleBrandAdded = async (newBrandId) => {
-        await fetchMetadata();
-        if (newBrandId) {
-            setFormData({ ...formData, maThuongHieu: String(newBrandId) });
-        }
-        showToast("Thêm thương hiệu thành công!", "success");
-    };
-
-    return (
-        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-20 bg-gray-50 min-h-screen">
-            {/* Action Bar */}
-            <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <button 
-                    onClick={() => navigate(-1)} 
-                    className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-bold transition-all cursor-pointer"
-                >
-                    <ArrowLeft size={20} /> Quay lại
-                </button>
-                <button 
-                    onClick={handleSave} 
-                    disabled={loading}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md disabled:bg-gray-400 transition-all active:scale-95 cursor-pointer"
-                >
-                    <Plus size={20} />
-                    {loading ? "Đang xử lý..." : "Thêm sản phẩm"}
-                </button>
+                <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                  <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
+                  <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors">Thêm ảnh</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    accept="image/*"
+                    onChange={handleProductImageUpload}
+                  />
+                </label>
+              </div>
             </div>
 
-            {errorMessage && (
-                <div className="p-4 bg-red-100 border-2 border-red-400 text-red-700 rounded-2xl text-center font-medium">
-                    {errorMessage}
-                </div>
-            )}
+            {/* Thông Tin Cơ Bản - giữ nguyên */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Package size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Thông Tin Cơ Bản</h2>
+              </div>
 
-            {/* THÔNG TIN CHÍNH */}
-            <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-gray-800 mb-6 uppercase tracking-tight">Thông tin cơ bản</h2>
-                <div className="space-y-5">
-                    <InputField 
-                        label="Tên sản phẩm" 
-                        value={formData.tenSanPham} 
-                        onChange={(v) => handleChange('tenSanPham', v)}
-                        error={errors.tenSanPham}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <InputField 
-                            label="Giá gốc (VNĐ)" 
-                            type="number" 
-                            value={formData.giaCoBan} 
-                            onChange={(v) => handleChange('giaCoBan', v)}
-                            error={errors.giaCoBan}
-                        />
-                        <InputField 
-                            label="Khuyến mãi (%)" 
-                            type="number" 
-                            value={formData.khuyenMai} 
-                            onChange={(v) => handleChange('khuyenMai', v)}
-                            error={errors.khuyenMai}
-                        />
-                        <InputField 
-                            label="Tổng số lượng tồn" 
-                            type="number" 
-                            value={totalStock}
-                            onChange={() => {}}
-                            disabled={true}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <SelectField
-                            label="Danh mục"
-                            value={formData.maDanhMuc}
-                            onChange={(v) => handleChange('maDanhMuc', v)}
-                            options={categories}
-                            valueKey="maDanhMuc"
-                            labelKey="tenDanhMuc"
-                            placeholder="Chọn danh mục"
-                            error={errors.maDanhMuc}
-                            onAdd={() => setIsCategoryModalOpen(true)}
-                        />
-                        <SelectField
-                            label="Thương hiệu"
-                            value={formData.maThuongHieu}
-                            onChange={(v) => handleChange('maThuongHieu', v)}
-                            options={brands}
-                            valueKey="maThuongHieu"
-                            labelKey="tenThuonHieu"
-                            placeholder="Chọn thương hiệu"
-                            error={errors.maThuongHieu}
-                            onAdd={() => setIsBrandModalOpen(true)}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* THÔNG SỐ KỸ THUẬT */}
-            <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-left">
-                <h2 className="text-xl font-black text-gray-800 uppercase mb-8 border-b pb-4">Thông Số Kỹ Thuật</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <InputField label="Màn hình" value={formData.kichThuocManHinh} onChange={(v) => handleChange('kichThuocManHinh', v)} />
-                    <InputField label="Số khe RAM" value={formData.soKheRam} onChange={(v) => handleChange('soKheRam', v)} />
-                    <InputField label="Ổ cứng" value={formData.oCung} onChange={(v) => handleChange('oCung', v)} />
-                    <InputField label="PIN" value={formData.pin} onChange={(v) => handleChange('pin', v)} />
-                    <InputField label="Hệ điều hành" value={formData.heDieuHanh} onChange={(v) => handleChange('heDieuHanh', v)} />
-                    <InputField label="Độ phân giải" value={formData.doPhanGiaiManHinh} onChange={(v) => handleChange('doPhanGiaiManHinh', v)} />
-                    <InputField label="CPU" value={formData.loaiXuLyTrungTam} onChange={(v) => handleChange('loaiXuLyTrungTam', v)} />
-                    <InputField label="GPU" value={formData.loaiXuLyDoHoa} onChange={(v) => handleChange('loaiXuLyDoHoa', v)} />
-                    <InputField label="Cổng kết nối" value={formData.congGiaoTiep} onChange={(v) => handleChange('congGiaoTiep', v)} />
-                </div>
-            </section>
-
-            {/* BIẾN THỂ */}
-            <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-left">
-                <div className="flex justify-between items-center mb-8 border-b pb-4">
-                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-wider">Biến Thể Sản Phẩm</h2>
-                    <button 
-                        type="button" 
-                        onClick={addVariant} 
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-md cursor-pointer"
-                    >
-                        <Plus size={18} /> Thêm biến thể
-                    </button>
-                </div>
-                <div className="max-h-[800px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                    {variants.map((v, index) => (
-                        <div key={v.id} className="p-6 rounded-3xl border-2 border-gray-200 bg-gradient-to-br from-gray-50 to-white relative group transition-all hover:border-blue-300 hover:shadow-lg">
-                            <button 
-                                type="button" 
-                                onClick={() => removeVariant(v.id)} 
-                                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white p-2 rounded-full shadow-md cursor-pointer z-10"
-                            >
-                                <Trash2 size={20} />
-                            </button>
-                            
-                            {/* Hình ảnh của biến thể */}
-                            <div className="mb-6">
-                                <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Hình ảnh biến thể</h3>
-                                
-                                {errors[`variant_${index}_hinhAnh`] && (
-                                    <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs">
-                                        {errors[`variant_${index}_hinhAnh`]}
-                                    </div>
-                                )}
-                                
-                                <div className="flex flex-wrap gap-3">
-                                    {v.hinhAnh.map((img, imgIdx) => (
-                                        <div key={imgIdx} className="relative w-24 h-24 rounded-xl border-2 border-gray-200 overflow-hidden group/img shadow-sm">
-                                            <img src={img} className="w-full h-full object-cover" alt={`Variant ${index + 1} - Image ${imgIdx + 1}`} />
-                                            <button 
-                                                type="button" 
-                                                onClick={() => removeVariantImage(v.id, imgIdx)} 
-                                                className="absolute inset-0 bg-black/50 flex items-center justify-center text-white opacity-0 group-hover/img:opacity-100 transition-all cursor-pointer"
-                                            >
-                                                <X size={20} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    
-                                    <label className={`w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                                        errors[`variant_${index}_hinhAnh`] 
-                                            ? 'border-red-500 bg-red-50 hover:bg-red-100' 
-                                            : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50'
-                                    }`}>
-                                        <Camera size={24} className={errors[`variant_${index}_hinhAnh`] ? 'text-red-400' : 'text-gray-400'} />
-                                        <span className="text-xs text-gray-500 mt-1">Thêm ảnh</span>
-                                        <input 
-                                            type="file" 
-                                            className="hidden" 
-                                            onChange={(e) => handleVariantImageUpload(v.id, e)} 
-                                            multiple 
-                                            accept="image/*"
-                                        />
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Thông tin biến thể */}
-                            <div className="w-full mb-5">
-                                <InputField 
-                                    label="Tên biến thể" 
-                                    value={v.tenBienThe} 
-                                    onChange={(val) => updateVariant(v.id, 'tenBienThe', val)}
-                                    error={errors[`variant_${index}_tenBienThe`]}
-                                />
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <InputField 
-                                    label="Màu sắc" 
-                                    value={v.mauSac} 
-                                    onChange={(val) => updateVariant(v.id, 'mauSac', val)} 
-                                />
-                                <InputField 
-                                    label="RAM" 
-                                    value={v.ram} 
-                                    onChange={(val) => updateVariant(v.id, 'ram', val)} 
-                                />
-                                <InputField 
-                                    label="Ổ cứng" 
-                                    value={v.oCung} 
-                                    onChange={(val) => updateVariant(v.id, 'oCung', val)} 
-                                />
-                                <InputField 
-                                    label="CPU" 
-                                    value={v.boXuLyTrungTam} 
-                                    onChange={(val) => updateVariant(v.id, 'boXuLyTrungTam', val)} 
-                                />
-                                <InputField 
-                                    label="GPU" 
-                                    value={v.boXuLyDoHoa} 
-                                    onChange={(val) => updateVariant(v.id, 'boXuLyDoHoa', val)} 
-                                />
-                                <InputField 
-                                    label="Giá bán (VNĐ)" 
-                                    type="number" 
-                                    value={v.giaBan} 
-                                    onChange={(val) => updateVariant(v.id, 'giaBan', val)}
-                                    error={errors[`variant_${index}_giaBan`]}
-                                />
-                                <InputField 
-                                    label="Giá khuyến mãi (VNĐ)" 
-                                    type="number" 
-                                    value={v.giaKhuyenMai} 
-                                    onChange={(val) => updateVariant(v.id, 'giaKhuyenMai', val)}
-                                />
-                                <InputField 
-                                    label="Số lượng tồn" 
-                                    type="number" 
-                                    value={v.soLuongTon} 
-                                    onChange={(val) => updateVariant(v.id, 'soLuongTon', val)}
-                                    error={errors[`variant_${index}_soLuongTon`]}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Modals */}
-            <AddCategoryModal 
-                isOpen={isCategoryModalOpen}
-                onClose={() => setIsCategoryModalOpen(false)}
-                onSuccess={handleCategoryAdded}
-            />
-
-            <AddBrandModal 
-                isOpen={isBrandModalOpen}
-                onClose={() => setIsBrandModalOpen(false)}
-                onSuccess={handleBrandAdded}
-            />
-
-            {toast.show && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={() => setToast({ ...toast, show: false })} 
+              <div className="space-y-6">
+                <InputField
+                  label="Tên sản phẩm *"
+                  value={formData.tenSanPham}
+                  onChange={(v) => {
+                    setFormData(prev => ({ ...prev, tenSanPham: v }));
+                    setErrors(prev => ({ ...prev, tenSanPham: '' }));
+                  }}
+                  error={errors.tenSanPham}
+                  placeholder="VD: Dell XPS 15 9520"
                 />
-            )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <SelectField
+                    label="Danh mục *"
+                    value={formData.maDanhMuc}
+                    onChange={(v) => {
+                      setFormData(prev => ({ ...prev, maDanhMuc: v }));
+                      setErrors(prev => ({ ...prev, maDanhMuc: '' }));
+                    }}
+                    options={categories}
+                    valueKey="maDanhMuc"
+                    labelKey="tenDanhMuc"
+                    placeholder="Chọn danh mục"
+                    error={errors.maDanhMuc}
+                    onAdd={() => setIsCategoryModalOpen(true)}
+                  />
+                  <SelectField
+                    label="Thương hiệu *"
+                    value={formData.maThuongHieu}
+                    onChange={(v) => {
+                      setFormData(prev => ({ ...prev, maThuongHieu: v }));
+                      setErrors(prev => ({ ...prev, maThuongHieu: '' }));
+                    }}
+                    options={brands}
+                    valueKey="maThuongHieu"
+                    labelKey="tenThuongHieu"
+                    placeholder="Chọn thương hiệu"
+                    error={errors.maThuongHieu}
+                    onAdd={() => setIsBrandModalOpen(true)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Biến Thể */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Settings size={20} className="text-blue-600" />
+                  <h2 className="text-lg font-bold text-gray-900">Biến Thể Sản Phẩm</h2>
+                </div>
+                <button
+                  onClick={addVariant}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all flex items-center gap-2 shadow-sm"
+                >
+                  <Plus size={16} /> Thêm biến thể
+                </button>
+              </div>
+
+              {variants.map((variant, index) => {
+                const isOpen = openVariant[variant.id];
+
+                // Tính giá KM để hiển thị (nếu chưa có thì để trống)
+                const giaBanNum = Number(variant.giaBan) || 0;
+                const phanTramNum = Number(variant.phanTramGiam) || 0;
+                const giaKMHienThi = (giaBanNum > 0 && phanTramNum > 0 && phanTramNum <= 100)
+                  ? Math.round(giaBanNum * (1 - phanTramNum / 100)).toLocaleString('vi-VN')
+                  : '';
+
+                return (
+                  <div key={variant.id} className="border border-gray-200 rounded-2xl mb-6 overflow-hidden shadow-sm">
+                    <div
+                      className="p-4 bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => toggleVariant(variant.id)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <h3 className="font-bold text-gray-800">
+                            Biến thể {index + 1} {variant.tenBienThe && `- ${variant.tenBienThe}`}
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            {variant.mauSac || '—'} • {variant.ram || '—'} • {variant.oCung || '—'} • {variant.soLuongTon || 0} sp
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {variants.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeVariant(variant.id);
+                            }}
+                            className="text-red-500 hover:text-red-700 transition-colors"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                        {isOpen ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                      </div>
+                    </div>
+
+                    {isOpen && (
+                      <div className="p-6 space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <InputField
+                            label="Tên biến thể *"
+                            value={variant.tenBienThe}
+                            onChange={(v) => handleVariantChange(variant.id, 'tenBienThe', v)}
+                            error={errors[`variant_${index}_tenBienThe`]}
+                            placeholder="VD: Core i7, 16GB RAM"
+                          />
+                          <InputField
+                            label="Giá bán (VNĐ) *"
+                            type="number"
+                            value={variant.giaBan}
+                            onChange={(v) => handleVariantChange(variant.id, 'giaBan', v)}
+                            error={errors[`variant_${index}_giaBan`]}
+                            placeholder="10000000"
+                          />
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                              Phần trăm giảm (%)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={variant.phanTramGiam ?? ''}
+                              onChange={(e) => handleVariantChange(variant.id, 'phanTramGiam', e.target.value)}
+                              placeholder="0 - 100"
+                              className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+                                errors[`variant_${index}_phanTramGiam`]
+                                  ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+                                  : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
+                              }`}
+                            />
+                            {errors[`variant_${index}_phanTramGiam`] && (
+                              <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+                                <AlertCircle size={12} /> {errors[`variant_${index}_phanTramGiam`]}
+                              </p>
+                            )}
+                            {giaKMHienThi && (
+                              <p className="text-sm text-green-600 mt-1">
+                                Giá KM: <strong>{giaKMHienThi} VNĐ</strong>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Phần còn lại giữ nguyên */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <InputField 
+                            label="Màu sắc" 
+                            value={variant.mauSac} 
+                            onChange={(v) => handleVariantChange(variant.id, 'mauSac', v)} 
+                            placeholder="VD: Đen"
+                          />
+                          <InputField 
+                            label="RAM" 
+                            value={variant.ram} 
+                            onChange={(v) => handleVariantChange(variant.id, 'ram', v)} 
+                            placeholder="VD: 16GB"
+                          />
+                          <InputField 
+                            label="Ổ cứng" 
+                            value={variant.oCung} 
+                            onChange={(v) => handleVariantChange(variant.id, 'oCung', v)} 
+                            placeholder="VD: 512GB SSD"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <InputField 
+                            label="CPU" 
+                            value={variant.boXuLyTrungTam} 
+                            onChange={(v) => handleVariantChange(variant.id, 'boXuLyTrungTam', v)} 
+                            placeholder="VD: Intel Core i7-12700H"
+                          />
+                          <InputField 
+                            label="GPU" 
+                            value={variant.boXuLyDoHoa} 
+                            onChange={(v) => handleVariantChange(variant.id, 'boXuLyDoHoa', v)} 
+                            placeholder="VD: NVIDIA RTX 3060"
+                          />
+                          <InputField
+                            label="Số lượng tồn *"
+                            type="number"
+                            value={variant.soLuongTon}
+                            onChange={(v) => handleVariantChange(variant.id, 'soLuongTon', v)}
+                            error={errors[`variant_${index}_soLuongTon`]}
+                            placeholder="0"
+                          />
+                        </div>
+
+                        <div className="border-t pt-6">
+                          <h4 className="text-lg font-bold text-gray-800 mb-4">Thông số kỹ thuật</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <InputField
+                              label="Kích thước màn hình"
+                              value={variant.thongSoKyThuat.kichThuocManHinh}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'kichThuocManHinh', v)}
+                              placeholder='VD: 15.6"'
+                            />
+                            <InputField
+                              label="Độ phân giải"
+                              value={variant.thongSoKyThuat.doPhanGiaiManHinh}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'doPhanGiaiManHinh', v)}
+                              placeholder="VD: 1920x1080 (Full HD)"
+                            />
+                            <InputField
+                              label="Hệ điều hành"
+                              value={variant.thongSoKyThuat.heDieuHanh}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'heDieuHanh', v)}
+                              placeholder="VD: Windows 11 Home"
+                            />
+                            <InputField
+                              label="Pin"
+                              value={variant.thongSoKyThuat.pin}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'pin', v)}
+                              placeholder="VD: 56Wh"
+                            />
+                            <InputField
+                              label="Số khe RAM"
+                              value={variant.thongSoKyThuat.soKheRam}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'soKheRam', v)}
+                              placeholder="VD: 2"
+                            />
+                            <InputField
+                              label="Cổng giao tiếp"
+                              value={variant.thongSoKyThuat.congGiaoTiep}
+                              onChange={(v) => handleVariantSpecChange(variant.id, 'congGiaoTiep', v)}
+                              placeholder="VD: USB-C, HDMI, USB 3.0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right - Tổng Quan */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+              <div className="flex items-center gap-2 mb-4">
+                <DollarSign size={20} className="text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-900">Tổng Quan</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Tổng biến thể:</span>
+                  <span className="font-bold text-gray-900">{variants.length}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Tổng số lượng tồn:</span>
+                  <span className="font-bold text-blue-600">{totalStock.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Số lượng ảnh:</span>
+                  <span className="font-bold text-gray-900">
+                    {productImages.filter(img => img !== null).length}
+                  </span>
+                </div>
+
+                <div className="pt-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                      <strong>Lưu ý:</strong> Ảnh đầu tiên sẽ là ảnh chính. Chỉ chấp nhận file ảnh ≤ 5MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      <AddCategoryModal isOpen={isCategoryModalOpen} onClose={() => setIsCategoryModalOpen(false)} onSuccess={handleCategoryAdded} />
+      <AddBrandModal isOpen={isBrandModalOpen} onClose={() => setIsBrandModalOpen(false)} onSuccess={handleBrandAdded} />
+
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
+          <div
+            className={`px-6 py-4 rounded-lg shadow-lg border-l-4 ${
+              toast.type === 'success' ? 'bg-green-50 border-green-500 text-green-800' : 'bg-red-50 border-red-500 text-red-800'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} />
+              <span className="font-medium">{toast.message}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AddProduct;

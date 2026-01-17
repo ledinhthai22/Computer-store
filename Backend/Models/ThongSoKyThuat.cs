@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
@@ -6,15 +7,21 @@ namespace Backend.Models
     {
         [Key]
         public int MaThongSo { get; set; }
-        public string KichThuocManHinh { get; set; } = null!;
-        public string SoKheRam { get; set; } = null!;
-        public string OCung { get; set; } = null!;
-        public string Pin { get; set; } = null!;
-        public string HeDieuHanh { get; set; } = null!;
-        public string DoPhanGiaiManHinh { get; set; } = null!;
-        public string LoaiXuLyTrungTam {get;set;} = null!;
-        public string LoaiXuLyDoHoa {get;set;} = null!;
-        public string CongGiaoTiep {get;set;} = null!;
-        public SanPham? SanPham { get; set; }
+
+        public string? KichThuocManHinh { get; set; }
+        public string? DungLuongRam { get; set; } 
+        public string? SoKheRam { get; set; }
+        public string? OCung { get; set; } 
+        public string? Pin { get; set; } 
+        public string? HeDieuHanh { get; set; } 
+        public string? DoPhanGiaiManHinh { get; set; }
+        public string? LoaiXuLyTrungTam { get; set; } 
+        public string? LoaiXuLyDoHoa { get; set; } 
+        public string? CongGiaoTiep { get; set; }
+
+        public int MaBienThe { get; set; }
+
+        [ForeignKey(nameof(MaBienThe))]
+        public BienThe BienThe { get; set; } = null!;
     }
 }

@@ -47,12 +47,6 @@ namespace Backend.Data
                 .WithMany(th => th.SanPham)
                 .HasForeignKey(s => s.MaThuongHieu);
 
-          
-            modelBuilder.Entity<SanPham>()
-                .HasOne(s => s.ThongSoKyThuat)
-                .WithOne(ts => ts.SanPham)
-                .HasForeignKey<SanPham>(s => s.MaThongSo);
-
             
             modelBuilder.Entity<DanhGia>()
                 .HasOne(d => d.SanPham)

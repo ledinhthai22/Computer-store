@@ -34,7 +34,23 @@ namespace Ecommerce.Controller.Client.Public
         [HttpPut]
         public async Task<IActionResult> UpdateMyInfo(UpdateUserRequest request)
         {
-            return Ok(await _userService.UpdateUserAsync(GetUserId(), request));
+            return Ok(await _userService.UpdateInfoUserAsync(GetUserId(), request));
+        }
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassWord(ChangePasswordRequest request)
+        {
+            var result = await _userService.ChangePasswordAsync(GetUserId(), request);
+
+            if (result == null)
+                return NotFound("Không tìm thấy người dùng");
+
+            if (result.Message == "Mật khẩu cũ không đúng")
+                return Unauthorized(result);
+
+            if (result.Message == "Mật khẩu mới phải khác mật khẩu cũ")
+                return BadRequest(result);
+
+            return Ok(result);
         }
     }
 }

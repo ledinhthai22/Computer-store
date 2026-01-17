@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: '/api', 
+  baseURL: 'https://localhost:7012/api', 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,14 +20,15 @@ axiosClient.interceptors.response.use(
       const noRedirectUrls = [
         '/auth/login', 
         '/auth/register', 
-        '/auth/refresh-token'
+        '/auth/refresh-token',
+        '/me/ChangePassword'
       ];
 
       const isAuthApi = noRedirectUrls.some(url => config.url.includes(url));
 
       if (!isAuthApi) {
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = '/dang-nhap';
       }
     }
 

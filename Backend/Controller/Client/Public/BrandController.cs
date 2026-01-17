@@ -21,7 +21,12 @@ namespace Ecommerce.Controller.Client.Public
             var result = await _brandService.GetAllAsync();
             return Ok(result);
         }
-
+        [HttpGet("san-pham-theo-brand/{MaBrand}")]
+        public async Task<IActionResult> GetProductByBrand(int MaBrand)
+        {
+            var result = await _brandService.GetProductByBrand(MaBrand);
+            return Ok(result);
+        }
         // GET /api/brands/{id}
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)

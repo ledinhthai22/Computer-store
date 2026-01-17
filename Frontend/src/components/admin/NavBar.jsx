@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import NavNoti from './ui/NavNoti';
 import NavUser from './ui/NavUser';
+import { Link } from 'react-router';
 
 const NavBar = () => {
   const [activeMenu, setActiveMenu] = useState(null);
@@ -20,9 +21,11 @@ const NavBar = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#2F9EA0] text-white flex items-center justify-between px-6 shadow-md border-b border-[#268b8d]">
       <div className="flex items-center space-x-4 w-64">
+        <Link to="/quan-ly/thong-ke">
         <div className="flex items-center space-x-2">
           <span className="text-xl font-bold tracking-wide">Computer-Store</span>
         </div>
+        </Link>
       </div>
       <div className="flex items-center space-x-6">
         

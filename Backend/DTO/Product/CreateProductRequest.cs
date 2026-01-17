@@ -1,26 +1,23 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Backend.DTO.Product
 {
     public class CreateProductRequest
     {
-        [Required]
+        [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
+        [MaxLength(255, ErrorMessage = "Tên sản phẩm không được quá 255 ký tự")]
         public string TenSanPham { get; set; } = null!;
-        [Range(0, double.MaxValue)]
-        public decimal GiaCoBan { get; set; }
-        public double KhuyenMai { get; set; }
-        [Range(0, int.MaxValue)]
-        public int SoLuongTon { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Mã danh mục không được để trống")]
         public int MaDanhMuc { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Mã thương hiệu không được để trống")]
         public int MaThuongHieu { get; set; }
-        [Required]
-        public ProductSpecificationsRequest ThongSoKyThuat { get; set; } = null!;
-        public List<ProductVariantResquest> BienThe { get; set; } = new();
+        public int SoLuongTon { get; set; } 
+        public List<IFormFile>? HinhAnh { get; set; }
+
+        [Required(ErrorMessage = "Phải có ít nhất 1 biến thể")]
+        [MinLength(1, ErrorMessage = "Phải có ít nhất 1 biến thể")]
+        public List<CreateProductVariantRequest> BienThe { get; set; } = new();
     }
 }

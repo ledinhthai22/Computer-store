@@ -12,11 +12,10 @@ namespace Backend.DTO.User
         [Required]
         public string HoTen {get;set;} = null!;
         [Required]
-        public string Email {get;set;}=null!;
+        public bool GioiTinh {get;set;}
+        public DateTime NgaySinh { get; set; }
         [Required]
         public string SoDienThoai {get;set;} = null!;
-        [Required]
-        public string MatKhau{get;set;}=null!;
-        public int MaVaiTro {get;set;} 
+
     }
 }

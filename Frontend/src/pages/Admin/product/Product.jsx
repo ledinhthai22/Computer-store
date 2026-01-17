@@ -1,47 +1,48 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import ProductTable from '../../../components/admin/product/ProductTable';
-import Toast from '../../../components/admin/Toast';
+import { useEffect, useState } from "react";
+import { productService } from "../../../services/api/productService";
+import ProductTable from "../../../components/admin/product/ProductTable";
+import Toast from "../../../components/admin/Toast";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
-  const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
-    };
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://localhost:7012/api/Product/all');
-        const actualData = res.data && Array.isArray(res.data.data) ? res.data.data : [];
-        setProducts(actualData);
+        const data = await productService.getAdminList();
+        setProducts(Array.isArray(data) ? data : []);
       } catch (error) {
-       console.error("Lỗi fetch:", error);
-            showToast("Tải danh sách sản phẩm thất bại", "error");
-      }finally{
+        console.error(error);
+        setToast({
+          show: true,
+          message: "Tải danh sách sản phẩm thất bại",
+          type: "error",
+        });
+      } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <ProductTable 
-          data={products} 
-          loading={loading} 
-        />
-      </div>
+      <ProductTable data={products} loading={loading} />
+
       {toast.show && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={() => setToast({ ...toast, show: false })} 
-                />
-            )}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
     </div>
   );
 };

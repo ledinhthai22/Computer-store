@@ -18,6 +18,10 @@ namespace Backend.DTO.Auth
         [Required]
         public string SoDienThoai { get; set; } = null!;
         [Required]
+        public bool GioiTinh { get; set; }
+        [Required]
+        public DateTime NgaySinh { get; set; }
+        [Required]
         [MinLength(8)]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$",
             ErrorMessage = "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt.")]

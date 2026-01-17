@@ -144,14 +144,14 @@ const Brand = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg whitespace-nowrap cursor-pointer"
                                 >
                                     Đóng
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300 font-medium"
+                                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:bg-blue-300 font-medium whitespace-nowrap cursor-pointer"
                                 >
                                     {isSubmitting ? 'Đang lưu...' : 'Xác nhận'}
                                 </button>

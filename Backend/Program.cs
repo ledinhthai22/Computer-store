@@ -11,7 +11,8 @@ using Backend.Services.WishList;
 using Backend.Services.Contact;
 using Backend.Services.WebInfo;
 using Backend.Services.Cart;
-//using Backend.Services.Product;
+using Backend.Services.File;
+using Backend.Services.Product;
 using Backend.Services.User;
 using Backend.Services.Order;
 namespace Backend
@@ -29,8 +30,10 @@ namespace Backend
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IWebInfoService, WebInfoService>();
-            //builder.Services.AddScoped<ICartService, CartService>();
-            //builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IFileService, FileService>();
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddControllers();
@@ -138,6 +141,7 @@ namespace Backend
                 app.UseCors("AllowReact");
 
             }
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 

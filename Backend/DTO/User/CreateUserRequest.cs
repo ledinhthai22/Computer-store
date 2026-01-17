@@ -15,6 +15,10 @@ namespace Backend.DTO.User
         [Required]
         public string MatKhau{get;set;} = null!;
         [Required]
+        public bool TrangThai { get; set;} = true;
+        [Required]
+        public DateTime? NgaySinh { get; set; }
+        [Required]
         public string SoDienThoai {get;set;} =null!;
 
     }
