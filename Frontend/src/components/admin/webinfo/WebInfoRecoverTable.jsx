@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
-import { History, ArrowUpIcon, ArrowLeft, Eye } from "lucide-react";
+import { RotateCcw, ArrowUpIcon, ArrowLeft, Eye } from "lucide-react";
 import TableSearch from '../../admin/TableSearch';
 import Pagination from '../Pagination';
 
@@ -10,10 +10,19 @@ const WebInfoRecoverTable = ({ data = [], loading, onRecover, onView }) => {
     const navigate = useNavigate();
 
     const filteredItems = data.filter(
-        item => 
-            (item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase())) ||
-            (item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()))
+        item => item.tenTrang && item.tenTrang.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.soDienThoai && item.soDienThoai.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.diaChi && item.diaChi.toLowerCase().includes(filterText.toLowerCase())
     );
+    
+    const truncateText = (text, wordLimit) => {     
+        if (!text) return "";
+        const words = text.split(" ");
+        if (words.length > wordLimit) {
+            return words.slice(0, wordLimit).join(" ") + "...";
+        }
+        return text;
+    };
 
     const columns = [
         {
@@ -24,53 +33,60 @@ const WebInfoRecoverTable = ({ data = [], loading, onRecover, onView }) => {
         },
         {
             name: 'TÊN TRANG',
-            selector: row => row.tenDanhMuc,
+            selector: row => row.tenTrang,
             sortable: true,
-            grow: 1.5,
+            grow: 2,
+            minWidth: '200px',
             cell: row => (
-                <span className="font-semibold text-gray-700 capitalize">
-                    {row.tenDanhMuc}
+                <span className="font-semibold text-gray-700">
+                    {row.tenTrang}
                 </span>
             ),
         },
         {
             name: 'SỐ ĐIỆN THOẠI',
-            selector: row => row.slug,
+            selector: row => row.soDienThoai,
             sortable: true,
+            width: '150px',
             cell: row => (
-                <span className="text-gray-500">
-                    {row.slug}
+                <span className="text-gray-700">
+                    {row.soDienThoai}
                 </span>
             ),
         },
         {
             name: 'ĐỊA CHỈ',
-            selector: row => row.slug,
+            selector: row => row.diaChi,
             sortable: true,
+            grow: 3,
+            minWidth: '200px',
             cell: row => (
-                <span className="text-gray-500">
-                    {row.slug}
+                <span className="text-gray-700" title={row.diaChi}>
+                    {truncateText(row.diaChi, 8)}
                 </span>
             ),
         },
         {
             name: 'HÀNH ĐỘNG',
-            minWidth: '150px',
+            center: true,
+            width: '250px',
             cell: row => (
-                <div className="flex justify-start w-full"> 
+                <div className="flex items-center gap-2 justify-center">
                     <button 
                         onClick={() => onView(row)}
-                        className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Sửa"
+                        className="flex items-center gap-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer"
+                        title="Xem chi tiết"
                     >
-                        <Eye size={18} /> Xem chi tiết
+                        <Eye size={16} /> 
+                        <span className="hidden sm:inline text-sm">Xem</span>
                     </button>
                     <button 
-                        onClick={() => onRecover(row.maDanhMuc)}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer whitespace-nowrap"
+                        onClick={() => onRecover(row.maThongTinTrang)}
+                        className="flex items-center gap-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer"
+                        title="Khôi phục"
                     >
-                        <History size={18} />
-                        <span>Khôi phục</span>
+                        <RotateCcw size={16} /> 
+                        <span className="hidden sm:inline text-sm">Khôi phục</span>
                     </button>
                 </div>
             ),
@@ -96,26 +112,26 @@ const WebInfoRecoverTable = ({ data = [], loading, onRecover, onView }) => {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    progressPending={loading}
-                    pagination
-                    paginationComponent={Pagination}
-                    paginationPerPage={5}
-                    persistTableHead
-                    className="custom-datatable"
-                    sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
-                    highlightOnHover
-                    responsive
-                    noDataComponent={
-                        <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy danh mục nào trong danh sách xóa.
-                        </div>
-                    }
-                />
+                    <DataTable
+                        columns={columns}
+                        data={filteredItems}
+                        progressPending={loading}
+                        pagination
+                        paginationComponent={Pagination}
+                        paginationPerPage={5}
+                        persistTableHead
+                        className="custom-datatable"
+                        sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
+                        highlightOnHover
+                        responsive
+                        noDataComponent={
+                            <div className="p-12 text-center text-gray-400 font-medium">
+                                Không có thông tin trang nào đã xóa.
+                            </div>
+                        }
+                    />
+                </div>
             </div>
-        </div>
     );
 };
 

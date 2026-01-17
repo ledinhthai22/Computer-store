@@ -17,14 +17,14 @@ const RestoreConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
           >
             Hủy bỏ
           </button>
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md transition-all active:scale-95 disabled:bg-green-300 flex items-center gap-2"
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md transition-all active:scale-95 disabled:bg-green-300 flex items-center gap-2 cursor-pointer"
           >
             {isLoading ? (
               <>
@@ -32,7 +32,7 @@ const RestoreConfirmModal = ({ isOpen, message, onConfirm, onCancel, isLoading }
                 Đang xử lý...
               </>
             ) : (
-              'Xác nhận khôi phục'
+              'Xác nhận'
             )}
           </button>
         </div>

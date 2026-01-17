@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { CheckCircle } from "lucide-react";
 
-const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) => {
-    // Khởi tạo state dựa trên cấu trúc API WebInfo
+const WebInfoModal = ({ isOpen, onClose, onSave, onUpdateStatus, editingData, isSubmitting, isUpdatingStatus }) => {
     const initialForm = {
         tenTrang: "",
         soDienThoai: "",
@@ -12,13 +12,13 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
         chinhSachBaoMat: "",
         chinhSachDoiTra: "",
         dieuKhoanSuDung: "",
-        duongDanAnh: ""
+        duongDanAnh: "",
+        trangThai: false
     };
 
     const [formData, setFormData] = useState(initialForm);
     const [error, setError] = useState("");
 
-    // Khi mở modal để sửa, đổ dữ liệu cũ vào form
     useEffect(() => {
         if (editingData) {
             setFormData(editingData);
@@ -42,20 +42,54 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
         onSave(formData);
     };
 
+    const handleActivate = () => {
+        if (editingData?.maThongTinTrang) {
+            onUpdateStatus(editingData.maThongTinTrang);
+        }
+    };
+
     if (!isOpen) return null;
+
+    const isActive = formData.trangThai === true;
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <form onSubmit={handleSubmit} className="p-6">
-                    <h2 className="text-xl font-bold mb-5 text-gray-800 border-b pb-3">
-                        {editingData ? 'Chỉnh sửa thông tin trang' : 'Thêm thông tin trang mới'}
-                    </h2>
+                    {/* Header with Activate Button */}
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold text-gray-800">
+                            {editingData ? 'Chỉnh sửa thông tin trang' : 'Thêm thông tin trang mới'}
+                        </h2>
+                        
+                        {editingData && (
+                            <div>
+                                {!isActive ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleActivate}
+                                        disabled={isUpdatingStatus}
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:bg-green-300 shadow-md transition-all font-medium cursor-pointer"
+                                    >
+                                        <CheckCircle size={18} />
+                                        {isUpdatingStatus ? 'Đang kích hoạt...' : 'Kích hoạt'}
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg border border-green-200 font-medium">
+                                        <CheckCircle size={18} />
+                                        Đang hoạt động
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Tên Trang */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tên trang</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Tên trang <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 name="tenTrang"
                                 value={formData.tenTrang}
@@ -67,12 +101,15 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
 
                         {/* Số điện thoại & Địa chỉ */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Số điện thoại <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 name="soDienThoai"
                                 value={formData.soDienThoai}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="0123456789"
                             />
                         </div>
                         <div>
@@ -82,6 +119,7 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
                                 value={formData.diaChi}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Nhập địa chỉ..."
                             />
                         </div>
 
@@ -93,6 +131,7 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
                                 value={formData.duongDanFacebook}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="https://facebook.com/..."
                             />
                         </div>
                         <div>
@@ -102,35 +141,75 @@ const WebInfoModal = ({ isOpen, onClose, onSave, editingData, isSubmitting }) =>
                                 value={formData.duongDanInstagram}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="https://instagram.com/..."
                             />
                         </div>
 
-                        {/* Chính sách (Textarea) */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Link Youtube</label>
+                            <input
+                                name="duongDanYoutube"
+                                value={formData.duongDanYoutube}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="https://youtube.com/..."
+                            />
+                        </div>
+
+                        {/* Chính sách */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Chính sách bảo mật</label>
                             <textarea
                                 name="chinhSachBaoMat"
                                 value={formData.chinhSachBaoMat}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-20 outline-none"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-20 outline-none resize-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Nhập chính sách bảo mật..."
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Chính sách đổi trả</label>
+                            <textarea
+                                name="chinhSachDoiTra"
+                                value={formData.chinhSachDoiTra}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-20 outline-none resize-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Nhập chính sách đổi trả..."
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Điều khoản sử dụng</label>
+                            <textarea
+                                name="dieuKhoanSuDung"
+                                value={formData.dieuKhoanSuDung}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-20 outline-none resize-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Nhập điều khoản sử dụng..."
                             />
                         </div>
                     </div>
 
-                    {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
+                    {error && (
+                        <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    )}
 
-                    <div className="flex justify-end gap-3 mt-6 border-t pt-4">
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-3 mt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                            className="px-6 py-2 bg-gray-200 text-gray-600 hover:bg-gray-300 rounded-lg transition-all cursor-pointer"
                         >
                             Đóng
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300 shadow-md hover:bg-blue-700 transition-all"
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300 shadow-md hover:bg-blue-700 transition-all font-medium cursor-pointer"
                         >
                             {isSubmitting ? 'Đang lưu...' : 'Xác nhận'}
                         </button>
