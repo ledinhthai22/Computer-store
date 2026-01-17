@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 
-// Thêm prop showCategories = true
-export default function FilterSidebar({ categories, brands, onFilterChange, showBrands = true, showCategories = true }) {
+export default function FilterSidebar({ 
+    categories = [], 
+    brands = [], 
+    onFilterChange, 
+    showBrands = true, 
+    showCategories = true,
+    showPrice = true // <--- Thêm prop này, mặc định là hiện
+}) {
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
@@ -25,7 +31,7 @@ export default function FilterSidebar({ categories, brands, onFilterChange, show
     return (
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 sticky top-24 transition-all">
             
-            {/* --- PHẦN 1: DANH MỤC (Chỉ hiện khi showCategories = true) --- */}
+            {/* --- PHẦN 1: DANH MỤC --- */}
             {showCategories && categories && categories.length > 0 && (
                 <div className="mb-8">
                     <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
@@ -54,9 +60,9 @@ export default function FilterSidebar({ categories, brands, onFilterChange, show
                 </div>
             )}
 
-            {/* --- PHẦN 2: THƯƠNG HIỆU (Chỉ hiện khi showBrands = true) --- */}
+            {/* --- PHẦN 2: THƯƠNG HIỆU --- */}
             {showBrands && brands && brands.length > 0 && (
-                <div className={`mb-8 border-gray-200 pt-6 ${showCategories ? 'border-t border-dashed' : ''}`}>
+                <div className={`mb-8 ${showCategories ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
                     <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
                         Thương hiệu
                     </h3>
@@ -80,27 +86,45 @@ export default function FilterSidebar({ categories, brands, onFilterChange, show
                 </div>
             )}
 
-            {/* --- PHẦN 3: KHOẢNG GIÁ --- */}
-            <div className={`border-t border-dashed border-gray-200 pt-6 ${(!showBrands && !showCategories) ? 'mt-0' : ''}`}>
-                <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
-                    Khoảng giá
-                </h3>
-                {/* (Giữ nguyên phần input giá như cũ) */}
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="relative w-full">
-                        <input type="number" placeholder="0" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: e.target.value})} className="w-full pl-3 pr-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#2f9ea0] focus:ring-1 focus:ring-[#2f9ea0] transition-colors" />
-                        <span className="absolute right-2 top-2 text-xs text-gray-400">₫</span>
+            {/* --- PHẦN 3: KHOẢNG GIÁ (Chỉ hiện khi showPrice = true) --- */}
+            {showPrice && (
+                <div className={`${(showCategories || showBrands) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
+                        Khoảng giá
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="relative w-full">
+                            <input 
+                                type="number" 
+                                placeholder="0" 
+                                value={priceRange.min} 
+                                onChange={(e) => setPriceRange({...priceRange, min: e.target.value})} 
+                                className="w-full pl-3 pr-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#2f9ea0] focus:ring-1 focus:ring-[#2f9ea0] transition-colors" 
+                            />
+                            <span className="absolute right-2 top-2 text-xs text-gray-400">₫</span>
+                        </div>
+                        <span className="text-gray-400 font-light">-</span>
+                        <div className="relative w-full">
+                            <input 
+                                type="number" 
+                                placeholder="Max" 
+                                value={priceRange.max} 
+                                onChange={(e) => setPriceRange({...priceRange, max: e.target.value})} 
+                                className="w-full pl-3 pr-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#2f9ea0] focus:ring-1 focus:ring-[#2f9ea0] transition-colors" 
+                            />
+                            <span className="absolute right-2 top-2 text-xs text-gray-400">₫</span>
+                        </div>
                     </div>
-                    <span className="text-gray-400 font-light">-</span>
-                    <div className="relative w-full">
-                        <input type="number" placeholder="Max" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: e.target.value})} className="w-full pl-3 pr-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#2f9ea0] focus:ring-1 focus:ring-[#2f9ea0] transition-colors" />
-                        <span className="absolute right-2 top-2 text-xs text-gray-400">₫</span>
-                    </div>
+                    
+                    <button 
+                        onClick={handleApplyPrice} 
+                        className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-[#258b8d] active:scale-95 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                        Áp dụng bộ lọc
+                    </button>
                 </div>
-                <button onClick={handleApplyPrice} className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-blue-600 active:scale-95 transition-all duration-200 shadow-sm hover:shadow">
-                    Áp dụng bộ lọc
-                </button>
-            </div>
+            )}
         </div>
     );
 }

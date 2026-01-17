@@ -36,6 +36,7 @@ import {
   CategoryProduct,
   BrandProduct,
   UpdatePassword,
+  PriceProduct,
   NotFound,
 } from "./pages/User";
 
@@ -57,6 +58,7 @@ function App() {
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} />
           <Route path="/yeu-thich" element={<WishList />} />
+          <Route path="/san-pham/loc-theo-gia" element={<PriceProduct />} />
           <Route element={<ProfileLayout/>}>
             <Route path="/thong-tin-ca-nhan" element={<Profile />} />
             <Route path="/doi-mat-khau" element={<UpdatePassword />} />
