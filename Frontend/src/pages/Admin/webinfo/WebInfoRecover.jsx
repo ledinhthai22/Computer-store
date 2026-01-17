@@ -1,9 +1,9 @@
-import axios from "axios";
+import { WebInfoService } from "../../../services/api/webInfoService";
 import { useEffect, useState } from "react";
 import WebInfoRecoverTable from '../../../components/admin/webinfo/WebInfoRecoverTable';
+import WebInfoViewModal from '../../../components/admin/webinfo/WebInfoViewModal';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
-import WebInfoModal from '../../../components/admin/webinfo/WebInfoModal';
 
 const WebInfoRecover = () => {
     const [webinfo, setWebinfo] = useState([]);
@@ -12,7 +12,7 @@ const WebInfoRecover = () => {
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [recoverId, setRecoverId] = useState(null);
-    const [isRecover, setIsRecover] = useState(false);
+    const [isRecovering, setIsRecovering] = useState(false);
 
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedWebInfo, setSelectedWebInfo] = useState(null);
@@ -24,40 +24,48 @@ const WebInfoRecover = () => {
     const fetchWebInfoRecover = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('https://localhost:7012/api/Webinfo/deleted');
-            const data = Array.isArray(res.data) ? res.data : [];
+            const res = await WebInfoService.getDeleted();
+            const data = Array.isArray(res) ? res : [];
             setWebinfo(data);
         } catch (error) {
             console.error("Lỗi khi fetch:", error);
-            showToast("Tải danh sách thông tin trang thất bại", "error");
+            showToast("Tải danh sách thông tin trang đã xóa thất bại", "error");
+            setWebinfo([]);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchWebInfoRecover(); }, []);
+    useEffect(() => { 
+        fetchWebInfoRecover(); 
+    }, []);
 
     const handleView = (item) => {
         setSelectedWebInfo(item);
         setIsViewModalOpen(true);
     };
 
-    const handleRecover = (id) => {
+    const handleRecoverClick = (id) => {
         setRecoverId(id);
         setIsConfirmOpen(true);
     };
 
     const handleConfirmRecover = async () => {
+        if (!recoverId) return;
+
         try {
-            setIsRecover(true);
-            await axios.put(`https://localhost:7012/api/WebInfo/recover/${recoverId}`);
-            showToast("Khôi phục thông tin trang thành công", "success");
+            setIsRecovering(true);
+            await WebInfoService.recover(recoverId);
+            showToast("Khôi phục thông tin trang thành công!", "success");
             await fetchWebInfoRecover();
         } catch (err) {
-            console.error(err)
-            showToast("Khôi phục thông tin trang thất bại", "error");
+            console.error("Lỗi khôi phục:", err);
+            showToast(
+                err.response?.data?.message || "Khôi phục thông tin trang thất bại", 
+                "error"
+            );
         } finally {
-            setIsRecover(false);
+            setIsRecovering(false);
             setIsConfirmOpen(false);
             setRecoverId(null);
         }
@@ -69,17 +77,20 @@ const WebInfoRecover = () => {
                 <WebInfoRecoverTable
                     data={webinfo} 
                     loading={loading}
-                    onRecover={handleRecover}
+                    onRecover={handleRecoverClick}
                     onView={handleView}
                 />
             </div>
-            
-            <WebInfoModal 
+            <WebInfoViewModal 
                 isOpen={isViewModalOpen} 
-                onClose={() => setIsViewModalOpen(false)} 
+                onClose={() => {
+                    setIsViewModalOpen(false);
+                    setSelectedWebInfo(null);
+                }} 
                 data={selectedWebInfo} 
             />
 
+            {/* Toast Notification */}
             {toast.show && (
                 <Toast 
                     message={toast.message} 
@@ -87,15 +98,20 @@ const WebInfoRecover = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+
+            {/* Confirm Modal */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có muốn khôi phục thông tin trang này không?"
+                message="Bạn có chắc chắn muốn khôi phục thông tin trang này?"
                 onConfirm={handleConfirmRecover}
-                onCancel={() => setIsConfirmOpen(false)}
-                isLoading={isRecover}
+                onCancel={() => {
+                    setIsConfirmOpen(false);
+                    setRecoverId(null);
+                }}
+                isLoading={isRecovering}
             />
         </div>
     );
-}
+};
 
 export default WebInfoRecover;
