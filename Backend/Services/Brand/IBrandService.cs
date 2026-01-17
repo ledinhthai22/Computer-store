@@ -1,5 +1,6 @@
-﻿using Backend.DTO.Category;
-using Backend.DTO.Brand;
+﻿using Backend.DTO.Brand;
+using Backend.DTO.Category;
+using Backend.DTO.Product;
 namespace Backend.Services.Brand
 {
     public interface IBrandService
@@ -11,5 +12,6 @@ namespace Backend.Services.Brand
         Task<BrandResult?> UpdateAsync(int id, UpdateBrandRequest request);
         Task<bool> DeleteAsync(int id);
         Task<bool> RestoreAsync(int id);
+        Task<List<ProductResult>> GetProductByBrand(int MaBrand);
     }
 }

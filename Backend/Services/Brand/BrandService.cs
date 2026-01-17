@@ -1,20 +1,24 @@
 ﻿using Backend.Data;
 using Backend.DTO.Brand;
+using Backend.DTO.Product;
 using Backend.Helper;
 using Backend.Models;
+using Ecommerce.DTO.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
-
+using Microsoft.Extensions.Configuration;
 namespace Backend.Services.Brand
 {
     public class BrandService : IBrandService
     {
         private readonly ApplicationDbContext _dbContext;
-        public BrandService(ApplicationDbContext dbContext)
+        private readonly IConfiguration _config;           
+        public BrandService(ApplicationDbContext dbContext, IConfiguration config)
         {
             _dbContext = dbContext;
+            _config = config;
         }
         public async Task<IEnumerable<BrandResult>> GetAllAsync()
         {
@@ -127,5 +131,59 @@ namespace Backend.Services.Brand
             }
             return true;
         }
+        public async Task<List<ProductResult>> GetProductByBrand(int MaBrand)
+        {
+            return await _dbContext.SanPham
+                .Where(s => s.MaThuongHieu == MaBrand && s.NgayXoa == null)
+                .Select(p => new ProductResult
+                {
+                    MaSanPham = p.MaSanPham,
+                    TenSanPham = p.TenSanPham,
+                    Slug = p.Slug,
+                    MaDanhMuc = p.MaDanhMuc,
+                    TenDanhMuc = p.DanhMuc != null ? p.DanhMuc.TenDanhMuc : "",
+                    MaThuongHieu = p.MaThuongHieu,
+                    TenThuongHieu = p.ThuongHieu != null ? p.ThuongHieu.TenThuongHieu : "",
+
+                    SoLuongTon = p.BienThe.Where(bt => bt.NgayXoa == null).Sum(bt => bt.SoLuongTon),
+
+                    HinhAnh = p.HinhAnhSanPham
+                        .Where(img => img.NgayXoa == null)
+                        .OrderBy(img => img.ThuTuAnh)
+                        .Select(img => new ProductImageResult
+                        {
+                            MaHinhAnh = img.MaHinhAnh,
+                            DuongDan = $"{_config["AppSettings:BaseUrl"]}/product/image/{img.DuongDanAnh}",
+                            AnhChinh = img.AnhChinh,
+                            ThuTuAnh = img.ThuTuAnh
+                        })
+                        .ToList(),
+
+                    BienThe = p.BienThe
+                        .Where(bt => bt.NgayXoa == null)
+                        .Select(bt => new ProductVariantResult
+                        {
+                            MaBTSP = bt.MaBTSP,
+                            TenBienThe = bt.TenBienThe,
+                            MauSac = bt.MauSac,
+                            Ram = bt.Ram,
+                            OCung = bt.OCung,
+                            BoXuLyTrungTam = bt.BoXuLyTrungTam,
+                            BoXuLyDoHoa = bt.BoXuLyDoHoa,
+                            SoLuongTon = bt.SoLuongTon,
+                            GiaBan = bt.GiaBan,
+                            GiaKhuyenMai = bt.GiaKhuyenMai,
+                            TrangThai = bt.TrangThai,
+                        }).ToList(),
+
+                    TrangThai = p.TrangThai,
+                    NgayTao = p.NgayTao,
+                    LuotXem = p.LuotXem,
+                    LuotMua = p.LuotMua,
+                    DanhGiaTrungBinh = 0
+                })
+                .ToListAsync();
+        }
     }
 }
+
