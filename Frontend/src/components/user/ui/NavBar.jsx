@@ -16,7 +16,7 @@ export default function NavBar() {
     const { activeModal, openLogin, openRegister, closeModal } = useModalLogin();
     
     const [openDanhMuc, setOpenDanhMuc] = useState(false);
-
+    
     return (
         <> 
             <nav className="bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-md py-2 md:py-3 transition-all">

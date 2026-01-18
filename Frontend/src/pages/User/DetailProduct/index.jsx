@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { productService } from "../../../services/api/productService";
 import useAddToCart from "../../../hooks/useAddToCart";
+import RelatedProduct from "../../../components/user/product/RelatedProduct";
 import { 
   ShoppingCart, 
   Star, 
@@ -17,7 +18,6 @@ import {
   Airplay,
   Plug2
 } from "lucide-react";
-import RelatedProduct from "../../../components/user/product/RelatedProduct";
 
 const API_BASE_URL = "https://localhost:7012"; 
 
@@ -27,38 +27,18 @@ export default function Details() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const { slug } = useParams();
+  const { handleAddToCart } = useAddToCart(product);
   const [quantity, setQuantity] = useState(1);
-  
+  const navigate = useNavigate();
+
   useEffect(()=>{
     document.title = `${slug}`;
-},[slug])
-
-  const { handleAddToCart } = useAddToCart(product);
-
-  // Hàm chuyển ảnh tiếp theo (dùng cho cả nút bấm và slideshow)
-  const nextImage = useCallback(() => {
-    if (product?.hinhAnh?.length > 0) {
-      setSelectedImage((prev) => (prev + 1) % product.hinhAnh.length);
-    }
-  }, [product?.hinhAnh?.length]);
-
-  const prevImage = () => {
-    if (product?.hinhAnh?.length > 0) {
-      setSelectedImage((prev) => (prev - 1 + product.hinhAnh.length) % product.hinhAnh.length);
-    }
-  };
+  },[slug])
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
-
-  useEffect(() => {
-    if (!loading && product?.hinhAnh?.length > 1) {
-      const timer = setInterval(nextImage, 3000);
-      return () => clearInterval(timer);
-    }
-  }, [loading, product?.hinhAnh?.length, nextImage]);
-
+  
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -82,29 +62,43 @@ export default function Details() {
     fetchProduct();
   }, [slug]);
 
+  const getImageUrl = (imgData) => {
+    if (!imgData) return "https://placehold.co/600x400?text=No+Image";
+    // Nếu imgData là string thì dùng trực tiếp, nếu là Object thì lấy thuộc tính duongDan
+    const path = typeof imgData === 'string' ? imgData : imgData.duongDan;
+    if (!path) return "https://placehold.co/600x400?text=No+Image";
+    return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  };
+  
+  // Hàm chuyển ảnh tiếp theo (dùng cho cả nút bấm và slideshow)
+  const nextImage = useCallback(() => {
+    if (product?.hinhAnh?.length > 0) {
+      setSelectedImage((prev) => (prev + 1) % product.hinhAnh.length);
+    }
+  }, [product?.hinhAnh?.length]);
+
+  const prevImage = () => {
+    if (product?.hinhAnh?.length > 0) {
+      setSelectedImage((prev) => (prev - 1 + product.hinhAnh.length) % product.hinhAnh.length);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && product?.hinhAnh?.length > 1) {
+      const timer = setInterval(nextImage, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [loading, product?.hinhAnh?.length, nextImage]);
+
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   if (!product || !selectedVariant) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Sản phẩm không tồn tại</h2>
-          <Link 
-            to="/" 
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2f9ea0] to-[#25888a] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-          >
-            <ChevronRight className="rotate-180" size={20} />
-            Quay về trang chủ
-          </Link>
-        </div>
-      </div>
-    );
+    return (navigate(`*`));
   }
 
   const discountPercent = selectedVariant.giaBan > 0 
-    ? Math.round(((selectedVariant.giaBan - selectedVariant.giaKhuyenMai) / selectedVariant.giaBan) * 100)
-    : 0;
+    ? Math.round(((selectedVariant.giaBan - selectedVariant.giaKhuyenMai) / selectedVariant.giaBan) * 100) : 0;
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -129,13 +123,7 @@ export default function Details() {
     }
     return stars;
   };
-  const getImageUrl = (imgData) => {
-    if (!imgData) return "https://placehold.co/600x400?text=No+Image";
-    // Nếu imgData là string thì dùng trực tiếp, nếu là Object thì lấy thuộc tính duongDan
-    const path = typeof imgData === 'string' ? imgData : imgData.duongDan;
-    if (!path) return "https://placehold.co/600x400?text=No+Image";
-    return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
-  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
       <div style={{ 
