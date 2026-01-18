@@ -113,6 +113,7 @@ export default function ScreenProduct() {
                             brands={brands} 
                             filters={filters}
                             showBrands={true} // Cho phép lọc thêm brand
+                            showScreens={false}
                             onFilterChange={handleFilterChange}
                         />
                     </div>

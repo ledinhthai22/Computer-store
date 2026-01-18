@@ -11,16 +11,6 @@ export default function MenuCategory({ onClose }) {
   const chipList = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'];
   const screenList = ['13 inch', '14 inch', '15.6 inch', '16 inch'];
 
-  const priceRanges = [
-    { label: 'Dưới 5 triệu', min: 0, max: 5000000 },
-    { label: '5 - 10 triệu', min: 5000000, max: 10000000 },
-    { label: '10 - 15 triệu', min: 10000000, max: 15000000 },
-    { label: '15 - 20 triệu', min: 15000000, max: 20000000 },
-    { label: '20 - 25 triệu', min: 20000000, max: 25000000 },
-    { label: '25 - 30 triệu', min: 25000000, max: 30000000 },
-    { label: 'Trên 30 triệu', min: 30000000, max: null },
-  ];
-
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -71,7 +61,7 @@ export default function MenuCategory({ onClose }) {
         </div>
 
         {/* EDIT 2: Sử dụng Grid 5 cột (lg:grid-cols-5) thay vì Flex để chia đều khoảng cách */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid lg:grid-cols-5 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid lg:grid-cols-4 gap-6 lg:gap-8">
 
             {/* Cột 1: Thương hiệu */}
             <div className="">
@@ -137,23 +127,6 @@ export default function MenuCategory({ onClose }) {
                 </ul>
             </div>
 
-            {/* Cột 5: Mức giá */}
-            <div className="">
-                <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Khoảng giá</h4>
-                <ul className="space-y-2 lg:space-y-3 text-sm">
-                    {priceRanges.map((range, index) => (
-                        <li key={index}>
-                            <Link 
-                                to={`/san-pham/loc-theo-gia?min=${range.min}${range.max ? `&max=${range.max}` : ''}`} 
-                                onClick={onClose} 
-                                className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
-                            >
-                                {range.label}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </div>
         </div>
       </div>
     </>

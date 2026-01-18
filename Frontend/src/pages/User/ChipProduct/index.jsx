@@ -112,7 +112,8 @@ export default function ChipProduct() {
                             categories={categories} 
                             brands={brands} // Cập nhật: Truyền state brands đã fetch vào đây
                             filters={filters} // Giờ biến filters đã tồn tại
-                            showBrands={true} 
+                            showBrands={true}
+                            showChips={false}
                             onFilterChange={handleFilterChange}
                         />
                     </div>
