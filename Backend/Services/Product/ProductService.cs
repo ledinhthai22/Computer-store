@@ -482,7 +482,7 @@ namespace Backend.Services.Product
                 await RenameImageToSecondaryAsync(img, product.TenSanPham);
             }
 
-            // ===== XỬ LÝ XÓA BIẾN THỂ =====
+            // xóa biến thể 
             if (request.BienTheXoa?.Any() == true)
             {
                 var now = DateTime.UtcNow;
@@ -501,7 +501,7 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== CẬP NHẬT BIẾN THỂ =====
+            //cập nhật biến thể
             if (request.BienThe?.Any() == true)
             {
                 foreach (var req in request.BienThe)
@@ -581,13 +581,13 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== LƯU VÀO DATABASE =====
+           
             await _db.SaveChangesAsync();
 
             return await GetByIdAsync(id);
         }
 
-        // ===== HÀM HELPER ĐỔI TÊN ẢNH =====
+     
         private async Task RenameImageToMainAsync(HinhAnhSanPham image, string productName)
         {
             await Task.Run(() =>

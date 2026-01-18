@@ -76,7 +76,7 @@ namespace Backend.Controllers
             var products = await _productService.GetProductsByBrandAsync(maThuongHieu, soLuong);
             return Ok(products);
         }
-        [HttpGet("{id}/related")]
+        [HttpGet("{maSanPham}/related")]
         public async Task<IActionResult> GetRelatedProducts(int maSanPham,[FromQuery] int limit = 10)
         {
             

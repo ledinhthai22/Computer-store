@@ -14,9 +14,9 @@ public class FileService : IFileService
         _env = env;
     }
 
-    /// <summary>
+  
     /// Validate file hình ảnh - Kiểm tra extension, size, MIME type và magic bytes
-    /// </summary>
+   
     private void ValidateImageFile(IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -38,7 +38,7 @@ public class FileService : IFileService
             throw new ArgumentException($"Kích thước file vượt quá {maxSizeMB}MB");
         }
 
-        // 3. Kiểm tra MIME type
+        // 3. Kiểm tra đuôi fie
         var allowedMimeTypes = new[] {
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
         };
@@ -119,7 +119,7 @@ public class FileService : IFileService
             throw new Exception($"Lỗi khi lưu file: {ex.Message}", ex);
         }
 
-        // Trả về chỉ TÊN FILE (không bao gồm đường dẫn)
+    
         return fileName;
     }
 
