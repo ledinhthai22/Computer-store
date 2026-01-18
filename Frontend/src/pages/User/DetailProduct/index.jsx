@@ -28,6 +28,10 @@ export default function Details() {
   const [loading, setLoading] = useState(true);
   const { slug } = useParams();
   const [quantity, setQuantity] = useState(1);
+  
+  useEffect(()=>{
+    document.title = `${slug}`;
+},[slug])
 
   const { handleAddToCart } = useAddToCart(product);
 
@@ -43,6 +47,11 @@ export default function Details() {
       setSelectedImage((prev) => (prev - 1 + product.hinhAnh.length) % product.hinhAnh.length);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
   useEffect(() => {
     if (!loading && product?.hinhAnh?.length > 1) {
       const timer = setInterval(nextImage, 3000);
@@ -58,7 +67,10 @@ export default function Details() {
         
         if (res && res.bienThe && res.bienThe.length > 0) {
           setProduct(res);
-          setSelectedVariant(res.bienThe[0]);
+          setQuantity(1);
+          if (res.bienThe && res.bienThe.length > 0) {
+            setSelectedVariant(res.bienThe[0]);
+          }
         }
       } catch (err) {
         console.log(err);
@@ -72,38 +84,6 @@ export default function Details() {
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="flex flex-col lg:flex-row gap-8">
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8">
-                  <div className="h-96 bg-gray-200 rounded-xl mb-4"></div>
-                  <div className="flex gap-3">
-                    {[1,2,3,4].map(i => (
-                      <div key={i} className="w-20 h-20 bg-gray-200 rounded-lg"></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8">
-                  <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-                  <div className="h-12 bg-gray-200 rounded mb-6"></div>
-                  <div className="h-48 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!product || !selectedVariant) {
     return (
@@ -157,14 +137,31 @@ export default function Details() {
     return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateRows: '0fr' // Thủ thuật để container cha không bị dư chiều cao
+      }}>
+      <div 
+        className="origin-top transition-all duration-300"
+        style={{ 
+          transform: 'scale(0.8)', 
+          width: '125%', 
+          marginLeft: '-12.5%',
+          marginBottom: '-20%' // Ép margin âm để kéo các thành phần phía dưới lên (nếu có Footer)
+        }}
+      >
       <div className="max-w-7xl mx-auto px-4">
         {/* Breadcrumb */}
         <nav className="mb-8">
-          <ol className="flex items-center gap-2 text-sm text-gray-600">
+          <ol className="flex items-center gap-2 text-sm text-gray-600 mt-6">
             <li><Link to="/" className="hover:text-[#2f9ea0] transition-colors">Trang chủ</Link></li>
             <li><ChevronRight size={16} /></li>
             <li><Link to="/" className="hover:text-[#2f9ea0] transition-colors">Sản phẩm</Link></li>
+            <li><ChevronRight size={16} /></li>
+            <li><Link to={`/chi-tiet-san-pham/${slug}`}><span className="hover:text-[#2f9ea0] transition-colors">{product.tenDanhMuc}</span></Link></li>
+            <li><ChevronRight size={16} /></li>
+            <li><Link to={`/chi-tiet-san-pham/${slug}`}><span className="hover:text-[#2f9ea0] transition-colors">{product.tenThuongHieu}</span></Link></li>
             <li><ChevronRight size={16} /></li>
             <li><Link to={`/chi-tiet-san-pham/${slug}`}><span className="text-gray-900 font-medium">{product.tenSanPham}</span></Link></li>
           </ol>
@@ -180,7 +177,7 @@ export default function Details() {
                   <img
                   src={getImageUrl(product.hinhAnh[selectedImage])}
                   alt={product.tenSanPham}
-                  className="w-full h-153 object-contain transition-all duration-500 ease-in-out"
+                  className="w-full h-140 object-contain transition-all duration-500 ease-in-out"
                 />
                 </div>
                 <button 
@@ -204,10 +201,20 @@ export default function Details() {
                 </div>
                 {/* Discount Badge */}
                 {discountPercent > 0 && (
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                      -{discountPercent}%
-                    </span>
+                  <div className="absolute top-4 -left-[6px] z-10">
+                    <div className="relative">
+                      {/* Thẻ giảm giá chính: Bo góc trên bên trái nhỏ hơn để trông tự nhiên khi quấn */}
+                      <div className="bg-[#e30019] text-white px-2 py-1 rounded-r-md rounded-tl-sm font-bold shadow-md flex items-baseline">
+                        <span className="text-[11px] leading-none uppercase">Giảm</span>
+                        <span className="pl-1 text-base leading-none">{discountPercent}%</span>
+                      </div>
+
+                      {/* Nếp gấp ở cạnh bên trái (quấn từ hông ra sau) */}
+                      <div 
+                        className="absolute top-full left-0 w-[6px] h-[6px] bg-[#8b0000]" 
+                        style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}
+                      ></div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -249,17 +256,20 @@ export default function Details() {
                   {selectedVariant.trangThai && selectedVariant.soLuongTon > 0 ? "Còn hàng" : "Hết hàng"}
                 </span>
               </div>
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <span className="font-semibold text-gray-700 min-w-28">Thương hiệu:</span>
-                  <span className="text-gray-900">{product.tenThuongHieu}</span>
+              <div className="space-y-4 mb-6 ">
+                <div className="flex flex-wrap items-center gap-y-2 gap-x-8 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-700">Danh mục:</span>
+                    <span className="text-gray-900">{product.tenDanhMuc}</span>
+                  </div>
+                  <div className="hidden md:block w-px h-4 bg-gray-300"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-700">Thương hiệu:</span>
+                    <span className="text-gray-900">{product.tenThuongHieu}</span>
+                  </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="font-semibold text-gray-700 min-w-28">Danh mục:</span>
-                  <span className="text-gray-900">{product.tenDanhMuc}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="font-semibold text-gray-700 min-w-28">Đánh giá:</span>
+                <div className="flex items-start">
+                  <span className="font-semibold text-gray-700 min-w-22">Đánh giá:</span>
                   <div className="flex items-center gap-2">
                     {renderStars(product.danhGiaTrungBinh || 0)}
                     <span className="text-gray-700">({product.luotMua || 0} đã bán)</span>
@@ -376,7 +386,7 @@ export default function Details() {
         </div>
 
         {/* Technical Specifications - Moved to bottom */}
-        <div className="mt-8">
+        <div className="mt-2">
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
             <div className="flex items-center gap-3 mb-6">
               <h3 className="text-xl font-bold text-gray-900">THÔNG SỐ KỸ THUẬT</h3>
@@ -456,6 +466,8 @@ export default function Details() {
             </div>
           </div>
 
+          <RelatedProduct productId={product.maSanPham} /> 
+
           {/* Reviews Section */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center justify-between mb-8">
@@ -474,9 +486,9 @@ export default function Details() {
               </button>
             </div>
           </div>
-          
-       <RelatedProduct/>
         </div>
+       </div>
+       </div>
        </div>
     </div>
   );

@@ -55,8 +55,8 @@ function App() {
           <Route path="/gui-lien-he" element={<LienHe />} />
           <Route path="/gio-hang" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/dang-nhap" element={<Login />} />
-          <Route path="/dang-ky" element={<Register />} />
+          {/* <Route path="/dang-nhap" element={<Login />} />
+          <Route path="/dang-ky" element={<Register />} /> */}
           <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/loc-theo-gia" element={<PriceProduct />} />
           <Route element={<ProfileLayout/>}>

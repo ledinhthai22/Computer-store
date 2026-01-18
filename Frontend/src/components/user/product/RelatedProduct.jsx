@@ -3,26 +3,32 @@ import { productService, handleApiError } from "../../../services/api/productSer
 import ProductCard from "./ProductCard"; 
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 
-export default function RelatedProduct() {
+// Thêm props productId vào component
+export default function RelatedProduct({ productId }) {
     const [products, setProducts] = useState([]);
     const [startIndex, setStartIndex] = useState(0);
     const ITEMS_PER_VIEW = 5;
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchRelatedProducts = async () => {
+            if (!productId) return; // Nếu chưa có ID thì không gọi API
+            
             try {
-                const data = await productService.usergetNewest(20);
-                const sortedProducts = data.sort((a, b) => 
-                    new Date(b.ngayTao) - new Date(a.ngayTao)
-                );
-                setProducts(sortedProducts.slice(0, 20));
+                // Sử dụng API usergetRelated thay vì usergetNewest
+                const data = await productService.usergetRelated(productId);
+                
+                // Giả sử API trả về mảng sản phẩm, ta set luôn vào state
+                // Nếu cần sắp xếp theo ngày như cũ thì giữ lại hàm sort
+                setProducts(data || []);
+                setStartIndex(0); // Reset slide về đầu khi đổi sản phẩm
             } catch (error) {
-                handleApiError(error, "Lỗi fetch sản phẩm mới nhất");
+                handleApiError(error, "Lỗi fetch sản phẩm liên quan");
                 setProducts([]); 
             }
         };
-        fetchProducts();
-    }, []);
+
+        fetchRelatedProducts();
+    }, [productId]); // Chạy lại mỗi khi productId thay đổi
 
     const visibleProducts = products.slice(startIndex, startIndex + ITEMS_PER_VIEW);
 
@@ -38,21 +44,17 @@ export default function RelatedProduct() {
         }
     };
 
-    if (products.length === 0) return null;
-
     return (
-        /* Chỉnh sửa 1: Thay đổi bg-stone-50 thành bg-white, thêm bo góc rounded-2xl và shadow-xl */
-        <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
-            
-            {/* Chỉnh sửa 2: Căn chỉnh lại tiêu đề cho giống các section khác trong Detail */}
+        <div className="mt-8 mb-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
             <div className="flex items-center gap-3 mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 uppercase tracking-tight">
-                    Sản phẩm liên quan
+                <h3 className="text-2xl font-bold text-gray-900">
+                    CÓ THỂ BẠN CŨNG THÍCH
                 </h3>
             </div>
 
             <div className="relative group/slider">
-                {/* Nút Previous */}
+                {products.length > 0 ? (
+                    <>
                 <button
                     onClick={handlePrev}
                     disabled={startIndex === 0}
@@ -65,7 +67,6 @@ export default function RelatedProduct() {
                     <MdNavigateBefore size={28} />
                 </button>
 
-                {/* Nút Next */}
                 <button
                     onClick={handleNext}
                     disabled={startIndex + ITEMS_PER_VIEW >= products.length}
@@ -78,15 +79,20 @@ export default function RelatedProduct() {
                     <MdNavigateNext size={28} />
                 </button>
 
-                {/* Grid sản phẩm - Giữ nguyên gap để thoáng đãng */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {visibleProducts.map(product => (
-                        /* Đảm bảo ProductCard bên trong cũng có bo góc nhẹ và shadow khi hover */
                         <div key={product.maSanPham} className="transition-transform duration-300 hover:-translate-y-1">
                             <ProductCard product={product} />
                         </div>
                     ))}
                 </div>
+            </>
+                ) : (
+                    /* Hiển thị thông báo khi không có sản phẩm */
+                    <div className="text-center py-10">
+                        <p className="text-gray-500">Hiện tại không có sản phẩm liên quan nào.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useParams } from "react-router-dom";
 import { productService, handleApiError } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
@@ -19,6 +19,9 @@ export default function BrandProduct() {
     });
 
     const { maThuongHieu } = useParams();
+    useEffect(()=>{
+        document.title = "Sản phẩm theo thương hiệu";
+    },[])
 
     useEffect(() => {
         const fetchInitialData = async () => {
