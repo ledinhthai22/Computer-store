@@ -116,11 +116,11 @@ const WebInfoRecoverTable = ({ data = [], loading, onRecover, onView }) => {
           Quay lại
         </button>
 
-        <div className="flex-1 max-w-md">
+        <div className="flex-1 max-w">
           <TableSearch
             filterText={filterText}
             onFilter={(e) => setFilterText(e.target.value)}
-            placeholder="Tìm kiếm cấu hình đã xóa..."
+            placeholder="Tìm kiếm..."
           />
         </div>
       </div>

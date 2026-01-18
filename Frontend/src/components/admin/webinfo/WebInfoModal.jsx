@@ -115,7 +115,7 @@ const WebInfoModal = ({
                         <button
                             type="button"
                             onClick={handleToggleStatus}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${isActive ? "bg-green-600" : "bg-gray-300"
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer ${isActive ? "bg-green-600" : "bg-gray-300"
                                 }`}
                         >
                             <span
@@ -134,18 +134,18 @@ const WebInfoModal = ({
                     )}
 
                     {/* ACTIONS */}
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="flex justify-center gap-3 pt-4">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-2 bg-gray-200 text-gray-600 rounded-lg"
+                            className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-lg cursor-pointer"
                         >
                             Đóng
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300"
+                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:bg-blue-300 cursor-pointer"
                         >
                             {isSubmitting ? "Đang lưu..." : "Xác nhận"}
                         </button>
