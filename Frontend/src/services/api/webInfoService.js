@@ -1,6 +1,8 @@
 import axiosClient from "./axiosClient";
 
 export const WebInfoService = {
+  userGetAll: () => axiosClient.get("/WebInfo").then((res) => res.data),
+
   getAll: () => axiosClient.get("/admin/WebInfoAdmin").then((res) => res.data),
 
   getDeleted: () =>

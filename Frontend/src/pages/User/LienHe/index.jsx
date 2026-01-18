@@ -16,10 +16,14 @@ export default function LienHe() {
 
     const { showToast } = useToast();
 
+    useEffect(()=>{
+        document.title = "Liên hệ";
+    },[])
+
     useEffect(() => {
         const fetchWebInfo = async () => {
             try {
-                const data = await WebInfoService.getAll();
+                const data = await WebInfoService.userGetAll();
                 if (Array.isArray(data) && data.length > 0) {
                     setWebInfo(data[0]);
                 } else {
@@ -222,7 +226,8 @@ export default function LienHe() {
                         </div>
 
                         <div className="rounded-xl overflow-hidden shadow-md h-64 w-full border border-gray-200">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1959.756966934177!2d106.70060596955592!3d10.771894099336052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f40a3b49e59%3A0xa1bd14e483a602db!2zVHLGsOG7nW5nIENhbyDEkeG6s25nIEvhu7kgdGh14bqtdCBDYW8gVGjhuq9uZw!5e0!3m2!1svi!2sus!4v1768556871481!5m2!1svi!2sus" width="100%" height="100%" style={{ border: 0 }} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1959.756966934177!2d106.70060596955592!3d10.771894099336052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f40a3b49e59%3A0xa1bd14e483a602db!2zVHLGsOG7nW5nIENhbyDEkeG6s25nIEvhu7kgdGh14bqtdCBDYW8gVGjhuq9uZw!5e0!3m2!1svi!2sus!4v1768556871481!5m2!1svi!2sus" 
+                        width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
                         </div>
                     </div>
 
