@@ -11,6 +11,10 @@ export default function WishList() {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
+        document.title = "Sản phẩm yêu thích";
+    })
+
     const fetchWishlistProducts = () => {
         if (!user) {
             setIsLoading(false);

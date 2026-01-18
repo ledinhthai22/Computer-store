@@ -1,6 +1,6 @@
 import { useCart } from "../../../contexts/CartContext";
 import { Link } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ConfirmModal from "../../../components/user/ConfirmModal"; // import component modal
 import { useToast } from "../../../contexts/ToastContext";
 
@@ -12,6 +12,10 @@ export default function Cart() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteMode, setDeleteMode] = useState(null); // "single" | "multiple"
   const [deleteId, setDeleteId] = useState(null);
+
+  useEffect(() => {
+    document.title = "Giỏ hàng của bạn";
+  })
 
   const isAllSelected =
     cart.length > 0 && selectedItems.length === cart.length;

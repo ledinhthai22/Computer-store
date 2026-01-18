@@ -17,7 +17,7 @@ export default function LienHe() {
     const { showToast } = useToast();
 
     useEffect(()=>{
-        document.title = "Liên hệ";
+        document.title = "Gửi liên hệ";
     },[])
 
     useEffect(() => {

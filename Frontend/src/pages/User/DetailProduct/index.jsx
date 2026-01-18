@@ -28,6 +28,10 @@ export default function Details() {
   const [loading, setLoading] = useState(true);
   const { slug } = useParams();
   const [quantity, setQuantity] = useState(1);
+  
+  useEffect(()=>{
+    document.title = `${slug}`;
+},[slug])
 
   const { handleAddToCart } = useAddToCart(product);
 
