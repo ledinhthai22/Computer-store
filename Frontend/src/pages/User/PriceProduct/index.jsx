@@ -29,6 +29,9 @@ export default function PriceProduct() {
         GiaMin: searchParams.get("min") || null,
         GiaMax: searchParams.get("max") || null
     });
+    useEffect(()=>{
+        document.title = `Mức giá ${searchParams.get("min") || "0"} - ${searchParams.get("max") || "∞"}`;
+    })
 
     useEffect(() => {
         const newMin = searchParams.get("min");

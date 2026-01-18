@@ -13,6 +13,11 @@ export default function UpdatePassword() {
   const [loading, setLoading] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
+
+  useEffect(()=>{
+    document.title = "Đổi mật khẩu";
+  })
+
   useEffect(() => {
     if (!user) {
       openLogin();

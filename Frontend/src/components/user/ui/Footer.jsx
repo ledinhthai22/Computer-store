@@ -9,7 +9,7 @@ export default function Footer() {
     useEffect(() => {
         const fetchWebInfo = async () => {
             try {
-                const data = await WebInfoService.getAll();
+                const data = await WebInfoService.userGetAll();
                 if (Array.isArray(data) && data.length > 0) {
                     setWebInfo(data[0]);
                 } else {

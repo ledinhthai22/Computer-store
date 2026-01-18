@@ -23,6 +23,10 @@ export default function CategoryProduct() {
     // Lấy maDanhMuc từ URL (Router trong App.js phải là /san-pham/danh-muc/:maDanhMuc)
     const { maDanhMuc } = useParams();
 
+    useEffect(()=>{
+        document.title = "Sản phẩm theo danh mục";
+    },[])
+
     // --- 2. Fetch Dữ liệu ---
     useEffect(() => {
         const fetchInitialData = async () => {
