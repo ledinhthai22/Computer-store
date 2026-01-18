@@ -14,3 +14,5 @@ export {default as CategoryProduct} from './CategoryProduct';
 export {default as BrandProduct} from './BrandProduct';
 export {default as UpdatePassword} from './UpdatePassword';
 export {default as PriceProduct} from './PriceProduct';
+export {default as ScreenProduct} from './ScreenProduct';
+export {default as ChipProduct} from './ChipProduct';

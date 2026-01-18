@@ -82,7 +82,7 @@ export default function FilterSidebar({
                                 key={brand.id}
                                 onClick={() => handleBrandClick(brand.id)}
                                 className={`
-                                    text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium
+                                    text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium cursor-pointer
                                     ${selectedBrand === brand.id
                                         ? "bg-[#2f9ea0] border-[#2f9ea0] text-white shadow-md transform scale-105"
                                         : "bg-white border-gray-200 text-gray-600 hover:border-[#2f9ea0] hover:text-[#2f9ea0]"
@@ -129,7 +129,7 @@ export default function FilterSidebar({
                     
                     <button 
                         onClick={handleApplyPrice} 
-                        className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-[#258b8d] active:scale-95 transition-all duration-200 shadow-sm hover:shadow"
+                        className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-[#258b8d] active:scale-95 transition-all duration-200 shadow-sm hover:shadow cursor-pointer"
                     >
                         Áp dụng bộ lọc
                     </button>
