@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260118124704_ChangeTableWebInFo")]
+    partial class ChangeTableWebInFo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -384,9 +387,9 @@ namespace Ecommerce.Migrations
                             GioiTinh = false,
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$1syk/9Jcn6.WLqhK44rNm.9x9HIOY94wEjPheW1hyUO4XAk4lCmtq",
-                            NgayCapNhat = new DateTime(2026, 1, 18, 19, 54, 57, 842, DateTimeKind.Local).AddTicks(7645),
-                            NgayTao = new DateTime(2026, 1, 18, 19, 54, 57, 842, DateTimeKind.Local).AddTicks(7621),
+                            MatKhauMaHoa = "$2a$11$PpKRuqavxNRX/F6//2sBe.HJ.pK9F.Lzs4l/DLJnmvDzeUmHg4q1S",
+                            NgayCapNhat = new DateTime(2026, 1, 18, 19, 47, 2, 922, DateTimeKind.Local).AddTicks(2376),
+                            NgayTao = new DateTime(2026, 1, 18, 19, 47, 2, 922, DateTimeKind.Local).AddTicks(2353),
                             SoDienThoai = "0999988884",
                             TrangThai = true
                         });
@@ -518,9 +521,6 @@ namespace Ecommerce.Migrations
                     b.Property<string>("TenKhoaCaiDat")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
 
                     b.HasKey("MaThongTinTrang");
 

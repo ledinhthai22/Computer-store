@@ -3,91 +3,68 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Ecommerce.DTO.WebInfo;
 
-
-namespace Ecommerce.Controller.Admin.WebInfo
+namespace Ecommerce.Controllers.Admin
 {
-    [Route("api/admin/[controller]")]
+    [Route("api/admin/web-info")]
     [ApiController]
+    [Authorize(Policy = "AdminOnly")]
     public class WebInfoAdminController : ControllerBase
     {
         private readonly IWebInfoService _webInfoService;
+
         public WebInfoAdminController(IWebInfoService webInfoService)
         {
             _webInfoService = webInfoService;
         }
 
         [HttpGet]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetForAdmin()
         {
-            var result = await _webInfoService.GetAllAsync();
-            return Ok(result);
+            return Ok(await _webInfoService.GetForAdminAsync());
         }
-        
-        [HttpPut("update-status/{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> UpdateStatus(int id)
-        {
-            var result = await _webInfoService.UpdateStatus(id);
-            if (!result) return NotFound(new { message = "Không tìm thấy thông tin trang hoặc đã bị xóa" });
-            return Ok(new { message = "Cập nhật trạng thái thành công" });
-        }
+
         [HttpGet("deleted")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetHidenAsync()
+        public async Task<IActionResult> GetDeleted()
         {
-            var result = await _webInfoService.GetAllHidenAsync();
-            return Ok(result);
+            return Ok(await _webInfoService.GetDeletedAsync());
         }
 
-        [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> CreateWebInfo(WebInfoItemRequest request)
+        
+        [HttpPost("create")]
+        public async Task<IActionResult> Create(WebInfoCreate request)
         {
-            var result = await _webInfoService.CreateWebInfo(request);
-            return Ok(result);
+            await _webInfoService.CreateAsync(request);
+            return Ok(new { message = "Thêm cấu hình thành công" });
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> UpdateWebInfo(int id, WebInfoItemRequest request)
-        {
-            var result = await _webInfoService.UpdateWebInfo(id, request);
-            if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
-            return Ok(result);
-        }
 
-        [HttpPut("restore/{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> ReStoreWebInfo(int id)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, WebInfoUpdate request)
         {
-            var result = await _webInfoService.RestoreWebInfo(id);
-            if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
-            return Ok(result);
-        }
+            var result = await _webInfoService.UpdateAsync(id, request);
 
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> SoftDelete(int id)
-        {
-            try
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy thông tin cần cập nhật" });
+
+            return Ok(new
             {
-                var success = await _webInfoService.SoftDelete(id);
-                if (!success) return NotFound(new { message = "Không tìm thấy thông tin trang" });
-                return Ok(new { message = "Xóa thông tin trang thành công" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+                message = "Cập nhật thông tin thành công",
+                data = result
+            });
         }
-        [HttpGet("detail/{id}")]
-        [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetDetailAsync(int id)
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await _webInfoService.GetDetailAsync(id);
-            if (result == null) return NotFound(new { message = "Không tìm thấy thông tin trang" });
-            return Ok(result);
+            await _webInfoService.DeleteAsync(id);
+            return Ok(new { message = "Xóa thành công" });
+        }
+
+        [HttpPut("restore/{id:int}")]
+        public async Task<IActionResult> Restore(int id)
+        {
+            await _webInfoService.RestoreAsync(id);
+            return Ok(new { message = "Khôi phục thành công" });
         }
     }
 }
