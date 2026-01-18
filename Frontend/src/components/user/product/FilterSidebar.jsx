@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function FilterSidebar({ 
     categories = [], 
-    brands = [], 
+    brands = [],
+    filters={},
     onFilterChange, 
     showBrands = true, 
     showCategories = true,
@@ -12,14 +13,23 @@ export default function FilterSidebar({
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
 
+    useEffect(() => {
+        setSelectedCategory(filters.MaDanhMuc || null);
+        setSelectedBrand(filters.MaThuongHieu || null);
+        setPriceRange({
+            min: filters.GiaMin || "",
+            max: filters.GiaMax || ""
+        });
+    }, [filters]);
+
     const handleCategoryClick = (id) => {
-        const newValue = selectedCategory === id ? null : id;
+        const newValue = (filters.MaDanhMuc === id) ? null : id;
         setSelectedCategory(newValue);
         onFilterChange("MaDanhMuc", newValue);
     };
 
     const handleBrandClick = (id) => {
-        const newValue = selectedBrand === id ? null : id;
+        const newValue = (filters.MaThuongHieu === id) ? null : id;
         setSelectedBrand(newValue);
         onFilterChange("MaThuongHieu", newValue);
     };
@@ -72,7 +82,7 @@ export default function FilterSidebar({
                                 key={brand.id}
                                 onClick={() => handleBrandClick(brand.id)}
                                 className={`
-                                    text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium
+                                    text-xs px-3 py-1.5 rounded-full border transition-all duration-200 font-medium cursor-pointer
                                     ${selectedBrand === brand.id
                                         ? "bg-[#2f9ea0] border-[#2f9ea0] text-white shadow-md transform scale-105"
                                         : "bg-white border-gray-200 text-gray-600 hover:border-[#2f9ea0] hover:text-[#2f9ea0]"
@@ -119,7 +129,7 @@ export default function FilterSidebar({
                     
                     <button 
                         onClick={handleApplyPrice} 
-                        className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-[#258b8d] active:scale-95 transition-all duration-200 shadow-sm hover:shadow"
+                        className="w-full bg-[#2f9ea0] text-white text-sm py-2.5 rounded-md font-medium hover:bg-[#258b8d] active:scale-95 transition-all duration-200 shadow-sm hover:shadow cursor-pointer"
                     >
                         Áp dụng bộ lọc
                     </button>

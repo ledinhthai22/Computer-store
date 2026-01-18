@@ -127,14 +127,15 @@ export default function HomeProduct() {
                     <div className="w-full lg:w-1/4 flex-shrink-0">
                         <FilterSidebar 
                             categories={categories} 
-                            brands={brands} 
+                            brands={brands}
+                            filters={filters}
                             onFilterChange={handleFilterChange}
                         />
                     </div>
 
                     {/* --- NỘI DUNG CHÍNH --- */}
-                    <div className="w-full lg:w-3/4 flex flex-col justify-between">
-                        <div>
+                    <div className="w-full lg:w-3/4 flex flex-col">
+                        <div className="min-h-[800px] flex flex-col">
                             {isLoading ? (
                                 /* Loading State */
                                 <div className="flex justify-center items-center py-32 bg-white rounded-xl shadow-sm">
@@ -167,7 +168,7 @@ export default function HomeProduct() {
 
                         {/* --- PHÂN TRANG --- */}
                         {!isLoading && products.length > 0 && (
-                            <div className="mt-8 flex justify-center">
+                            <div className="mt-8 flex justify-center pb-4">
                                 <UserPagination 
                                     currentPage={currentPage}
                                     totalPages={totalPages}

@@ -8,6 +8,9 @@ export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
+  const chipList = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'];
+  const screenList = ['13 inch', '14 inch', '15.6 inch', '16 inch'];
+
   const priceRanges = [
     { label: 'Dưới 5 triệu', min: 0, max: 5000000 },
     { label: '5 - 10 triệu', min: 5000000, max: 10000000 },
@@ -71,7 +74,7 @@ export default function MenuCategory({ onClose }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid lg:grid-cols-5 gap-6 lg:gap-8">
 
             {/* Cột 1: Thương hiệu */}
-            <div className=""> {/* Bỏ min-w-[150px] để grid tự căn chỉnh */}
+            <div className="">
                 <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Thương hiệu</h4>
                 <ul className="space-y-2 lg:space-y-3 text-sm">
                     {brands.map(b => (
@@ -98,25 +101,37 @@ export default function MenuCategory({ onClose }) {
                 </ul>
             </div>
 
-            {/* Cột 3: Dòng Chip */}
+            {/* Cột 3: Dòng Chip (ĐÃ CẬP NHẬT LINK) */}
             <div className="">
                 <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Dòng chip</h4>
                 <ul className="space-y-2 lg:space-y-3 text-sm">
-                    {['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'].map((chip, index) => (
+                    {chipList.map((chip, index) => (
                         <li key={index}>
-                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">Laptop {chip}</Link>
+                            <Link 
+                                to={`/san-pham/dong-chip/${encodeURIComponent(chip)}`} 
+                                onClick={onClose} 
+                                className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
+                            >
+                                Laptop {chip}
+                            </Link>
                         </li>
                     ))}
                 </ul>
             </div>
 
-            {/* Cột 4: Màn hình */}
+            {/* Cột 4: Màn hình (ĐÃ CẬP NHẬT LINK) */}
              <div className="">
                 <h4 className="font-bold mb-3 text-[#2f9ea0] uppercase text-xs lg:text-sm">Màn hình</h4>
                 <ul className="space-y-2 lg:space-y-3 text-sm">
-                    {['13 inch', '14 inch', '15.6 inch', '16 inch'].map((size, index) => (
+                    {screenList.map((size, index) => (
                         <li key={index}>
-                            <Link to="/" onClick={onClose} className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform">Laptop {size}</Link>
+                            <Link 
+                                to={`/san-pham/man-hinh/${encodeURIComponent(size)}`} 
+                                onClick={onClose} 
+                                className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
+                            >
+                                Laptop {size}
+                            </Link>
                         </li>
                     ))}
                 </ul>
