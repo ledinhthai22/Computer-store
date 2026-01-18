@@ -116,7 +116,7 @@ const WebInfoTable = ({
                     <div className="flex items-center gap-2 justify-center">
                         <button
                             onClick={() => onEdit(row)}
-                            className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1"
+                            className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                             title="Chỉnh sửa"
                         >
                             <Edit size={18} />
@@ -131,7 +131,7 @@ const WebInfoTable = ({
                                     ? "Cấu hình đang hoạt động, không thể xóa"
                                     : "Xóa (xóa mềm)"
                             }
-                            className={`p-2 rounded-lg transition-colors flex items-center gap-1
+                            className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
                                 ${
                                     isDisabled
                                         ? "text-gray-400 cursor-not-allowed bg-gray-100"
@@ -151,18 +151,18 @@ const WebInfoTable = ({
     return (
         <div className="w-full space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex-1 max-w-md">
+                <div className="flex-1 max-w">
                     <TableSearch
                         filterText={filterText}
                         onFilter={(e) => setFilterText(e.target.value)}
-                        placeholder="Tìm kiếm cấu hình web..."
+                        placeholder="Tìm kiếm..."
                     />
                 </div>
 
                 <div className="flex items-center gap-2">
                     <button
                         onClick={onOpenAddModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
                     >
                         <Plus size={16} />
                         <span>Thêm mới</span>
@@ -172,7 +172,7 @@ const WebInfoTable = ({
                         onClick={() =>
                             navigate("/quan-ly/thong-tin-trang/khoi-phuc")
                         }
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md"
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
                     >
                         <History size={16} />
                         <span className="hidden lg:inline">
@@ -192,6 +192,7 @@ const WebInfoTable = ({
                     paginationComponent={Pagination}
                     paginationPerPage={5}
                     persistTableHead
+                    className="custom-datatable"
                     sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
                     highlightOnHover
                     responsive
