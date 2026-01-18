@@ -3,35 +3,78 @@ import React, { useState, useEffect } from "react";
 export default function FilterSidebar({ 
     categories = [], 
     brands = [],
+    
+    // --- DỮ LIỆU MẶC ĐỊNH ---
+    chips = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'],
+    screens = ['13 inch', '14 inch', '15.6 inch', '16 inch'],
+    // Thêm danh sách GPU phổ biến dựa trên ảnh database của bạn
+    gpus = ['Intel Iris Xe', 'RTX 1050','RTX 2050','RTX 3050', 'RTX 4050', 'RTX 4060', 'AMD Radeon'], 
+    
     filters={},
     onFilterChange, 
-    showBrands = true, 
+    
+    // --- CỜ HIỂN THỊ ---
     showCategories = true,
-    showPrice = true // <--- Thêm prop này, mặc định là hiện
+    showBrands = true,
+    showChips = true,    
+    showScreens = true,  
+    showGPUs = true,     // <--- Cờ hiển thị mới cho GPU
+    showPrice = true 
 }) {
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+    
+    // State quản lý lựa chọn
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
+    const [selectedChip, setSelectedChip] = useState(null);     
+    const [selectedScreen, setSelectedScreen] = useState(null); 
+    const [selectedGPU, setSelectedGPU] = useState(null); // <--- State mới cho GPU
 
+    // Cập nhật State khi Props filters thay đổi (từ URL hoặc Parent)
     useEffect(() => {
         setSelectedCategory(filters.MaDanhMuc || null);
         setSelectedBrand(filters.MaThuongHieu || null);
+        setSelectedChip(filters.BoXuLyTrungTam || null);     
+        setSelectedScreen(filters.KichThuocManHinh || null); 
+        setSelectedGPU(filters.BoXuLyDoHoa || null); // <--- Map với key API Swagger
+        
         setPriceRange({
             min: filters.GiaMin || "",
             max: filters.GiaMax || ""
         });
     }, [filters]);
 
+    // --- HANDLERS ---
     const handleCategoryClick = (id) => {
-        const newValue = (filters.MaDanhMuc === id) ? null : id;
+        const newValue = (selectedCategory === id) ? null : id;
         setSelectedCategory(newValue);
         onFilterChange("MaDanhMuc", newValue);
     };
 
     const handleBrandClick = (id) => {
-        const newValue = (filters.MaThuongHieu === id) ? null : id;
+        const newValue = (selectedBrand === id) ? null : id;
         setSelectedBrand(newValue);
         onFilterChange("MaThuongHieu", newValue);
+    };
+
+    const handleChipClick = (chipName) => {
+        const newValue = (selectedChip === chipName) ? null : chipName;
+        setSelectedChip(newValue);
+        onFilterChange("BoXuLyTrungTam", newValue);
+    };
+
+    const handleScreenClick = (screenSize) => {
+        const newValue = (selectedScreen === screenSize) ? null : screenSize;
+        setSelectedScreen(newValue);
+        onFilterChange("KichThuocManHinh", newValue);
+    };
+
+    // Handler mới cho GPU
+    const handleGPUClick = (gpuName) => {
+        const newValue = (selectedGPU === gpuName) ? null : gpuName;
+        setSelectedGPU(newValue);
+        // Lưu ý: Key phải khớp với Swagger ('BoXuLyDoHoa')
+        onFilterChange("BoXuLyDoHoa", newValue);
     };
 
     const handleApplyPrice = () => {
@@ -61,9 +104,7 @@ export default function FilterSidebar({
                                 `}
                             >
                                 <span>{cat.name}</span>
-                                {selectedCategory === cat.id && (
-                                    <span className="text-xs text-[#2f9ea0]">●</span>
-                                )}
+                                {selectedCategory === cat.id && <span className="text-xs text-[#2f9ea0]">●</span>}
                             </li>
                         ))}
                     </ul>
@@ -96,9 +137,87 @@ export default function FilterSidebar({
                 </div>
             )}
 
-            {/* --- PHẦN 3: KHOẢNG GIÁ (Chỉ hiện khi showPrice = true) --- */}
+            {/* --- PHẦN 3: DÒNG CHIP --- */}
+            {showChips && chips && chips.length > 0 && (
+                <div className={`mb-8 ${(showCategories || showBrands) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
+                        Vi xử lý (CPU)
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {chips.map((chip, index) => (
+                            <button 
+                                key={index}
+                                onClick={() => handleChipClick(chip)}
+                                className={`
+                                    text-xs px-3 py-1.5 rounded-md border transition-all duration-200 font-medium cursor-pointer
+                                    ${selectedChip === chip
+                                        ? "bg-[#2f9ea0] border-[#2f9ea0] text-white shadow-md transform scale-105"
+                                        : "bg-white border-gray-200 text-gray-600 hover:border-[#2f9ea0] hover:text-[#2f9ea0]"
+                                    }
+                                `}
+                            >
+                                {chip}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* --- PHẦN 4: CARD ĐỒ HỌA (GPU) - MỚI --- */}
+            {showGPUs && gpus && gpus.length > 0 && (
+                <div className={`mb-8 ${(showCategories || showBrands || showChips) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
+                        Card đồ họa
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {gpus.map((gpu, index) => (
+                            <button 
+                                key={index}
+                                onClick={() => handleGPUClick(gpu)}
+                                className={`
+                                    text-xs px-3 py-1.5 rounded-md border transition-all duration-200 font-medium cursor-pointer
+                                    ${selectedGPU === gpu
+                                        ? "bg-[#2f9ea0] border-[#2f9ea0] text-white shadow-md transform scale-105"
+                                        : "bg-white border-gray-200 text-gray-600 hover:border-[#2f9ea0] hover:text-[#2f9ea0]"
+                                    }
+                                `}
+                            >
+                                {gpu}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* --- PHẦN 5: MÀN HÌNH --- */}
+            {showScreens && screens && screens.length > 0 && (
+                <div className={`mb-8 ${(showCategories || showBrands || showChips || showGPUs) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
+                        Màn hình
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {screens.map((screen, index) => (
+                            <button 
+                                key={index}
+                                onClick={() => handleScreenClick(screen)}
+                                className={`
+                                    text-xs px-3 py-1.5 rounded-md border transition-all duration-200 font-medium cursor-pointer
+                                    ${selectedScreen === screen
+                                        ? "bg-[#2f9ea0] border-[#2f9ea0] text-white shadow-md transform scale-105"
+                                        : "bg-white border-gray-200 text-gray-600 hover:border-[#2f9ea0] hover:text-[#2f9ea0]"
+                                    }
+                                `}
+                            >
+                                {screen}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* --- PHẦN 6: KHOẢNG GIÁ --- */}
             {showPrice && (
-                <div className={`${(showCategories || showBrands) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
+                <div className={`${(showCategories || showBrands || showChips || showScreens || showGPUs) ? 'border-t border-dashed border-gray-200 pt-6' : ''}`}>
                     <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-4 border-l-4 border-[#2f9ea0] pl-2">
                         Khoảng giá
                     </h3>
