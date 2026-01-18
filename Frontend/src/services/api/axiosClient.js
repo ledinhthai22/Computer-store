@@ -27,7 +27,7 @@ axiosClient.interceptors.response.use(
 
       if (!isAuthApi) {
         localStorage.removeItem("user");
-        window.location.href = "/dang-nhap";
+        window.location.href = "/";
       }
     }
 
