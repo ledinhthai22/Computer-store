@@ -44,17 +44,17 @@ export default function RelatedProduct({ productId }) {
         }
     };
 
-    if (products.length === 0) return null;
-
     return (
-        <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+        <div className="mt-8 mb-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
             <div className="flex items-center gap-3 mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 uppercase tracking-tight">
-                    Sản phẩm liên quan
+                <h3 className="text-2xl font-bold text-gray-900">
+                    CÓ THỂ BẠN CŨNG THÍCH
                 </h3>
             </div>
 
             <div className="relative group/slider">
+                {products.length > 0 ? (
+                    <>
                 <button
                     onClick={handlePrev}
                     disabled={startIndex === 0}
@@ -86,6 +86,13 @@ export default function RelatedProduct({ productId }) {
                         </div>
                     ))}
                 </div>
+            </>
+                ) : (
+                    /* Hiển thị thông báo khi không có sản phẩm */
+                    <div className="text-center py-10">
+                        <p className="text-gray-500">Hiện tại không có sản phẩm liên quan nào.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

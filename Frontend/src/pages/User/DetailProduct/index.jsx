@@ -212,10 +212,20 @@ export default function Details() {
                 </div>
                 {/* Discount Badge */}
                 {discountPercent > 0 && (
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                      -{discountPercent}%
-                    </span>
+                  <div className="absolute top-4 -left-[6px] z-10">
+                    <div className="relative">
+                      {/* Thẻ giảm giá chính: Bo góc trên bên trái nhỏ hơn để trông tự nhiên khi quấn */}
+                      <div className="bg-[#e30019] text-white px-2 py-1 rounded-r-md rounded-tl-sm font-bold shadow-md flex items-baseline">
+                        <span className="text-[11px] leading-none uppercase">Giảm</span>
+                        <span className="pl-1 text-base leading-none">{discountPercent}%</span>
+                      </div>
+
+                      {/* Nếp gấp ở cạnh bên trái (quấn từ hông ra sau) */}
+                      <div 
+                        className="absolute top-full left-0 w-[6px] h-[6px] bg-[#8b0000]" 
+                        style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}
+                      ></div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -464,6 +474,8 @@ export default function Details() {
             </div>
           </div>
 
+          <RelatedProduct productId={product.maSanPham} /> 
+
           {/* Reviews Section */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center justify-between mb-8">
@@ -482,7 +494,6 @@ export default function Details() {
               </button>
             </div>
           </div>
-          <RelatedProduct productId={product.maSanPham} />
         </div>
        </div>
     </div>
