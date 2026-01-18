@@ -134,6 +134,7 @@ export default function CategoryProduct() {
                         <FilterSidebar 
                             categories={[]} // Không cần truyền danh mục
                             brands={brands} // Truyền danh sách thương hiệu
+                            filters={filters}
                             showCategories={false} // Ẩn phần Danh mục
                             showBrands={true}      // Hiện phần Thương hiệu
                             onFilterChange={handleFilterChange}

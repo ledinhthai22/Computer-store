@@ -111,6 +111,7 @@ export default function BrandProduct() {
                         <FilterSidebar 
                             categories={categories} 
                             brands={[]} 
+                            filters={filters}
                             showBrands={false} 
                             onFilterChange={handleFilterChange}
                         />

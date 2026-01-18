@@ -143,6 +143,7 @@ export default function PriceProduct() {
                         <FilterSidebar 
                             categories={categories} 
                             brands={brands} 
+                            filters={filters}
                             showBrands={true}      
                             showCategories={true}
                             showPrice={false} 

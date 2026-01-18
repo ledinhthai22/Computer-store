@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function FilterSidebar({ 
     categories = [], 
-    brands = [], 
+    brands = [],
+    filters={},
     onFilterChange, 
     showBrands = true, 
     showCategories = true,
@@ -12,14 +13,23 @@ export default function FilterSidebar({
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
 
+    useEffect(() => {
+        setSelectedCategory(filters.MaDanhMuc || null);
+        setSelectedBrand(filters.MaThuongHieu || null);
+        setPriceRange({
+            min: filters.GiaMin || "",
+            max: filters.GiaMax || ""
+        });
+    }, [filters]);
+
     const handleCategoryClick = (id) => {
-        const newValue = selectedCategory === id ? null : id;
+        const newValue = (filters.MaDanhMuc === id) ? null : id;
         setSelectedCategory(newValue);
         onFilterChange("MaDanhMuc", newValue);
     };
 
     const handleBrandClick = (id) => {
-        const newValue = selectedBrand === id ? null : id;
+        const newValue = (filters.MaThuongHieu === id) ? null : id;
         setSelectedBrand(newValue);
         onFilterChange("MaThuongHieu", newValue);
     };
