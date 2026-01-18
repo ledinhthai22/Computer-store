@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaFacebook, FaYoutube, FaInstagramSquare, FaTiktok } from "react-icons/fa";
 import { SiZalo } from "react-icons/si";
-import { WebInfoService, handleApiError } from "../../../services/api/webInfoService";
+import { WebInfoService} from "../../../services/api/webInfoService";
 
 export default function Footer() {
     const [webInfo, setWebInfo] = useState(null);
@@ -16,7 +16,7 @@ export default function Footer() {
                     setWebInfo(data);
                 }
             } catch (error) {
-                handleApiError(error, "Lỗi khi tải thông tin Footer");
+               console.log("Thông báo lỗi",error)
             }
         };
 

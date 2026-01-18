@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaSyncAlt, FaPhoneAlt } from "react-icons/fa";
 import { MdStorefront } from "react-icons/md";
 
-import { WebInfoService, handleApiError } from "../../../services/api/webInfoService"; 
+import { WebInfoService} from "../../../services/api/webInfoService"; 
 
 export default function Header() {
   const [webInfo, setWebInfo] = useState(null);
@@ -18,7 +18,7 @@ export default function Header() {
           setWebInfo(data);
         }
       } catch (error) {
-        handleApiError(error, "Lỗi khi tải thông tin Web");
+        console.log("Thông báo lỗi",error)
       }
     };
 

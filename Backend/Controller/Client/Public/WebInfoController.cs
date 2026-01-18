@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Backend.Services.WebInfo;
 using Backend.DTO.WebInfo;
+using Ecommerce.DTO.WebInfo;
 
 namespace Ecommerce.Controller.Client.Public
 {
@@ -14,10 +15,9 @@ namespace Ecommerce.Controller.Client.Public
             _webInfoService = webInfoService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetActiveAsync()
+        public async Task<IActionResult> GetForClient()
         {
-            var result = await _webInfoService.GetActiveAsync();
-            return Ok(result);
+            return Ok(await _webInfoService.GetForClientAsync());
         }
     }
 }

@@ -1,17 +1,21 @@
 ﻿using Backend.DTO.WebInfo;
 using Ecommerce.DTO.WebInfo;
+
 namespace Backend.Services.WebInfo
 {
     public interface IWebInfoService
     {
-        Task<WebInfoResult> GetActiveAsync();
-        Task<List<WebInfoResult>> GetAllAsync();
-        Task<List<WebInfoResult>> GetAllHidenAsync();
-        Task<bool> SoftDelete(int id);
-        Task<WebInfoResult> CreateWebInfo(WebInfoItemRequest request);
-        Task<WebInfoResult> UpdateWebInfo(int id, WebInfoItemRequest request);
-        Task<bool> RestoreWebInfo(int id);
-        Task<bool> UpdateStatus(int id);
-        Task<WebInfoResult> GetDetailAsync(int id);
+        // Client
+        Task<Dictionary<string, string?>> GetForClientAsync();
+
+        // Admin
+        Task<List<WebInfoResult>> GetForAdminAsync();
+        Task<List<WebInfoResult>> GetDeletedAsync();
+
+        // CRUD
+        Task CreateAsync(WebInfoCreate request);
+        Task<WebInfoResult?> UpdateAsync(int id, WebInfoUpdate request);
+        Task DeleteAsync(int id);
+        Task RestoreAsync(int id);
     }
 }
