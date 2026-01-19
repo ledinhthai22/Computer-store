@@ -32,9 +32,9 @@ namespace Backend.Services.Cart
                     MaNguoiDung = c.MaNguoiDung,
                     MaBienThe = c.MaBienThe,
                     TenSanPham = c.BienThe.SanPham.TenSanPham,
-                    GiaBan = c.BienThe.GiaBan.ToString("N0"),
+                    GiaBan = c.BienThe.GiaBan.ToString(),
                     GiaKhuyenMai = c.BienThe.GiaKhuyenMai.HasValue
-                                         ? c.BienThe.GiaKhuyenMai.Value.ToString("N0")
+                                         ? c.BienThe.GiaKhuyenMai.Value.ToString()
                                          : string.Empty,
                     DuongDanAnh = c.BienThe.SanPham.HinhAnhSanPham
                                          .Where(i => i.AnhChinh)
