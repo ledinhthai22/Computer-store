@@ -295,7 +295,7 @@ namespace Backend.Services.Order
             {
                 throw new InvalidOperationException($"Địa chỉ nhận hàng mã: {request.MaDiaChiNhanHang} không tồn tại!");
             }
-            if (request.PhuongThucThanhToan != 1 || request.PhuongThucThanhToan != 2)
+            if (request.PhuongThucThanhToan != 1 && request.PhuongThucThanhToan != 2)
             {
                 throw new InvalidOperationException($"Phương thức thanh toán sai!");
             }
@@ -371,53 +371,65 @@ namespace Backend.Services.Order
                 TrangThai = 0,
                 NgayTao = DateTime.Now
             };
+
             await _DbContext.DonHang.AddAsync(newOrder);
+
             if (!(await _DbContext.SaveChangesAsync() > 0))
             {
                 throw new InvalidOperationException("Tạo đơn hàng không thành công!");
             }
-            else
-            {
-                var orderDetails = await CreateOrderDetails(newOrder.MaDH, request.ChiTietDonHang);
 
-                if (orderDetails == null)
-                {
-                    throw new InvalidOperationException("Tạo chi tiết đơn hàng không thành công!");
-                }
-                return new OrderResult
-                {
-                    MaDonHang = newOrder.MaDH,
-                    MaDon = newOrder.MaDon,
-                    TongTien = newOrder.TongTienThanhToan,
-                    PhuongThucThanhToan = newOrder.PhuongThucThanhToan,
-                    TrangThai = GetStatusText(newOrder.TrangThai),
-                    NgayTao = newOrder.NgayTao == null ? "Chưa cập nhật"
-                            : newOrder.NgayTao.ToString("HH:mm dd/MM/yyyy"),
-                    KhachHang = new OrderCustomer
-                    {
-                        MaNguoiDung = newOrder.KhachHang.MaNguoiDung,
-                        HoTen = newOrder.KhachHang.HoTen,
-                        Email = newOrder.KhachHang.Email,
-                        SoDienThoai = newOrder.KhachHang.SoDienThoai
-                    },
-                    DiaChi = new OrderAddress
-                    {
-                        TenNguoiNhan = newOrder.NguoiNhan,
-                        TinhThanh = newOrder.TinhThanh,
-                        PhuongXa = newOrder.PhuongXa,
-                        DiaChi = newOrder.DiaChi,
-                        SoDienThoai = newOrder.SoDienThoaiNguoiNhan
-                    },
-                    ChiTietDonHang = orderDetails.Select(ct => new OrderDetail
-                    {
-                        MaBienThe = ct.MaBienThe,
-                        SoLuong = ct.SoLuong,
-                        TenBienThe = _DbContext.BienThe
-                                        .Where(bt => bt.NgayXoa == null)
-                                        .FirstOrDefault(bt => bt.MaBTSP == ct.MaBienThe)!.TenBienThe
-                    }).ToList()
-                };
+            // --- BẮT ĐẦU ĐOẠN SỬA ---
+            var orderDetails = await CreateOrderDetails(newOrder.MaDH, request.ChiTietDonHang);
+            if (orderDetails == null)
+            {
+                throw new InvalidOperationException("Tạo chi tiết đơn hàng không thành công!");
             }
+
+            // [FIX 1]: Lấy thông tin khách hàng từ DB vì newOrder.KhachHang đang là null
+            // Giả sử bảng người dùng của bạn tên là NguoiDung hoặc KhachHang
+            var khachHangInfo = await _DbContext.NguoiDung.FindAsync(request.MaKH);
+
+            // [FIX 2]: Lấy danh sách tên biến thể để tránh query trong vòng lặp (Tối ưu hiệu năng)
+            var listMaBienThe = orderDetails.Select(x => x.MaBienThe).ToList();
+            var listTenBienThe = _DbContext.BienThe
+                                .Where(bt => listMaBienThe.Contains(bt.MaBTSP))
+                                .ToDictionary(k => k.MaBTSP, v => v.TenBienThe);
+
+            return new OrderResult
+            {
+                MaDonHang = newOrder.MaDH,
+                MaDon = newOrder.MaDon,
+                TongTien = newOrder.TongTienThanhToan,
+                PhuongThucThanhToan = newOrder.PhuongThucThanhToan,
+                TrangThai = GetStatusText(newOrder.TrangThai), 
+                NgayTao = newOrder.NgayTao == null ? "Chưa cập nhật"
+                          : newOrder.NgayTao.ToString("HH:mm dd/MM/yyyy"), 
+
+                KhachHang = new OrderCustomer
+                {
+                    MaNguoiDung = khachHangInfo?.MaNguoiDung ?? 0,
+                    HoTen = khachHangInfo?.HoTen ?? "Khách lẻ",
+                    Email = khachHangInfo?.Email ?? "",
+                    SoDienThoai = khachHangInfo?.SoDienThoai ?? ""
+                },
+
+                DiaChi = new OrderAddress
+                {
+                    TenNguoiNhan = newOrder.NguoiNhan,
+                    TinhThanh = newOrder.TinhThanh,
+                    PhuongXa = newOrder.PhuongXa,
+                    DiaChi = newOrder.DiaChi,
+                    SoDienThoai = newOrder.SoDienThoaiNguoiNhan
+                },
+
+                ChiTietDonHang = orderDetails.Select(ct => new OrderDetail
+                {
+                    MaBienThe = ct.MaBienThe,
+                    SoLuong = ct.SoLuong,
+                    TenBienThe = listTenBienThe.ContainsKey(ct.MaBienThe) ? listTenBienThe[ct.MaBienThe] : "Sản phẩm không xác định"
+                }).ToList()
+            };
         }
         private async Task<(NguoiDung User, DiaChiNhanHang Address, List<ChiTietGioHang> CartItems, decimal TienGoc, decimal ThanhToan)> ValidateAndPrepareData(int userId, CheckoutCartRequest request)
         {
@@ -632,5 +644,9 @@ namespace Backend.Services.Order
                 })
                 .FirstOrDefaultAsync();
         }
+        //public async Task<OrderResult> DeleteOrderAsync(int MaDH)
+        //{
+        //    return await _DbContext.DonHang.CountAsync();
+        //}
     }
 }

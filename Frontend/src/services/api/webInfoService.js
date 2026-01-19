@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 export const WebInfoService = {
   // CLIENT
   userGetAll: () =>
-    axiosClient.get("/web-info").then((res) => res.data),
+    axiosClient.get("/webinfo").then((res) => res.data),
 
   // ADMIN
   getAll: () =>
