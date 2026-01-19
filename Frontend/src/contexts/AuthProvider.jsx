@@ -19,7 +19,9 @@ export function AuthProvider({ children }) {
       const data = response.data;
 
       const userData = {
+        maNguoiDung: data.maNguoiDung,
         hoTen: data.hoTen,
+        email: data.email,
         vaiTro: data.vaiTro,
       };
 
