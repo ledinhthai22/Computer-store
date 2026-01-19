@@ -12,7 +12,7 @@ namespace Backend.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal GiaBan { get; set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal GiaKhuyenMai { get; set; }
+        public decimal? GiaKhuyenMai { get; set; }
         public string MauSac { get; set; } = null!;
         public string Ram { get; set; } = null!;
         public string OCung { get; set; } = null!;

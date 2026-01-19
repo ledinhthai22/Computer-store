@@ -32,7 +32,7 @@ namespace Backend
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IWebInfoService, WebInfoService>();
-            //builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IFileService, FileService>();
             

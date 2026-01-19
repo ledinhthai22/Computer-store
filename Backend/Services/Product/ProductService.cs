@@ -59,8 +59,9 @@ namespace Backend.Services.Product
 
                 // List<ProductImageResult> thay vì List<string>
                 HinhAnh = product.HinhAnhSanPham
-                    .Where(img => img.NgayXoa == null) // Chỉ lấy ảnh chưa bị xóa
-                    .OrderBy(img => img.ThuTuAnh)     // Sắp xếp theo thứ tự hiển thị
+                    .Where(img => img.NgayXoa == null)
+                    .OrderByDescending(img => img.AnhChinh)       // ảnh chính trước
+                    .ThenBy(img => img.ThuTuAnh)                  // sau đó theo thứ tự
                     .Select(img => new ProductImageResult
                     {
                         MaHinhAnh = img.MaHinhAnh,
@@ -83,7 +84,7 @@ namespace Backend.Services.Product
                         BoXuLyDoHoa = bt.BoXuLyDoHoa,
                         SoLuongTon = bt.SoLuongTon,
                         GiaBan = bt.GiaBan,
-                        GiaKhuyenMai = bt.GiaKhuyenMai,
+                        GiaKhuyenMai = bt.GiaKhuyenMai ?? 0,
                         TrangThai = bt.TrangThai,
 
                         ThongSoKyThuat = bt.thongSoKyThuat == null ? null : new ProductSpecificationsResult
@@ -1027,8 +1028,8 @@ namespace Backend.Services.Product
                     TenSanPham = x.TenSanPham,
                     Slug = x.Slug,
 
-                    TenDanhMuc = x.DanhMuc.TenDanhMuc,
-                    TenThuongHieu = x.ThuongHieu.TenThuongHieu,
+                    TenDanhMuc = x.DanhMuc!.TenDanhMuc,
+                    TenThuongHieu = x.ThuongHieu!.TenThuongHieu,
 
                     AnhDaiDien = x.HinhAnhSanPham
                         .Where(h => h.AnhChinh)
@@ -1091,7 +1092,7 @@ namespace Backend.Services.Product
                         MaBTSP = bt.MaBTSP,
                         TenBienThe = bt.TenBienThe,
                         GiaBan = bt.GiaBan,
-                        GiaKhuyenMai = bt.GiaKhuyenMai,
+                        GiaKhuyenMai = bt.GiaKhuyenMai ?? 0 ,
                         MauSac = bt.MauSac,
                         Ram = bt.Ram,
                         OCung = bt.OCung,
