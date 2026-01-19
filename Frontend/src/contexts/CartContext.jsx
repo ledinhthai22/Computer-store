@@ -1,64 +1,123 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { cartService } from "../services/api/cartService";
+import { useAuth } from "./AuthProvider";
+import { useToast } from "./ToastContext";
+
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [cart, setCart] = useState([]);
 
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const exist = prev.find((item) => item.id === product.id);
-      if (exist) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
+  const fetchCart = async () => {
+    if (!user?.maNguoiDung) return;
+    try {
+      const res = await cartService.getByUser(user.maNguoiDung);
+      setCart(Array.isArray(res) ? res : []);
+    } catch (err) {
+      console.error("Fetch cart error:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.maNguoiDung) {
+      setCart([]);
+      return;
+    }
+    fetchCart();
+  }, [user]);
+
+  const addToCart = async (variantId, quantity = 1) => {
+    try {
+      await cartService.add({
+        MaNguoiDung: user.maNguoiDung,
+        MaBienThe: variantId,
+        SoLuong: quantity,
+      });
+      await fetchCart();
+      showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
+    } catch {
+      showToast("Không thể thêm sản phẩm", "error");
+    }
+  };
+
+  const increase = async (variantId, qty) => {
+    const newQty = qty + 1;
+    await cartService.update({
+      MaNguoiDung: user.maNguoiDung,
+      MaBienThe: variantId,
+      SoLuong: newQty,
     });
-  };
-  
-  const decrease = (id) => {
     setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-  const crease = (id) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
+      prev.map((i) =>
+        i.maBienThe === variantId || i.MaBienThe === variantId
+          ? { ...i, soLuong: newQty, SoLuong: newQty }
+          : i
+      )
     );
   };
 
-  const remove = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const decrease = async (variantId, qty) => {
+    if (qty <= 1) return;
+    const newQty = qty - 1;
+    await cartService.update({
+      MaNguoiDung: user.maNguoiDung,
+      MaBienThe: variantId,
+      SoLuong: newQty,
+    });
+    setCart((prev) =>
+      prev.map((i) =>
+        i.maBienThe === variantId || i.MaBienThe === variantId
+          ? { ...i, soLuong: newQty, SoLuong: newQty }
+          : i
+      )
+    );
   };
 
-  const totalPrice = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const remove = async (variantId) => {
+    await cartService.remove({
+      MaNguoiDung: user.maNguoiDung,
+      MaBienThe: variantId,
+    });
+    setCart((prev) =>
+      prev.filter(
+        (i) =>
+          i.maBienThe !== variantId && i.MaBienThe !== variantId
+      )
+    );
+    showToast("Đã xoá sản phẩm", "success");
+  };
+
+  const totalPrice = cart.reduce((sum, item) => {
+    const price =
+      Number(item.giaKhuyenMai) ||
+      Number(item.giaBan) ||
+      Number(item.gia) ||
+      0;
+
+    const qty =
+      Number(item.soLuong) ||
+      Number(item.SoLuong) ||
+      0;
+
+    return sum + price * qty;
+  }, 0);
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart,crease,decrease, remove, totalPrice }}
+      value={{
+        cart,
+        addToCart,
+        increase,
+        decrease,
+        remove,
+        totalPrice,
+      }}
     >
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => {
-  return useContext(CartContext);
-};
+export const useCart = () => useContext(CartContext);

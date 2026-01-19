@@ -27,8 +27,8 @@ export default function Details() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const { slug } = useParams();
-  const { handleAddToCart } = useAddToCart(product);
   const [quantity, setQuantity] = useState(1);
+  const { handleAddToCart } = useAddToCart(selectedVariant, quantity);
   const navigate = useNavigate();
 
   useEffect(()=>{
@@ -93,9 +93,14 @@ export default function Details() {
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
-  if (!product || !selectedVariant) {
-    return (navigate(`*`));
-  }
+  useEffect(() => {
+    if (!loading && (!product || !selectedVariant)) {
+      navigate("*");
+    }
+  }, [loading, product, selectedVariant, navigate]);
+  
+  if (!product || !selectedVariant) return null;
+  
 
   const discountPercent = selectedVariant.giaBan > 0 
     ? Math.round(((selectedVariant.giaBan - selectedVariant.giaKhuyenMai) / selectedVariant.giaBan) * 100) : 0;
@@ -108,21 +113,22 @@ export default function Details() {
   };
 
   const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<Star key={i} className="fill-yellow-400 text-yellow-400" size={20} />);
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(<Star key={i} className="fill-yellow-400 text-yellow-400" size={20} />);
-      } else {
-        stars.push(<Star key={i} className="text-gray-300" size={20} />);
-      }
-    }
-    return stars;
+    return Array.from({ length: 5 }).map((_, index) => {
+      const filled = index < Math.floor(rating);
+      return (
+        <Star
+          key={`star-${index}`}
+          className={
+            filled
+              ? "fill-yellow-400 text-yellow-400"
+              : "text-gray-300"
+          }
+          size={20}
+        />
+      );
+    });
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
