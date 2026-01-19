@@ -36,7 +36,7 @@ namespace Backend
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IFileService, FileService>();
-            
+            builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IStatisticsService, StatisticsService>();
