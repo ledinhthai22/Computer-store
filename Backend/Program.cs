@@ -17,6 +17,7 @@ using Backend.Services.User;
 using Backend.Services.Order;
 using Backend.Services.Statistics;
 using Backend.Services.Search;
+using Ecommerce.Services.DeliveryAddress;
 namespace Backend
 {
     public class Program
@@ -32,10 +33,10 @@ namespace Backend
             builder.Services.AddScoped<IWishListService, WishListService>();
             builder.Services.AddScoped<IContactService, ContactService>();
             builder.Services.AddScoped<IWebInfoService, WebInfoService>();
-            //builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IFileService, FileService>();
-
+            
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IStatisticsService, StatisticsService>();
@@ -75,7 +76,9 @@ namespace Backend
                     }
                 };
             });
-
+            builder.Services.AddHttpClient<IDeliveryAddress, DeliveryAddressService>();
+            builder.Services.Configure<ProvinceOptions>(
+                builder.Configuration.GetSection("ExternalApis:Provinces"));
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {

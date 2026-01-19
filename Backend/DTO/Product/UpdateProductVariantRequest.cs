@@ -19,7 +19,7 @@ namespace Backend.DTO.Product
         public decimal GiaBan { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "Giá khuyến mãi phải lớn hơn hoặc bằng 0")]
-        public decimal GiaKhuyenMai { get; set; }
+        public decimal? GiaKhuyenMai { get; set; }
 
         [Required(ErrorMessage = "Màu sắc không được để trống")]
         public string MauSac { get; set; } = null!;

@@ -19,13 +19,15 @@ export function AuthProvider({ children }) {
       const data = response.data;
 
       const userData = {
+        maNguoiDung: data.maNguoiDung,
         hoTen: data.hoTen,
+        email: data.email,
         vaiTro: data.vaiTro,
       };
 
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
-      if(data.vaiTro === "QuanTriVien"){
+      if (data.vaiTro === "QuanTriVien") {
         window.location.href = "/quan-ly/thong-ke";
       }
       return { success: true };
@@ -72,35 +74,39 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Trong AuthProvider
+  const [isCheckingSession, setIsCheckingSession] = useState(!!user); // true nếu có user
+
   useEffect(() => {
-    if (!user) return;
-    let isSubscribed = true;
-    const verifySession = async () => {
+    if (!user) {
+      setIsCheckingSession(false);
+      return;
+    }
+
+    const checkSession = async () => {
       try {
-        // Gọi API để gia hạn token (Refresh Token gửi qua Cookie)
         await axiosClient.post("/auth/refresh-token");
-        if (isSubscribed) {
-          console.log("Phiên đăng nhập hợp lệ. Đã gia hạn token.");
-        }
-      } catch (error) {
-        // Nếu lỗi (401/403) nghĩa là Refresh Token cũng đã hết hạn (do tắt máy quá lâu)
-        if (isSubscribed) {
-        console.warn("Phiên đăng nhập đã hết hạn. Đang đăng xuất...",error);
+      } catch (err) {
+        // Không redirect ở đây, để interceptor lo
         await logout();
-      } // Tự động đăng xuất
+      } finally {
+        setIsCheckingSession(false);
       }
     };
 
-    // 1. Kiểm tra ngay lập tức khi vừa vào trang (Load/Reload)
-    verifySession();
+    checkSession();
 
-    // 2. Thiết lập timer: Gọi định kỳ mỗi 50 phút
-    const intervalId = setInterval(verifySession, 50 * 60 * 1000);
+    const interval = setInterval(() => {
+      axiosClient.post("/auth/refresh-token").catch(() => logout());
+    }, 50 * 60 * 1000);
 
-    // Dọn dẹp timer khi unmount
-    return () => clearInterval(intervalId);
+    return () => clearInterval(interval);
   }, [user, logout]);
 
+  // Trong render
+  if (isCheckingSession) {
+    return <div>Đang kiểm tra phiên đăng nhập...</div>;
+  }
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}

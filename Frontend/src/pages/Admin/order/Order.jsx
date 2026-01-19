@@ -1,106 +1,209 @@
-import {useState, useEffect, useCallback} from 'react';
+// Order.jsx - Main Page
+import { useState, useEffect, useCallback } from 'react';
 import OrderTable from '../../../components/admin/order/OrderTable';
+import OrderDetailModal from '../../../components/admin/order/OrderDetailModal';
+import OrderUpdateModal from '../../../components/admin/order/OrderUpdateModal';
 import Toast from '../../../components/admin/Toast';
-import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
-import OrderModal from '../../../components/admin/order/OrderModal';
-import { contactService, handleApiError } from '../../../services/api/contactService';
+// import { orderService } from '../../../services/api/orderService'; // TODO: Import service khi API ready
+
+// ⚠️ MOCK DATA - Thay thế bằng API call sau này
+const MOCK_ORDERS = [
+    {
+        maHoaDon: "HD001",
+        tenKhachHang: "Nguyễn Văn A",
+        email: "nguyenvana@email.com",
+        soDienThoai: "0901234567",
+        diaChiGiaoHang: "123 Đường ABC, Quận 1, TP.HCM",
+        tongTien: 25000000,
+        trangThai: 1, // 0: Tất cả, 1: Chưa duyệt, 2: Đã duyệt, 3: Đang xử lý, 4: Đang giao, 5: Đã giao, 6: Hoàn thành, 7: Đã hủy, 8: Trả hàng
+        ngayDatHang: "2024-01-15T10:30:00",
+        ghiChu: "Giao hàng giờ hành chính"
+    },
+    {
+        maHoaDon: "HD002",
+        tenKhachHang: "Trần Thị B",
+        email: "tranthib@email.com",
+        soDienThoai: "0912345678",
+        diaChiGiaoHang: "456 Đường XYZ, Quận 3, TP.HCM",
+        tongTien: 15000000,
+        trangThai: 3,
+        ngayDatHang: "2024-01-14T14:20:00",
+        ghiChu: ""
+    },
+    {
+        maHoaDon: "HD003",
+        tenKhachHang: "Lê Văn C",
+        email: "levanc@email.com",
+        soDienThoai: "0923456789",
+        diaChiGiaoHang: "789 Đường DEF, Quận 5, TP.HCM",
+        tongTien: 35000000,
+        trangThai: 6,
+        ngayDatHang: "2024-01-13T09:15:00",
+        ghiChu: "Đã thanh toán"
+    }
+];
 
 const Order = () => {
-    const [contacts, setContacts] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const [filterType, setFilterType] = useState('unread');
+    const [filterType, setFilterType] = useState('all');
 
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState(null);
-    const [isDeleting, setIsDeleting] = useState(false);
-
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [selectedContact, setSelectedContact] = useState(null);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+
+    // ✅ State quản lý trạng thái đang được cập nhật
+    const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null); // { maHoaDon, newStatus }
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
-    }
+    };
 
-    const fetchContacts = useCallback(async () => {
+    // TODO: Thay thế bằng API call
+    const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
-            let res = [];
-            if (filterType === 'unread') {
-                res = await contactService.getAllUnread();
-            } else if (filterType === 'read') {
-                res = await contactService.getAllRead();
-            } else {
-                res = await contactService.getAll();
+            
+            // TODO: Uncomment khi API ready
+            // const res = await orderService.getByStatus(filterType);
+            // setOrders(Array.isArray(res) ? res : []);
+            
+            // ⚠️ MOCK: Filter data theo trạng thái
+            let filteredData = MOCK_ORDERS;
+            if (filterType !== 'all') {
+                const statusMap = {
+                    'unread': 1,      // Chưa duyệt
+                    'approved': 2,    // Đã duyệt
+                    'processing': 3,  // Đang xử lý
+                    'shipping': 4,    // Đang giao
+                    'delivered': 5,   // Đã giao
+                    'completed': 6,   // Hoàn thành
+                    'cancelled': 7,   // Đã hủy
+                    'returned': 8     // Trả hàng
+                };
+                filteredData = MOCK_ORDERS.filter(order => order.trangThai === statusMap[filterType]);
             }
-            const data = Array.isArray(res) ? res : [];
-            setContacts(data);
+            
+            setOrders(filteredData);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách liên hệ thất bại");
-            showToast(errorMessage, "error");
-            setContacts([]);
+            console.log(err)
+            showToast("Tải danh sách đơn hàng thất bại", "error");
+            setOrders([]);
         } finally {
             setLoading(false);
         }
     }, [filterType]);
 
-    useEffect(() => {fetchContacts();}, [fetchContacts]);
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
 
-    // MODAL XÓA
-    const handleDeleteClick = (id) => {
-        setDeleteId(id);
-        setIsConfirmOpen(true);
-    };
-    const handleConfirmDelete = async () => {
-        try {
-            setIsDeleting(true);
-            await contactService.delete(deleteId);
-            showToast("Đã xóa liên hệ thành công!", "success");
-            await fetchContacts();
-            window.dispatchEvent(new CustomEvent('contactUpdated'));
-        } catch (err) {
-            const errorMessage = handleApiError(err, "Xóa liên hệ thất bại");
-            showToast(errorMessage, "error");
-        } finally {
-            setIsDeleting(false);
-            setIsConfirmOpen(false);
-            setDeleteId(null);
-        }
-    };
-
-    const handleViewClick = async (contact) => {
-        setSelectedContact(contact);
+    // ✅ Xem chi tiết đơn hàng
+    const handleViewClick = (order) => {
+        setSelectedOrder(order);
         setIsViewModalOpen(true);
+    };
 
-        if (contact.message?.toLowerCase() !== "đã đọc") {
-            try {
-                await contactService.update(contact.maLienHe);
-                await fetchContacts(); 
-                window.dispatchEvent(new CustomEvent('contactUpdated'));
-            } catch (err) {
-                const errorMessage = handleApiError(err, "Cập nhật trạng thái liên hệ thất bại");
-                showToast(errorMessage, "error");
-            }
+    // ✅ Mở modal cập nhật trạng thái
+    const handleUpdateClick = (order) => {
+        // ⚠️ Kiểm tra xem có đang cập nhật order khác không
+        if (pendingStatusUpdate && pendingStatusUpdate.maHoaDon !== order.maHoaDon) {
+            showToast(
+                `Vui lòng hoàn thành cập nhật đơn hàng ${pendingStatusUpdate.maHoaDon} trước!`, 
+                "error"
+            );
+            return;
         }
+        
+        // ✅ Chỉ set selectedOrder và mở modal, KHÔNG set pendingStatusUpdate ở đây
+        setSelectedOrder(order);
+        setIsUpdateModalOpen(true);
+    };
+
+    // ✅ Xác nhận cập nhật trạng thái - Gọi từ modal
+    const handleConfirmUpdate = async (newStatus) => {
+        if (!selectedOrder) return;
+
+        try {
+            // ✅ Set pending update NGAY KHI BẮT ĐẦU cập nhật
+            setPendingStatusUpdate({ 
+                maHoaDon: selectedOrder.maHoaDon, 
+                newStatus: newStatus 
+            });
+
+            // TODO: Uncomment khi API ready
+            // await orderService.updateStatus(selectedOrder.maHoaDon, { trangThai: newStatus });
+            
+            // ⚠️ MOCK: Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // ⚠️ MOCK: Cập nhật state local
+            setOrders(prev => prev.map(order => 
+                order.maHoaDon === selectedOrder.maHoaDon 
+                    ? { ...order, trangThai: newStatus }
+                    : order
+            ));
+            
+            showToast("Cập nhật trạng thái đơn hàng thành công!", "success");
+            
+            // ✅ Đóng modal
+            setIsUpdateModalOpen(false);
+            setSelectedOrder(null);
+            
+            // Reload data
+            await fetchOrders();
+            
+        } catch (err) {
+            console.log(err);
+            showToast("Cập nhật trạng thái thất bại", "error");
+        } finally {
+            // ✅ CRITICAL: LUÔN LUÔN reset pendingStatusUpdate sau khi hoàn thành (success hoặc fail)
+            setPendingStatusUpdate(null);
+        }
+    };
+
+    // ✅ Đóng modal cập nhật - Chỉ reset selectedOrder
+    const handleCloseUpdateModal = () => {
+        setIsUpdateModalOpen(false);
+        setSelectedOrder(null);
+        // ⚠️ KHÔNG reset pendingStatusUpdate ở đây - chỉ reset sau khi API call xong
     };
 
     return (
-        <>
-            <div className="space-y-6">
+        <div className="space-y-6">
             <div className="flex flex-col gap-4">
                 <OrderTable 
-                    data={contacts} 
+                    data={orders} 
                     loading={loading}
-                    onDelete={handleDeleteClick}
                     onView={handleViewClick}
+                    onUpdate={handleUpdateClick}
                     filterType={filterType}
                     onFilterTypeChange={setFilterType}
+                    updatingOrderId={pendingStatusUpdate?.maHoaDon || null}
                 />
             </div>
             
-            {/* Hiển thị Toast */}
+            {/* View Modal */}
+            <OrderDetailModal
+                isOpen={isViewModalOpen}
+                order={selectedOrder}
+                onClose={() => {
+                    setIsViewModalOpen(false);
+                    setSelectedOrder(null);
+                }}
+            />
+
+            {/* Update Status Modal */}
+            <OrderUpdateModal
+                isOpen={isUpdateModalOpen}
+                order={selectedOrder}
+                onConfirm={handleConfirmUpdate}
+                onClose={handleCloseUpdateModal}
+            />
+
+            {/* Toast */}
             {toast.show && (
                 <Toast 
                     message={toast.message} 
@@ -108,21 +211,8 @@ const Order = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
-            <ConfirmModal 
-                isOpen={isConfirmOpen}
-                message="Bạn có muốn xóa liên hệ này không?"
-                onConfirm={handleConfirmDelete}
-                onCancel={() => setIsConfirmOpen(false)}
-                isLoading={isDeleting}
-            />
-            <OrderModal
-                isOpen={isViewModalOpen}
-                contact={selectedContact}
-                onClose={() => setIsViewModalOpen(false)}
-            />
         </div>
-        </>
-    )
-}
+    );
+};
 
 export default Order;

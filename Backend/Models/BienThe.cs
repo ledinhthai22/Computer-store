@@ -12,7 +12,7 @@ namespace Backend.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal GiaBan { get; set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal GiaKhuyenMai { get; set; }
+        public decimal? GiaKhuyenMai { get; set; }
         public string MauSac { get; set; } = null!;
         public string Ram { get; set; } = null!;
         public string OCung { get; set; } = null!;
@@ -28,7 +28,7 @@ namespace Backend.Models
 
         public ThongSoKyThuat  thongSoKyThuat {get;set;} =null!;
         public ICollection<ChiTietGioHang> ChiTietGioHang { get; set; } = new List<ChiTietGioHang>();
-        public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
+        //public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
         public ICollection<DonHang> DonHang { get; set; } = new List<DonHang>();
     }
 }

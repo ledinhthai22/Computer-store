@@ -9,16 +9,12 @@ namespace Backend.DTO.WebInfo
     public class WebInfoResult
     {
         public int MaThongTinTrang { get; set; }
-        public string ? TenTrang { get; set; }
-        public string ? SoDienThoai { get; set; }
-        public string ? DiaChi { get; set; } 
-        public string ? DuongDanFacebook { get; set; }
-        public string ? DuongDanInstagram { get; set; } 
-        public string ? DuongDanYoutube { get; set; } 
-        public string ?ChinhSachBaoMat { get; set; }
-        public string ?ChinhSachDoiTra { get; set; } 
-        public string ?DieuKhoanSuDung { get; set; } 
-        public string ?DuongDanAnh { get; set; } 
-        public bool TrangThai { get; set; }
+        public string TenKhoaCaiDat { get; set; } = null!;
+        public string? GiaTriCaiDat { get; set; }
+        public string? MoTa { get; set; }
+        public bool TrangThaiHienThi { get; set; }
+        public DateTime NgayCapNhat { get; set; }
+        public DateTime? NgayXoa { get; set; }
+        public string Message { get; set; } = null!;
     }
 }

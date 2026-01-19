@@ -41,7 +41,7 @@ namespace Ecommerce.Migrations
                     b.Property<decimal>("GiaBan")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("GiaKhuyenMai")
+                    b.Property<decimal?>("GiaKhuyenMai")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("MaSanPham")
@@ -384,9 +384,9 @@ namespace Ecommerce.Migrations
                             GioiTinh = false,
                             HoTen = "Quản trị viên",
                             MaVaiTro = 1,
-                            MatKhauMaHoa = "$2a$11$fUKRIv8julyZw3GGtqGR8eTgEjZTqxuAH2gufNXAu6xQ4pCGBFwCi",
-                            NgayCapNhat = new DateTime(2026, 1, 17, 17, 54, 2, 426, DateTimeKind.Local).AddTicks(1755),
-                            NgayTao = new DateTime(2026, 1, 17, 17, 54, 2, 426, DateTimeKind.Local).AddTicks(1738),
+                            MatKhauMaHoa = "$2a$11$DT9CddSYKZpLjeo6KdnEPe8ShPQCPxTvy.2Rti1VKbYaVrFyJv9Ye",
+                            NgayCapNhat = new DateTime(2026, 1, 19, 16, 37, 1, 167, DateTimeKind.Local).AddTicks(4604),
+                            NgayTao = new DateTime(2026, 1, 19, 16, 37, 1, 167, DateTimeKind.Local).AddTicks(4583),
                             SoDienThoai = "0999988884",
                             TrangThai = true
                         });
@@ -497,59 +497,32 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Backend.Models.ThongTinTrang", b =>
                 {
-                    b.Property<int>("MaThongTin")
+                    b.Property<int>("MaThongTinTrang")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThongTin"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThongTinTrang"));
 
-                    b.Property<string>("ChinhSachBaoMat")
-                        .IsRequired()
+                    b.Property<string>("GiaTriCaiDat")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ChinhSachDoiTra")
-                        .IsRequired()
+                    b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DiaChi")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DieuKhoanSuDung")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DuongDanAn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DuongDanFacebook")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DuongDanInstagram")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DuongDanYoutube")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("NgayCapNhat")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("NgayXoa")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("SoDienThoai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenTrang")
+                    b.Property<string>("TenKhoaCaiDat")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
-                    b.HasKey("MaThongTin");
+                    b.HasKey("MaThongTinTrang");
 
                     b.ToTable("ThongTinTrang");
                 });
@@ -677,10 +650,10 @@ namespace Ecommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaYeuThich"));
 
-                    b.Property<int>("MaBienThe")
+                    b.Property<int>("MaNguoiDung")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaNguoiDung")
+                    b.Property<int>("MaSanPham")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("NgayXoa")
@@ -688,9 +661,9 @@ namespace Ecommerce.Migrations
 
                     b.HasKey("MaYeuThich");
 
-                    b.HasIndex("MaBienThe");
-
                     b.HasIndex("MaNguoiDung");
+
+                    b.HasIndex("MaSanPham");
 
                     b.ToTable("YeuThich");
                 });
@@ -851,21 +824,21 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Ecommerce.Models.YeuThich", b =>
                 {
-                    b.HasOne("Backend.Models.BienThe", "BienThe")
-                        .WithMany("YeuThich")
-                        .HasForeignKey("MaBienThe")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Backend.Models.NguoiDung", "NguoiDung")
                         .WithMany("YeuThich")
                         .HasForeignKey("MaNguoiDung")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("BienThe");
+                    b.HasOne("Backend.Models.SanPham", "SanPham")
+                        .WithMany("YeuThich")
+                        .HasForeignKey("MaSanPham")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("NguoiDung");
+
+                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("Backend.Models.BienThe", b =>
@@ -873,8 +846,6 @@ namespace Ecommerce.Migrations
                     b.Navigation("ChiTietGioHang");
 
                     b.Navigation("DonHang");
-
-                    b.Navigation("YeuThich");
 
                     b.Navigation("thongSoKyThuat")
                         .IsRequired();
@@ -910,6 +881,8 @@ namespace Ecommerce.Migrations
                     b.Navigation("DanhGia");
 
                     b.Navigation("HinhAnhSanPham");
+
+                    b.Navigation("YeuThich");
                 });
 
             modelBuilder.Entity("Backend.Models.ThuongHieu", b =>

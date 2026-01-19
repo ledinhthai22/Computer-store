@@ -59,8 +59,9 @@ namespace Backend.Services.Product
 
                 // List<ProductImageResult> thay vì List<string>
                 HinhAnh = product.HinhAnhSanPham
-                    .Where(img => img.NgayXoa == null) // Chỉ lấy ảnh chưa bị xóa
-                    .OrderBy(img => img.ThuTuAnh)     // Sắp xếp theo thứ tự hiển thị
+                    .Where(img => img.NgayXoa == null)
+                    .OrderByDescending(img => img.AnhChinh)       // ảnh chính trước
+                    .ThenBy(img => img.ThuTuAnh)                  // sau đó theo thứ tự
                     .Select(img => new ProductImageResult
                     {
                         MaHinhAnh = img.MaHinhAnh,
@@ -83,7 +84,7 @@ namespace Backend.Services.Product
                         BoXuLyDoHoa = bt.BoXuLyDoHoa,
                         SoLuongTon = bt.SoLuongTon,
                         GiaBan = bt.GiaBan,
-                        GiaKhuyenMai = bt.GiaKhuyenMai,
+                        GiaKhuyenMai = bt.GiaKhuyenMai ?? 0,
                         TrangThai = bt.TrangThai,
 
                         ThongSoKyThuat = bt.thongSoKyThuat == null ? null : new ProductSpecificationsResult
@@ -482,7 +483,7 @@ namespace Backend.Services.Product
                 await RenameImageToSecondaryAsync(img, product.TenSanPham);
             }
 
-            // ===== XỬ LÝ XÓA BIẾN THỂ =====
+            // xóa biến thể 
             if (request.BienTheXoa?.Any() == true)
             {
                 var now = DateTime.UtcNow;
@@ -501,7 +502,7 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== CẬP NHẬT BIẾN THỂ =====
+            //cập nhật biến thể
             if (request.BienThe?.Any() == true)
             {
                 foreach (var req in request.BienThe)
@@ -581,13 +582,13 @@ namespace Backend.Services.Product
                 }
             }
 
-            // ===== LƯU VÀO DATABASE =====
+           
             await _db.SaveChangesAsync();
 
             return await GetByIdAsync(id);
         }
 
-        // ===== HÀM HELPER ĐỔI TÊN ẢNH =====
+     
         private async Task RenameImageToMainAsync(HinhAnhSanPham image, string productName)
         {
             await Task.Run(() =>
@@ -987,6 +988,74 @@ namespace Backend.Services.Product
                 .Select(x => MapToProductListItem(x))
                 .ToListAsync();
         }
+        public async Task<List<ProductListItem>> GetRelatedProductsAsync(int maSanPham,int maDanhMuc,int maThuongHieu,int soLuong = 10)
+        {
+            // 1. Giá sản phẩm hiện tại
+            var giaHienTai = await _db.SanPham
+                .Where(x => x.MaSanPham == maSanPham)
+                .Select(x => x.BienThe.Average(bt => bt.GiaBan))
+                .FirstOrDefaultAsync();
+
+            if (giaHienTai == 0)
+                return new List<ProductListItem>();
+
+            var giaMin = giaHienTai * 0.8m;
+            var giaMax = giaHienTai * 1.2m;
+
+            // 2. Query sản phẩm liên quan
+            return await _db.SanPham
+                .Include(x => x.DanhMuc)
+                .Include(x => x.ThuongHieu)
+                .Include(x => x.HinhAnhSanPham)
+                .Include(x => x.BienThe)
+                .Where(x =>
+                    x.MaDanhMuc == maDanhMuc &&
+                    x.MaSanPham != maSanPham &&
+                    x.NgayXoa == null &&
+                    x.BienThe.Any(bt =>
+                        bt.GiaBan >= giaMin &&
+                        bt.GiaBan <= giaMax
+                    )
+                )
+                // Ưu tiên cùng thương hiệu
+                .OrderByDescending(x => x.MaThuongHieu == maThuongHieu)
+                // RANDOM
+                .ThenBy(x => Guid.NewGuid())
+                .Take(soLuong)
+                .Select(x => new ProductListItem
+                {
+                    MaSanPham = x.MaSanPham,
+                    TenSanPham = x.TenSanPham,
+                    Slug = x.Slug,
+
+                    TenDanhMuc = x.DanhMuc!.TenDanhMuc,
+                    TenThuongHieu = x.ThuongHieu!.TenThuongHieu,
+
+                    AnhDaiDien = x.HinhAnhSanPham
+                        .Where(h => h.AnhChinh)
+                        .Select(h => h.DuongDanAnh)
+                        .FirstOrDefault(),
+
+                    GiaNhoNhat = x.BienThe.Min(bt => bt.GiaBan),
+                    GiaLonNhat = x.BienThe.Max(bt => bt.GiaBan),
+
+                    GiaKhuyenMaiNhoNhat = x.BienThe
+                        .Where(bt => bt.GiaKhuyenMai != null)
+                        .Min(bt => bt.GiaKhuyenMai),
+
+                    DanhGiaTrungBinh = x.DanhGia.Any()
+                        ? x.DanhGia.Average(dg => dg.SoSao)
+                        : 0,
+
+                    LuotXem = x.LuotXem,
+                    LuotMua = x.LuotMua,
+                    NgayTao = x.NgayTao,
+
+                    SoLuongBienThe = x.BienThe.Count,
+                    CoKhuyenMai = x.BienThe.Any(bt => bt.GiaKhuyenMai != null)
+                })
+                .ToListAsync();
+        }
 
         private ProductResult MapToProductResult(SanPham sp)
         {
@@ -1023,7 +1092,7 @@ namespace Backend.Services.Product
                         MaBTSP = bt.MaBTSP,
                         TenBienThe = bt.TenBienThe,
                         GiaBan = bt.GiaBan,
-                        GiaKhuyenMai = bt.GiaKhuyenMai,
+                        GiaKhuyenMai = bt.GiaKhuyenMai ?? 0 ,
                         MauSac = bt.MauSac,
                         Ram = bt.Ram,
                         OCung = bt.OCung,

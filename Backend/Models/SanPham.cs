@@ -34,7 +34,7 @@ namespace Backend.Models
 
         [ForeignKey(nameof(MaThuongHieu))]
         public ThuongHieu? ThuongHieu { get; set; }
-
+        public ICollection<YeuThich> YeuThich { get; set; } = new List<YeuThich>();
         public ICollection<BienThe> BienThe { get; set; } = new List<BienThe>();
         public ICollection<HinhAnhSanPham> HinhAnhSanPham { get; set; } = new List<HinhAnhSanPham>();
         public ICollection<DanhGia> DanhGia { get; set; } = new List<DanhGia>();

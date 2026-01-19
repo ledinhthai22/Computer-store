@@ -11,6 +11,6 @@ namespace Backend.DTO.WishList
     {
         [Required]
         public int MaNguoiDung { get; set; }
-        public int MaBienThe { get; set; }
+        public int MaSanPham { get; set; }
     }
 }

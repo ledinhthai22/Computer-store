@@ -1,4 +1,3 @@
-// ProductDetailFixed.jsx - ĐÃ ĐỒNG BỘ LOGIC GIÁ KHUYẾN MÃI VỚI ADD PRODUCT
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -35,7 +34,7 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
   </div>
 );
 
-const ProductDetailFixed = () => {
+const ProductDetail = () => {
   const { maSanPham } = useParams();
   const navigate = useNavigate();
 
@@ -97,13 +96,24 @@ const ProductDetailFixed = () => {
         });
 
         if (product.hinhAnh?.length) {
-          const formatted = product.hinhAnh.map(img => ({
-            id: img.maHinhAnh || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
-            maHinhAnh: img.maHinhAnh,
-            anhChinh: img.anhChinh || false,
-            isNew: false,
-          }));
+          const formatted = product.hinhAnh
+            // Bước 1: Lọc ảnh chưa xóa (nếu backend chưa lọc)
+            .filter(img => !img.ngayXoa) // tùy backend có trả về trường này không
+            // Bước 2: Sắp xếp - Ưu tiên ảnh chính (AnhChinh = true) lên đầu, sau đó theo ThuTuAnh
+            .sort((a, b) => {
+              if (a.anhChinh !== b.anhChinh) {
+                return b.anhChinh ? 1 : -1;           // true → lên đầu
+              }
+              return (a.thuTuAnh || 0) - (b.thuTuAnh || 0); // cùng loại thì theo thứ tự
+            })
+            .map(img => ({
+              id: img.maHinhAnh || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+              maHinhAnh: img.maHinhAnh,
+              anhChinh: img.anhChinh || false,
+              isNew: false,
+            }));
+
           setProductImages(formatted);
         }
 
@@ -219,8 +229,6 @@ const ProductDetailFixed = () => {
     e.target.value = '';
   };
 
-  // Xử lý thay đổi biến thể - tự động tính giá KM
-  // Trong hàm updateVariant
   const updateVariant = (id, field, value) => {
     setVariants(prev =>
       prev.map(v => {
@@ -228,26 +236,17 @@ const ProductDetailFixed = () => {
 
         let updated = { ...v, [field]: value };
 
-        if (field === 'phanTramGiam') {
-          const phanTram = Number(value);
-          if (value !== '' && (phanTram < 0 || phanTram > 100)) {
-            // Có thể thêm cảnh báo ngay đây nếu muốn toast, nhưng ưu tiên error field
-          }
-        }
-
         // Tự động tính giaKhuyenMai
         if (field === 'giaBan' || field === 'phanTramGiam') {
           const giaBan = Number(updated.giaBan) || 0;
-          let phanTram = Number(updated.phanTramGiam) || 0;
 
-          // Giới hạn % trong khoảng 0-100 để tránh tính sai
-          if (phanTram < 0) phanTram = 0;
-          if (phanTram > 100) phanTram = 100;
-
-          if (giaBan > 0) {
-            updated.giaKhuyenMai = Math.round(giaBan * (1 - phanTram / 100));
+          // ❗ Không nhập % giảm → KHÔNG có KM
+          if (updated.phanTramGiam === '' || updated.phanTramGiam === null) {
+            updated.giaKhuyenMai = null;
           } else {
-            updated.giaKhuyenMai = '';
+            let phanTram = Number(updated.phanTramGiam);
+            phanTram = Math.min(Math.max(phanTram, 0), 100);
+            updated.giaKhuyenMai = Math.round(giaBan * (1 - phanTram / 100));
           }
         }
 
@@ -287,7 +286,7 @@ const ProductDetailFixed = () => {
         tenBienThe: '',
         giaBan: 0,
         phanTramGiam: '',
-        giaKhuyenMai: 0,
+        giaKhuyenMai: null,
         mauSac: '',
         ram: '',
         oCung: '',
@@ -338,8 +337,14 @@ const ProductDetailFixed = () => {
         newErrors[`variant_${vid}_phanTramGiam`] = 'Phần trăm giảm phải từ 0 đến 100';
       }
 
-      if (Number(v.giaKhuyenMai) >= Number(v.giaBan) && Number(v.giaKhuyenMai) > 0) {
-        newErrors[`variant_${vid}_giaKhuyenMai`] = 'Giá khuyến mãi phải nhỏ hơn giá bán';
+      // ✅ FIX: Chỉ validate nếu có % giảm > 0
+      if (
+        v.phanTramGiam !== '' &&
+        Number(v.phanTramGiam) > 0 &&
+        Number(v.giaKhuyenMai) >= Number(v.giaBan)
+      ) {
+        newErrors[`variant_${vid}_giaKhuyenMai`] =
+          'Giá khuyến mãi phải nhỏ hơn giá bán';
       }
     });
 
@@ -393,7 +398,13 @@ const ProductDetailFixed = () => {
         if (v.maBTSP > 0) formData.append(`BienThe[${i}].MaBTSP`, v.maBTSP);
         formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe?.trim() || fallback);
         formData.append(`BienThe[${i}].GiaBan`, Number(v.giaBan) || 0);
-        formData.append(`BienThe[${i}].GiaKhuyenMai`, Number(v.giaKhuyenMai) || 0); // Chỉ gửi giá KM
+
+        // ✅ FIX: Chỉ gửi GiaKhuyenMai nếu có giá trị hợp lệ
+        if (v.phanTramGiam !== '' && v.phanTramGiam != null && v.giaKhuyenMai != null) {
+          formData.append(`BienThe[${i}].GiaKhuyenMai`, Number(v.giaKhuyenMai));
+        }
+        // Nếu không có phần trăm giảm, KHÔNG gửi field GiaKhuyenMai → backend nhận null
+
         formData.append(`BienThe[${i}].MauSac`, v.mauSac?.trim() || fallback);
         formData.append(`BienThe[${i}].Ram`, v.ram?.trim() || fallback);
         formData.append(`BienThe[${i}].OCung`, v.oCung?.trim() || fallback);
@@ -422,7 +433,8 @@ const ProductDetailFixed = () => {
       setDeletedImageIds([]);
       setDeletedVariantIds([]);
 
-      // Reload để đồng bộ (bao gồm tính lại % nếu server trả về giá KM khác)
+      // Reload để đồng bộ
+      // Reload để đồng bộ
       const refreshed = await productService.getDetailProduct(maSanPham);
       if (refreshed) {
         setBasicInfo({
@@ -434,17 +446,27 @@ const ProductDetailFixed = () => {
           soLuongTon: refreshed.soLuongTon || basicInfo.soLuongTon,
         });
 
+        // Xử lý ảnh - có sort
         if (refreshed.hinhAnh?.length) {
-          const formatted = refreshed.hinhAnh.map(img => ({
-            id: img.maHinhAnh || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
-            maHinhAnh: img.maHinhAnh,
-            anhChinh: img.anhChinh || false,
-            isNew: false,
-          }));
+          const formatted = refreshed.hinhAnh
+            .filter(img => !img.ngayXoa) // nếu có
+            .sort((a, b) => {
+              if (a.anhChinh !== b.anhChinh) return b.anhChinh ? 1 : -1;
+              return (a.thuTuAnh || 0) - (b.thuTuAnh || 0);
+            })
+            .map(img => ({
+              id: img.maHinhAnh || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              duongDan: formatImageUrl(img.duongDan || img.duongDanAnh),
+              maHinhAnh: img.maHinhAnh,
+              anhChinh: !!img.anhChinh,
+              isNew: false,
+            }));
           setProductImages(formatted);
+        } else {
+          setProductImages([]);
         }
 
+        // Biến thể (giữ nguyên)
         if (refreshed.bienThe) {
           const formattedVariants = refreshed.bienThe.map(bt => {
             let phanTramGiam = '';
@@ -564,7 +586,7 @@ const ProductDetailFixed = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
 
-            {/* Hình Ảnh - giữ nguyên */}
+            {/* Hình Ảnh */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon size={20} className="text-blue-600" />
@@ -821,7 +843,7 @@ const ProductDetailFixed = () => {
                                 <AlertCircle size={12} /> {errors[`variant_${id}_phanTramGiam`]}
                               </p>
                             )}
-                            {giaKMHienThi && isEditing && (
+                            {variant.phanTramGiam !== '' && isEditing && (
                               <p className="text-sm text-green-600 mt-1">
                                 Giá KM: <strong>{giaKMHienThi} VNĐ</strong>
                               </p>
@@ -1003,4 +1025,4 @@ const ProductDetailFixed = () => {
   );
 };
 
-export default ProductDetailFixed;
+export default ProductDetail;

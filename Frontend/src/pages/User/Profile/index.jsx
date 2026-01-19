@@ -14,6 +14,10 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  useEffect(() => {
+    document.title = "Thông tin cá nhân";
+  }, []);
+
   const fetchProfile = useCallback(async () => {
     try {
       const response = await axiosClient.get("/me");

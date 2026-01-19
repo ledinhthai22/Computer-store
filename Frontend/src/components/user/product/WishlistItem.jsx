@@ -4,15 +4,18 @@ import { Link } from "react-router-dom";
 
 const API_BASE_URL = "https://localhost:7012";
 
-export default function WishlistItem({ product, onRemove, onAddToCart }) {
+export default function WishlistItem({ product, yeuThichId, onRemove, onAddToCart }) {
     const [isRemoving, setIsRemoving] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+
+    if (!product) return null;
 
     const handleRemove = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         setIsRemoving(true);
-        await onRemove(product.id);
+        await onRemove(yeuThichId);
+        setIsRemoving(false);
     };
 
     const handleAddToCart = (e) => {
@@ -25,25 +28,27 @@ export default function WishlistItem({ product, onRemove, onAddToCart }) {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
-        }).format(price);
+        }).format(price || 0);
     };
 
+    // Mapping đúng theo API trả về trong ảnh image_057749.png
     const getProductImage = () => {
-        if (product.anhDaiDien) {
-            return `${API_BASE_URL}/Product/Image/${product.anhDaiDien}`;
+        if (product.hinhAnhChinh) {
+            return `${API_BASE_URL}/Product/Image/${product.hinhAnhChinh}`;
         }
-        return "https://via.placeholder.com/300x300?text=No+Image";
+        return "https://via.placeholder.com/300?text=No+Image";
     };
 
-    const giaGoc = product.giaNhoNhat || 0;
-    const giaHienTai = product.giaKhuyenMaiNhoNhat || giaGoc;
+    const giaGoc = product.giaBan || 0;
+    const giaHienTai = product.giaKhuyenMai || giaGoc;
     
     let phanTramGiam = 0;
     if (giaGoc > giaHienTai && giaGoc > 0) {
         phanTramGiam = Math.round(((giaGoc - giaHienTai) / giaGoc) * 100);
     }
 
-    const productLink = `/chi-tiet-san-pham/${product.slug}`;
+    // Nếu API không trả về slug, dùng maSanPham để tạo link
+    const productLink = `/chi-tiet-san-pham/${product.slug || product.maSanPham}`;
 
     return (
         <div 
@@ -73,12 +78,6 @@ export default function WishlistItem({ product, onRemove, onAddToCart }) {
                         </h3>
                     </Link>
                     
-                    {product.tenThuongHieu && (
-                        <p className="text-sm text-gray-500 mb-2">
-                            Thương hiệu: {product.tenThuongHieu}
-                        </p>
-                    )}
-
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-lg font-bold text-teal-600">
                             {formatPrice(giaHienTai)}
@@ -96,17 +95,16 @@ export default function WishlistItem({ product, onRemove, onAddToCart }) {
                     </div>
 
                     <p className="text-sm text-gray-500 mt-1">
-                        Đã bán: {product.luotMua || 0}
+                        Mã SP: {product.maSanPham}
                     </p>
                 </div>
 
-                {/* Actions - Hiển thị khi hover */}
-                <div className={`flex flex-col gap-2 flex-shrink-0 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'}`}>
+                {/* Actions */}
+                <div className={`flex flex-col gap-2 flex-shrink-0 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
                     <button
                         onClick={handleAddToCart}
                         disabled={isRemoving}
-                        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
-                        title="Thêm vào giỏ hàng"
+                        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors disabled:bg-gray-300 whitespace-nowrap"
                     >
                         <FaShoppingCart />
                         <span className="hidden sm:inline">Thêm vào giỏ</span>
@@ -116,7 +114,6 @@ export default function WishlistItem({ product, onRemove, onAddToCart }) {
                         onClick={handleRemove}
                         disabled={isRemoving}
                         className="flex items-center gap-2 px-4 py-2 bg-white text-red-500 border border-red-500 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 whitespace-nowrap"
-                        title="Xóa khỏi danh sách yêu thích"
                     >
                         <FaTrash />
                         <span className="hidden sm:inline">Xóa</span>

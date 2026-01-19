@@ -37,6 +37,8 @@ import {
   BrandProduct,
   UpdatePassword,
   PriceProduct,
+  ChipProduct,
+  ScreenProduct,
   NotFound,
 } from "./pages/User";
 
@@ -51,12 +53,14 @@ function App() {
           <Route path="/chi-tiet-san-pham/:slug" element={<Details />} />
           <Route path="/san-pham/danh-muc/:maDanhMuc" element={<CategoryProduct />} />
           <Route path="/san-pham/thuong-hieu/:maThuongHieu" element={<BrandProduct />} />
+          <Route path="/san-pham/dong-chip/:slug" element={<ChipProduct />} />
+          <Route path="/san-pham/man-hinh/:slug" element={<ScreenProduct />} />
           <Route path="/about" element={<About />} />
           <Route path="/gui-lien-he" element={<LienHe />} />
           <Route path="/gio-hang" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/dang-nhap" element={<Login />} />
-          <Route path="/dang-ky" element={<Register />} />
+          {/* <Route path="/dang-nhap" element={<Login />} />
+          <Route path="/dang-ky" element={<Register />} /> */}
           <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/loc-theo-gia" element={<PriceProduct />} />
           <Route element={<ProfileLayout/>}>

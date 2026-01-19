@@ -11,9 +11,9 @@ namespace Ecommerce.Models
         public int MaNguoiDung { get; set; }
         [ForeignKey(nameof(MaNguoiDung))]
         public virtual NguoiDung NguoiDung { get; set; } = null!;
-        public int MaBienThe { get; set; }
-        [ForeignKey(nameof(MaBienThe))]
-        public virtual BienThe BienThe { get; set; } = null!;
+        public int MaSanPham { get; set; }
+        [ForeignKey(nameof(MaSanPham))]
+        public virtual SanPham SanPham { get; set; } = null!;
         public DateTime? NgayXoa { get; set; }
     }
 }

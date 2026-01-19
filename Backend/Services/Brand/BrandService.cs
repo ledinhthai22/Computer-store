@@ -172,7 +172,7 @@ namespace Backend.Services.Brand
                             BoXuLyDoHoa = bt.BoXuLyDoHoa,
                             SoLuongTon = bt.SoLuongTon,
                             GiaBan = bt.GiaBan,
-                            GiaKhuyenMai = bt.GiaKhuyenMai,
+                            GiaKhuyenMai = bt.GiaKhuyenMai ?? 0,
                             TrangThai = bt.TrangThai,
                         }).ToList(),
 
