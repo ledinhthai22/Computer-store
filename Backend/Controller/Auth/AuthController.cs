@@ -43,10 +43,11 @@ namespace Backend.Controllers.Auth
 
             var refreshToken = _jwtHelper.GenerateRefreshToken(result.MaNguoiDung);
 
+            // Vẫn lưu vào cookie (cho bảo mật)
             Response.Cookies.Append("access_token", accessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,              // localhost
+                Secure = false,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddMinutes(60)
             });
@@ -59,17 +60,18 @@ namespace Backend.Controllers.Auth
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new AuthResult
+            // ✅ THÊM: Trả token trong response body để frontend có thể lưu vào localStorage
+            return Ok(new
             {
                 Message = "Đăng nhập thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
+                Email = request.Email, // ✅ Thêm email
                 VaiTro = result.VaiTro,
+                Token = accessToken,   // ✅ Thêm token
                 Success = true
             });
         }
-
-
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -85,17 +87,18 @@ namespace Backend.Controllers.Auth
 
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
-                HttpOnly = true,    
+                HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new AuthResult
+            return Ok(new
             {
                 Message = "Đăng ký thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
+                Email = request.Email, // ✅ Thêm email
                 VaiTro = result.VaiTro,
                 Success = true
             });
@@ -126,7 +129,7 @@ namespace Backend.Controllers.Auth
                 Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true, // true khi deploy HTTPS
+                    Secure = true,
                     SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddMinutes(60)
                 });
@@ -139,7 +142,6 @@ namespace Backend.Controllers.Auth
             }
         }
 
-
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -148,6 +150,5 @@ namespace Backend.Controllers.Auth
 
             return Ok(new { message = "Logged out" });
         }
-
     }
 }

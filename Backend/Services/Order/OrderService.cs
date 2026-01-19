@@ -281,7 +281,7 @@ namespace Backend.Services.Order
                     throw new InvalidOperationException("Số lượng sản phẩm mua lớn hơn số lượng tồn!");
                 }
                 TienGoc += (bt.GiaBan * BienThe.SoLuong);
-                ThanhToan += (bt.GiaKhuyenMai * BienThe.SoLuong);
+                ThanhToan += (bt.GiaKhuyenMai ?? 0 * BienThe.SoLuong);
             }
             if (request.TongTienGoc < request.TongTienThanhToan)
             {
@@ -454,7 +454,7 @@ namespace Backend.Services.Order
                     throw new InvalidOperationException($"Sản phẩm '{item.BienThe.TenBienThe}' không đủ hàng (Còn: {item.BienThe.SoLuongTon}).");
 
                 TienGoc += (item.BienThe.GiaBan * item.SoLuong);
-                ThanhToan += (item.BienThe.GiaKhuyenMai * item.SoLuong);
+                ThanhToan += (item.BienThe.GiaKhuyenMai ?? 0 * item.SoLuong);
             }
             if (TienGoc > ThanhToan)
             {
