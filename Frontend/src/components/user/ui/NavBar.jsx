@@ -3,12 +3,13 @@ import { IoMenu, IoSearch } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
 import MenuCategory from "./MenuCategory";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Thêm useEffect
 import { useAuth } from "../../../contexts/AuthProvider";
-import { useModalLogin } from "../../../contexts/ModalLoginContext"; // Import Context mới
+import { useModalLogin } from "../../../contexts/ModalLoginContext"; 
 import UserDropdown from "./UserDropdown";
 import LoginModal from "../Auth/LoginModal";
 import RegisterModal from "../Auth/RegisterModal";
+import { WebInfoService } from "../../../services/api/webInfoService"; // Import Service
 
 export default function NavBar() {
     const { user } = useAuth();
@@ -17,6 +18,31 @@ export default function NavBar() {
     
     const [openDanhMuc, setOpenDanhMuc] = useState(false);
     
+    // State lưu tên cửa hàng, mặc định là Computer-Store
+    const [storeName, setStoreName] = useState("Computer-Store");
+
+    // Lấy thông tin web khi component load
+    useEffect(() => {
+        const fetchWebInfo = async () => {
+            try {
+                const response = await WebInfoService.userGetAll();
+                // Xử lý nếu API trả về mảng hoặc object
+                const data = Array.isArray(response) ? response[0] : response;
+                
+                // Lấy tên từ key mapping (tenTrang) hoặc key gốc (Tên cửa hàng)
+                if (data) {
+                    const name = data.tenTrang || data["Tên cửa hàng"];
+                    if (name) {
+                        setStoreName(name);
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi lấy thông tin Header:", error);
+            }
+        };
+        fetchWebInfo();
+    }, []);
+
     return (
         <> 
             <nav className="bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-md py-2 md:py-3 transition-all">
@@ -25,7 +51,8 @@ export default function NavBar() {
                     {/* --- Logo & Danh mục --- */}
                     <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <Link to="/" className="text-xl md:text-2xl font-bold hover:opacity-90 whitespace-nowrap tracking-tight" title="Trang chủ">
-                            Computer-Store
+                            {/* Hiển thị tên động từ API */}
+                            {storeName}
                         </Link>
 
                         <div
@@ -54,7 +81,7 @@ export default function NavBar() {
 
                         {user ? <UserDropdown /> : (
                             <button 
-                                onClick={openLogin} // Gọi hàm từ Context
+                                onClick={openLogin} 
                                 className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 font-medium" 
                                 title="Đăng nhập"
                             >
