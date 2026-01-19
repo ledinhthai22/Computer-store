@@ -73,13 +73,13 @@ namespace Backend.Controller.Admin.Order
                 return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
             }
         }
-        [HttpGet("Ma-Don-Hang/{MaDH:int}")]
-        public async Task<IActionResult> GetByMaDHAsync(int MaDH)
-        {
-            var order = await _orderService.GetByMaDHAsync(MaDH);
-            if (order == null) return Ok(new { message = "Mã đơn hàng không tồn tại" });
-            return Ok(order);
-        }
+        //[HttpGet("Ma-Don-Hang/{MaDH:int}")]
+        //public async Task<IActionResult> GetByMaDHAsync(int MaDH)
+        //{
+        //    var order = await _orderService.GetByMaDHAsync(MaDH);
+        //    if (order == null) return Ok(new { message = "Mã đơn hàng không tồn tại" });
+        //    return Ok(order);
+        //}
         [HttpGet("Ma-Don/{MaDon}")]
         public async Task<IActionResult> GetByMaDonAsync(string MaDon)
         {
