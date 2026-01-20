@@ -128,6 +128,18 @@ export default function Details() {
       );
     });
   };
+
+  const handleBuyNow = () => {
+    const item = {
+      maBienThe: selectedVariant.maBTSP,
+      soLuong: quantity,
+      tenBienThe: selectedVariant.tenBienThe || product.tenSanPham,
+      giaKhuyenMai: selectedVariant.giaKhuyenMai || selectedVariant.giaBan,
+      giaBan: selectedVariant.giaBan,
+      hinhAnh: product.hinhAnh[0],  // Sử dụng ảnh đầu tiên
+    };
+    navigate("/checkout", { state: { buyNowItem: item } });
+  };
   
 
   return (
@@ -369,12 +381,12 @@ export default function Details() {
                   Thêm vào giỏ hàng
                 </button>
                 
-                <Link 
-                  to={`/checkout?product=${selectedVariant.maBTSP}&quantity=${quantity}`}
+                <button 
+                  onClick={handleBuyNow}
                   className="block w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-xl font-semibold text-lg text-center shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Mua ngay
-                </Link>
+                </button>
               </div>
             </div>
           </div>

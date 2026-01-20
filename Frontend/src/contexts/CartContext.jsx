@@ -113,6 +113,7 @@ export function CartProvider({ children }) {
         decrease,
         remove,
         totalPrice,
+        fetchCart,  // Export fetchCart để sử dụng ở Checkout
       }}
     >
       {children}
