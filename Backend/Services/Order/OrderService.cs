@@ -654,9 +654,280 @@ namespace Backend.Services.Order
                 })
                 .ToListAsync();
         }
-        //public async Task<OrderResult> DeleteOrderAsync(int MaDH)
-        //{
-        //    return await _DbContext.DonHang.CountAsync();
-        //}
+        // Theo dõi đơn hàng của user theo trạng thái
+        public async Task<List<OrderResult>> GetUserOrdersByStatusAsync(int userId, int status)
+        {
+            // Validate user
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            // Validate status
+            if (status < 0 || status > 7)
+                throw new InvalidOperationException("Trạng thái không hợp lệ (phải từ 0-7)!");
+
+            return await _DbContext.DonHang
+                .Where(dh => dh.MaKH == userId && dh.TrangThai == status)
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .OrderByDescending(dh => dh.NgayTao)
+                .Select(dh => new OrderResult
+                {
+                    MaDonHang = dh.MaDH,
+                    MaDon = dh.MaDon,
+                    TongTien = dh.TongTienThanhToan,
+                    PhuongThucThanhToan = dh.PhuongThucThanhToan,
+                    TrangThai = GetStatusText(dh.TrangThai),
+                    NgayTao = dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
+                    KhachHang = new OrderCustomer
+                    {
+                        MaNguoiDung = dh.KhachHang.MaNguoiDung,
+                        HoTen = dh.KhachHang.HoTen,
+                        Email = dh.KhachHang.Email,
+                        SoDienThoai = dh.KhachHang.SoDienThoai
+                    },
+                    DiaChi = new OrderAddress
+                    {
+                        TenNguoiNhan = dh.NguoiNhan,
+                        TinhThanh = dh.TinhThanh,
+                        PhuongXa = dh.PhuongXa,
+                        DiaChi = dh.DiaChi,
+                        SoDienThoai = dh.SoDienThoaiNguoiNhan
+                    },
+                    ChiTietDonHang = dh.ChiTietDonHang.Select(ct => new OrderDetail
+                    {
+                        MaBienThe = ct.BienThe.MaBTSP,
+                        TenBienThe = ct.BienThe.TenBienThe,
+                        SoLuong = ct.SoLuong,
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+
+        // Theo dõi đơn hàng theo số điện thoại người nhận
+        public async Task<List<OrderResult>> GetUserOrdersByPhoneAsync(int userId, string phone)
+        {
+            // Validate user
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            // Validate phone
+            if (string.IsNullOrWhiteSpace(phone) || phone.Length < 10)
+                throw new ArgumentException("Số điện thoại không hợp lệ (Phải từ 10 số trở lên).");
+
+            return await _DbContext.DonHang
+                .Where(dh => dh.MaKH == userId && dh.SoDienThoaiNguoiNhan == phone)
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .OrderByDescending(dh => dh.NgayTao)
+                .Select(dh => new OrderResult
+                {
+                    MaDonHang = dh.MaDH,
+                    MaDon = dh.MaDon,
+                    TongTien = dh.TongTienThanhToan,
+                    PhuongThucThanhToan = dh.PhuongThucThanhToan,
+                    TrangThai = GetStatusText(dh.TrangThai),
+                    NgayTao = dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
+                    KhachHang = new OrderCustomer
+                    {
+                        MaNguoiDung = dh.KhachHang.MaNguoiDung,
+                        HoTen = dh.KhachHang.HoTen,
+                        Email = dh.KhachHang.Email,
+                        SoDienThoai = dh.KhachHang.SoDienThoai
+                    },
+                    DiaChi = new OrderAddress
+                    {
+                        TenNguoiNhan = dh.NguoiNhan,
+                        TinhThanh = dh.TinhThanh,
+                        PhuongXa = dh.PhuongXa,
+                        DiaChi = dh.DiaChi,
+                        SoDienThoai = dh.SoDienThoaiNguoiNhan
+                    },
+                    ChiTietDonHang = dh.ChiTietDonHang.Select(ct => new OrderDetail
+                    {
+                        MaBienThe = ct.BienThe.MaBTSP,
+                        TenBienThe = ct.BienThe.TenBienThe,
+                        SoLuong = ct.SoLuong,
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+
+        // Theo dõi đơn hàng theo mã đơn hàng
+        public async Task<OrderResult> GetUserOrderByCodeAsync(int userId, string maDon)
+        {
+            // Validate user
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            // Validate maDon
+            if (string.IsNullOrWhiteSpace(maDon))
+                throw new ArgumentException("Mã đơn hàng không được để trống.");
+
+            var order = await _DbContext.DonHang
+                .Where(dh => dh.MaKH == userId && dh.MaDon == maDon)
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .Select(dh => new OrderResult
+                {
+                    MaDonHang = dh.MaDH,
+                    MaDon = dh.MaDon,
+                    TongTien = dh.TongTienThanhToan,
+                    PhuongThucThanhToan = dh.PhuongThucThanhToan,
+                    TrangThai = GetStatusText(dh.TrangThai),
+                    NgayTao = dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
+                    KhachHang = new OrderCustomer
+                    {
+                        MaNguoiDung = dh.KhachHang.MaNguoiDung,
+                        HoTen = dh.KhachHang.HoTen,
+                        Email = dh.KhachHang.Email,
+                        SoDienThoai = dh.KhachHang.SoDienThoai
+                    },
+                    DiaChi = new OrderAddress
+                    {
+                        TenNguoiNhan = dh.NguoiNhan,
+                        TinhThanh = dh.TinhThanh,
+                        PhuongXa = dh.PhuongXa,
+                        DiaChi = dh.DiaChi,
+                        SoDienThoai = dh.SoDienThoaiNguoiNhan
+                    },
+                    ChiTietDonHang = dh.ChiTietDonHang.Select(ct => new OrderDetail
+                    {
+                        MaBienThe = ct.BienThe.MaBTSP,
+                        TenBienThe = ct.BienThe.TenBienThe,
+                        SoLuong = ct.SoLuong,
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                throw new InvalidOperationException("Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này!");
+
+            return order;
+        }
+
+        // Xem lịch sử các đơn hàng đã hủy (trạng thái = 6)
+        public async Task<List<OrderResult>> GetCancelledOrdersAsync(int userId)
+        {
+            // Validate user
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            return await _DbContext.DonHang
+                .Where(dh => dh.MaKH == userId && dh.TrangThai == 6) // 6 = Đã hủy
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .OrderByDescending(dh => dh.NgayTao)
+                .Select(dh => new OrderResult
+                {
+                    MaDonHang = dh.MaDH,
+                    MaDon = dh.MaDon,
+                    TongTien = dh.TongTienThanhToan,
+                    PhuongThucThanhToan = dh.PhuongThucThanhToan,
+                    TrangThai = GetStatusText(dh.TrangThai),
+                    NgayTao = dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
+                    KhachHang = new OrderCustomer
+                    {
+                        MaNguoiDung = dh.KhachHang.MaNguoiDung,
+                        HoTen = dh.KhachHang.HoTen,
+                        Email = dh.KhachHang.Email,
+                        SoDienThoai = dh.KhachHang.SoDienThoai
+                    },
+                    DiaChi = new OrderAddress
+                    {
+                        TenNguoiNhan = dh.NguoiNhan,
+                        TinhThanh = dh.TinhThanh,
+                        PhuongXa = dh.PhuongXa,
+                        DiaChi = dh.DiaChi,
+                        SoDienThoai = dh.SoDienThoaiNguoiNhan
+                    },
+                    ChiTietDonHang = dh.ChiTietDonHang.Select(ct => new OrderDetail
+                    {
+                        MaBienThe = ct.BienThe.MaBTSP,
+                        TenBienThe = ct.BienThe.TenBienThe,
+                        SoLuong = ct.SoLuong,
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+
+        // Xem lịch sử các đơn hàng đã hoàn thành (trạng thái = 5)
+        public async Task<List<OrderResult>> GetCompletedOrdersAsync(int userId)
+        {
+            // Validate user
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            return await _DbContext.DonHang
+                .Where(dh => dh.MaKH == userId && dh.TrangThai == 5) // 5 = Hoàn thành
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .OrderByDescending(dh => dh.NgayTao)
+                .Select(dh => new OrderResult
+                {
+                    MaDonHang = dh.MaDH,
+                    MaDon = dh.MaDon,
+                    TongTien = dh.TongTienThanhToan,
+                    PhuongThucThanhToan = dh.PhuongThucThanhToan,
+                    TrangThai = GetStatusText(dh.TrangThai),
+                    NgayTao = dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
+                    KhachHang = new OrderCustomer
+                    {
+                        MaNguoiDung = dh.KhachHang.MaNguoiDung,
+                        HoTen = dh.KhachHang.HoTen,
+                        Email = dh.KhachHang.Email,
+                        SoDienThoai = dh.KhachHang.SoDienThoai
+                    },
+                    DiaChi = new OrderAddress
+                    {
+                        TenNguoiNhan = dh.NguoiNhan,
+                        TinhThanh = dh.TinhThanh,
+                        PhuongXa = dh.PhuongXa,
+                        DiaChi = dh.DiaChi,
+                        SoDienThoai = dh.SoDienThoaiNguoiNhan
+                    },
+                    ChiTietDonHang = dh.ChiTietDonHang.Select(ct => new OrderDetail
+                    {
+                        MaBienThe = ct.BienThe.MaBTSP,
+                        TenBienThe = ct.BienThe.TenBienThe,
+                        SoLuong = ct.SoLuong,
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
     }
 }

@@ -139,9 +139,19 @@ namespace Backend
                 options.AddPolicy("UserOnly",
                     policy => policy.RequireRole("NguoiDung"));
             });
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(60);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
             var app = builder.Build();
-
-
+            app.UseSession();
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

@@ -18,13 +18,18 @@ namespace Ecommerce.Services.Product
         private readonly IConfiguration _config;
         private readonly ILogger<ProductService> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+
         public ProductService(
             ApplicationDbContext db,
             SlugHelper slugHelper,
             IFileService fileService,
             IConfiguration config,
             ILogger<ProductService> logger,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IHttpContextAccessor httpContextAccessor
+            )
         {
             _db = db;
             _slugHelper = slugHelper;
@@ -32,6 +37,9 @@ namespace Ecommerce.Services.Product
             _config = config;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
+            _httpContextAccessor = httpContextAccessor;
+
+
         }
 
         public async Task<ProductResult?> GetByIdAsync(int id)
@@ -762,12 +770,24 @@ namespace Ecommerce.Services.Product
             if (product == null)
                 return null;
 
-            // Tăng lượt xem
-            product.LuotXem++;
-            await _db.SaveChangesAsync();
+            var context = _httpContextAccessor.HttpContext;
+            if (context == null)
+                return MapToProductResult(product);
+
+            string sessionKey = $"VIEWED_PRODUCT_{product.MaSanPham}";
+
+            if (context.Session.GetString(sessionKey) == null)
+            {
+                product.LuotXem++;
+                await _db.SaveChangesAsync();
+
+                context.Session.SetString(sessionKey, "1");
+            }
 
             return MapToProductResult(product);
         }
+
+
 
         public async Task<ProductResult?> GetBySlugAsync(string slug)
         {
@@ -786,11 +806,23 @@ namespace Ecommerce.Services.Product
             if (product == null)
                 return null;
 
-            product.LuotXem++;
-            await _db.SaveChangesAsync();
+            var context = _httpContextAccessor.HttpContext;
+            if (context == null)
+                return MapToProductResult(product);
+
+            string sessionKey = $"VIEWED_PRODUCT_{product.MaSanPham}";
+
+            if (context.Session.GetString(sessionKey) == null)
+            {
+                product.LuotXem++;
+                await _db.SaveChangesAsync();
+
+                context.Session.SetString(sessionKey, "1");
+            }
 
             return MapToProductResult(product);
         }
+
 
         public async Task<ProductListResponse> GetProductListAsync(ProductFilterRequest filter)
         {

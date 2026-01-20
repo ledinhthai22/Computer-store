@@ -33,7 +33,6 @@ namespace Backend.Services.WishList
                     MaNguoiDung = w.MaNguoiDung,
                     MaSanPham = w.MaSanPham,
                     TenSanPham = w.SanPham.TenSanPham,
-
                     HinhAnhChinh = w.SanPham.HinhAnhSanPham
                         .Where(i => i.AnhChinh && i.NgayXoa == null)
                         .OrderBy(i => i.ThuTuAnh)
