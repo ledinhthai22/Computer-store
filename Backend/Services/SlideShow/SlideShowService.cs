@@ -15,9 +15,25 @@ namespace Ecommerce.Services.SlideShow
             _DbContext = dbContext;
             _Env = env;
         }
+        public async Task<List<SlideShowResult>> ShowAsyn()
+        {
+            return await _DbContext.TrinhChieu
+                .Where(t => t.NgayXoa == null && t.TrangThai == true)
+                .OrderBy(t => t.SoThuTu)
+                .Select(t => new SlideShowResult
+                {
+                    MaTrinhChieu = t.MaTrinhChieu,
+                    DuongDanHinh = t.DuongDanHinh,
+                    DuongDanSanPham = t.DuongDanSanPham,
+                    SoThuTu = t.SoThuTu,
+                    TrangThai = t.TrangThai
+                }).ToListAsync();
+        }
+
         public async Task<List<SlideShowResult>> GetAllAsync()
         {
             return await _DbContext.TrinhChieu
+                .Where(t  => t.NgayXoa == null)
                 .OrderBy(t => t.SoThuTu)
                 .Select(t => new SlideShowResult
                 {
