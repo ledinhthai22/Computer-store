@@ -7,34 +7,37 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
-        item => item.tenSlideShow && item.tenSlideShow.toLowerCase().includes(filterText.toLowerCase()),
+        item => item.duongDanSanPham && item.duongDanSanPham.toLowerCase().includes(filterText.toLowerCase()),
     );
     const columns = [
         {
             name: 'STT',
-            selector: (row, index) => index + 1,
+            selector: row => row.soThuTu,
             width: '80px',
-            sortable: false,
+            sortable: true,
         },
         {
-            name: 'TÊN SLIDE SHOW',
-            selector: row => row.tenSlideShow,
-            sortable: true,
-            grow: 2,
+            name: 'HÌNH ẢNH',
+            selector: row => row.duongDanHinh,
+            grow: 1,
             cell: row => (
-                <span className="font-semibold text-gray-700 capitalize">
-                    {row.tenSlideShow}
-                </span>
+                <div className="py-2">
+                    <span className="text-blue-600 truncate block w-40">{row.duongDanHinh}</span>
+                </div>
             ),
         },
         {
-            name: 'TÊN SLIDE SHOW',
-            selector: row => row.tenSlideShow,
-            sortable: true,
-            grow: 2,
+            name: 'LIÊN KẾT SẢN PHẨM',
+            selector: row => row.duongDanSanPham,
+            grow: 1,
+        },
+        {
+            name: 'TRẠNG THÁI',
+            selector: row => row.trangThai,
+            width: '120px',
             cell: row => (
-                <span className="font-semibold text-gray-700 capitalize">
-                    {row.tenSlideShow}
+                <span className={`px-2 py-1 rounded-full text-xs ${row.trangThai === 1 ? 'bg-green-100 text-green-700 w-15 text-center' : 'bg-red-100 text-red-700 w-15 text-center'}`}>
+                    {row.trangThai === 1 ? 'Hiển thị' : 'Ẩn'}
                 </span>
             ),
         },
@@ -46,15 +49,13 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => onEdit(row)}
-                        className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Sửa"
+                        className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg cursor-pointer flex items-center gap-1"
                     >
                         <Edit size={18} /> Sửa
                     </button>
                     <button 
-                        onClick={() => onDelete(row.maThuongHieu)}
-                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Xóa"
+                        onClick={() => onDelete(row.maTrinhChieu)} // Chú ý: dùng maTrinhChieu
+                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg cursor-pointer flex items-center gap-1"
                     >
                         <Trash2 size={18} /> Xóa
                     </button>
