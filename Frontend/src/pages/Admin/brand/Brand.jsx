@@ -10,7 +10,6 @@ import {
 const Brand = () => {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +17,7 @@ const Brand = () => {
     const [brandNameInput, setBrandNameInput] = useState("");
     const [isActive, setIsActive] = useState(true);
     const [editingBrand, setEditingBrand] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false); // ← Thêm để phân biệt thêm mới / chỉnh sửa
 
     const [filterType, setFilterType] = useState('all');
 
@@ -41,9 +41,9 @@ const Brand = () => {
             let res;
             if (filterType === 'all') {
                 res = await brandService.getAll();
-            }else if (filterType === 'active') {
+            } else if (filterType === 'active') {
                 res = await brandService.getAll().then(data => data.filter(brand => brand.trangThai));
-            }else{
+            } else {
                 res = await brandService.getAll().then(data => data.filter(brand => !brand.trangThai));
             }
             setBrands(Array.isArray(res) ? res : []);
@@ -60,7 +60,7 @@ const Brand = () => {
 
     useEffect(() => { fetchBrands(); }, [fetchBrands]);
 
-    // XÓA 
+    // XÓA
     const handleDeleteClick = (id) => {
         setDeleteId(id);
         setIsConfirmOpen(true);
@@ -81,16 +81,17 @@ const Brand = () => {
         }
     };
 
-    // SỬA 
+    // SỬA - mở modal chỉnh sửa
     const handleEditClick = (brand) => {
         setEditingBrand(brand);
         setBrandNameInput(brand.tenThuongHieu || "");
         setIsActive(brand.trangThai ?? true);
         setError("");
+        setIsEditMode(true);          // ← Bật chế độ chỉnh sửa
         setIsModalOpen(true);
     };
 
-    //  LƯU (THÊM / SỬA)
+    // LƯU (THÊM / SỬA)
     const handleSave = async (e) => {
         e.preventDefault();
 
@@ -104,7 +105,7 @@ const Brand = () => {
 
             const data = {
                 tenThuongHieu: nameTrimmed,
-                trangThai: isActive,
+                ...(isEditMode && { trangThai: isActive }), // Chỉ gửi trạng thái khi chỉnh sửa
             };
 
             if (editingBrand) {
@@ -120,6 +121,7 @@ const Brand = () => {
             setEditingBrand(null);
             setBrandNameInput("");
             setIsActive(true);
+            setIsEditMode(false);
         } catch (err) {
             showToast(handleApiError(err, "Có lỗi xảy ra khi lưu thương hiệu"), "error");
         } finally {
@@ -141,19 +143,18 @@ const Brand = () => {
                     setBrandNameInput("");
                     setIsActive(true);
                     setError("");
+                    setIsEditMode(false);     // ← Chế độ thêm mới → không hiện switch
                     setIsModalOpen(true);
                 }}
             />
 
-            {/*MODAL THÊM / SỬA*/}
+            {/* MODAL THÊM / SỬA */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
                         <form onSubmit={handleSave} className="p-6">
                             <h2 className="text-xl font-bold mb-6 text-center">
-                                {editingBrand
-                                    ? "Chỉnh sửa thương hiệu"
-                                    : "Thêm thương hiệu mới"}
+                                {isEditMode ? "Chỉnh sửa thương hiệu" : "Thêm thương hiệu mới"}
                             </h2>
 
                             {/* TÊN */}
@@ -168,10 +169,11 @@ const Brand = () => {
                                         setBrandNameInput(e.target.value);
                                         if (error) setError("");
                                     }}
-                                    className={`w-full px-4 py-2 border rounded-lg outline-none ${error
+                                    className={`w-full px-4 py-2 border rounded-lg outline-none ${
+                                        error
                                             ? "border-red-500"
                                             : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-                                        }`}
+                                    }`}
                                     autoFocus
                                 />
                                 {error && (
@@ -181,29 +183,33 @@ const Brand = () => {
                                 )}
                             </div>
 
-                            {/* SWITCH */}
-                            <div className="flex items-center gap-4 mt-5">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsActive(!isActive)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${isActive ? "bg-green-500" : "bg-gray-300"
+                            {/* SWITCH CHỈ HIỆN KHI CHỈNH SỬA */}
+                            {isEditMode && (
+                                <div className="flex items-center gap-4 mt-5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsActive(!isActive)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                                            isActive ? "bg-green-500" : "bg-gray-300"
                                         }`}
-                                >
-                                    <span
-                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${isActive ? "translate-x-6" : "translate-x-1"
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                                                isActive ? "translate-x-6" : "translate-x-1"
                                             }`}
-                                    />
-                                </button>
+                                        />
+                                    </button>
 
-                                <div>
-                                    <p className="text-sm font-medium text-gray-800">
-                                        Trạng thái hiển thị
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        Bật để hiển thị thương hiệu trên website
-                                    </p>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">
+                                            Trạng thái hiển thị
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            Bật để hiển thị thương hiệu trên website
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* ACTION */}
                             <div className="flex justify-center gap-3 mt-8">

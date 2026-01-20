@@ -4,7 +4,6 @@ import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
 import BrandRecoverTable from '../../../components/admin/brand/BrandRecoverTable';
 import { brandService, handleApiError } from '../../../services/api/brandService';
 
-
 const BrandRecover = () => {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,51 +12,67 @@ const BrandRecover = () => {
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [recoverId, setRecoverId] = useState(null);
-    const [isRecover, setIsRecover] = useState(false);
+    const [isRecovering, setIsRecovering] = useState(false); // rename cho rõ nghĩa
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
+        // Tự động ẩn sau 4s (tùy chọn)
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
     };
 
     const fetchDataRecover = async () => {
+        setLoading(true);
         try {
-            setLoading(false);
             const res = await brandService.getDeleted();
-            const data = Array.isArray(res) ? res : [];
+            // Đảm bảo data là array, tránh lỗi nếu backend trả object hoặc null
+            const data = Array.isArray(res) ? res : res?.data || [];
             setBrands(data);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách đã xóa thương hiệu thất bại");
+            const errorMessage = handleApiError(err, "Tải danh sách thương hiệu đã xóa thất bại");
             showToast(errorMessage, "error");
-        }finally{
-            setLoading(false);}
+            console.error("Fetch deleted brands error:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    useEffect(() => { fetchDataRecover(); }, []);
+    useEffect(() => {
+        fetchDataRecover();
+    }, []);
 
-    // MODAL Recover
+    // Mở modal confirm
     const handleRecover = (id) => {
         setRecoverId(id);
         setIsConfirmOpen(true);
     };
+
+    // Xử lý confirm khôi phục
     const handleConfirmRecover = async () => {
-    try {
-        setIsRecover(true);
-        await brandService.recover(recoverId);
-        
-        showToast("Khôi phục thương hiệu thành công", "success");
-        await fetchDataRecover();
-    } catch (err) {
-        const errorMessage = handleApiError(err, "Thôi phục thương hiệu thất bại");
-        showToast(errorMessage, "error");
-    } finally {
-        setIsRecover(false);
-        setIsConfirmOpen(false);
-        setRecoverId(null);
-    }
-};
+        if (!recoverId) return;
+
+        setIsRecovering(true);
+        try {
+            await brandService.recover(recoverId);
+            showToast("Khôi phục thương hiệu thành công!", "success");
+
+            // Reload danh sách ngay lập tức
+            await fetchDataRecover();
+
+            // Optional: Nếu muốn xóa ngay mà không chờ API (nhanh hơn)
+            // setBrands(prev => prev.filter(b => b.maThuongHieu !== recoverId));
+        } catch (err) {
+            const errorMessage = handleApiError(err, "Khôi phục thương hiệu thất bại");
+            showToast(errorMessage, "error");
+            console.error("Recover error:", err?.response?.data || err);
+        } finally {
+            setIsRecovering(false);
+            setIsConfirmOpen(false);
+            setRecoverId(null);
+        }
+    };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-4">
             <div className="flex flex-col gap-4">
                 <BrandRecoverTable 
                     data={brands} 
@@ -66,7 +81,7 @@ const BrandRecover = () => {
                 />
             </div>
             
-            {/* Hiển thị Toast */}
+            {/* Toast thông báo */}
             {toast.show && (
                 <Toast 
                     message={toast.message} 
@@ -74,12 +89,17 @@ const BrandRecover = () => {
                     onClose={() => setToast({ ...toast, show: false })} 
                 />
             )}
+
+            {/* Modal confirm */}
             <ConfirmModal 
                 isOpen={isConfirmOpen}
-                message="Bạn có muốn khôi phục thương hiệu này không?"
+                message="Bạn có chắc muốn khôi phục thương hiệu này không?"
                 onConfirm={handleConfirmRecover}
-                onCancel={() => setIsConfirmOpen(false)}
-                isLoading={isRecover}
+                onCancel={() => {
+                    setIsConfirmOpen(false);
+                    setRecoverId(null);
+                }}
+                isLoading={isRecovering}
             />
         </div>
     );

@@ -33,9 +33,9 @@ export const brandService = {
       .then((res) => res.data),
 
   recover: (id) =>
-    axiosClient
-      .put(`/admin/brands/Restore/${id}`)
-      .then((res) => res.data),
+  axiosClient
+    .put(`/admin/brands/recover/${id}`)   // sửa Restore → recover
+    .then((res) => res.data),
 };
 
 
