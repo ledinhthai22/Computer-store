@@ -35,6 +35,7 @@ const SlideShow = () => {
         try {
             setLoading(true);
             const data = await slideShowService.getAll();
+            console.log("Dữ liệu API:", data);
             let res = data;
             if (filterType === 'active') {
                 res = data.filter(item => item.trangThai);
@@ -51,7 +52,6 @@ const SlideShow = () => {
     }, [filterType]);
 
     useEffect(() => { fetchSlideShows(); }, [fetchSlideShows]);
-
     const handleEditClick = (slideShow) => {
         setEditingSlideShow(slideShow);
         setFormData({
@@ -234,7 +234,7 @@ const SlideShow = () => {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({...formData, TrangThai: !formData.TrangThai})}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${formData.TrangThai ? "bg-green-500" : "bg-gray-300"}`}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition cursor-pointer ${formData.TrangThai ? "bg-green-500" : "bg-gray-300"}`}
                                 >
                                     <span
                                         className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${formData.TrangThai ? "translate-x-6" : "translate-x-1"}`}

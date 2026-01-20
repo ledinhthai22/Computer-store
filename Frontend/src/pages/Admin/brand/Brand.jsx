@@ -209,7 +209,7 @@ const handleSave = async (e) => {
                                     <button
                                         type="button"
                                         onClick={() => setIsActive(!isActive)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition cursor-pointer ${
                                             isActive ? "bg-green-500" : "bg-gray-300"
                                         }`}
                                     >
