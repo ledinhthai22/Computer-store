@@ -7,7 +7,7 @@ namespace Backend.Services.Order
         Task<List<OrderResult>> GetAllByStatusAsync(int status);
         Task<OrderResult> GetByMaDHAsync(int MaDH);
         Task<OrderResult> GetByMaDonAsync(string MaDon);
-        Task<OrderResult> GetOrderByPhoneAsync(string Phone);
+        Task<List<OrderResult>> GetOrderByPhoneAsync(string Phone);
         Task<bool> UpdateStatusAsync(int MaDH, UpdateOrderStatusRequest request);
         Task<OrderResult> CreateOrderAsync(CreateOrderInfoRequest request);
         Task<OrderResult> CreateOrderFromCartAsync(int UserId, CheckoutCartRequest request);

@@ -41,6 +41,8 @@ namespace Backend.Services.Order
                     TrangThai = GetStatusText(dh.TrangThai),
                     NgayTao = dh.NgayTao == null ? "Chưa cập nhật"
                             : dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
                     KhachHang = new OrderCustomer
                     {
                         MaNguoiDung = dh.KhachHang.MaNguoiDung,
@@ -98,6 +100,8 @@ namespace Backend.Services.Order
                     TrangThai = GetStatusText(dh.TrangThai),
                     NgayTao = dh.NgayTao == null ? "Chưa cập nhật"
                             : dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
                     KhachHang = new OrderCustomer
                     {
                         MaNguoiDung = dh.KhachHang.MaNguoiDung,
@@ -139,6 +143,8 @@ namespace Backend.Services.Order
                     TrangThai = GetStatusText(dh.TrangThai),
                     NgayTao = dh.NgayTao == null ? "Chưa cập nhật"
                             : dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
                     KhachHang = new OrderCustomer
                     {
                         MaNguoiDung = dh.KhachHang.MaNguoiDung,
@@ -180,6 +186,8 @@ namespace Backend.Services.Order
                     TrangThai = GetStatusText(dh.TrangThai),
                     NgayTao = dh.NgayTao == null ? "Chưa cập nhật"
                             : dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
                     KhachHang = new OrderCustomer
                     {
                         MaNguoiDung = dh.KhachHang.MaNguoiDung,
@@ -386,11 +394,8 @@ namespace Backend.Services.Order
                 throw new InvalidOperationException("Tạo chi tiết đơn hàng không thành công!");
             }
 
-            // [FIX 1]: Lấy thông tin khách hàng từ DB vì newOrder.KhachHang đang là null
-            // Giả sử bảng người dùng của bạn tên là NguoiDung hoặc KhachHang
             var khachHangInfo = await _DbContext.NguoiDung.FindAsync(request.MaKH);
 
-            // [FIX 2]: Lấy danh sách tên biến thể để tránh query trong vòng lặp (Tối ưu hiệu năng)
             var listMaBienThe = orderDetails.Select(x => x.MaBienThe).ToList();
             var listTenBienThe = _DbContext.BienThe
                                 .Where(bt => listMaBienThe.Contains(bt.MaBTSP))
@@ -404,8 +409,9 @@ namespace Backend.Services.Order
                 PhuongThucThanhToan = newOrder.PhuongThucThanhToan,
                 TrangThai = GetStatusText(newOrder.TrangThai), 
                 NgayTao = newOrder.NgayTao == null ? "Chưa cập nhật"
-                          : newOrder.NgayTao.ToString("HH:mm dd/MM/yyyy"), 
-
+                          : newOrder.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                GhiChu = newOrder.GhiChu,
+                GhiChuNoiBo = newOrder.GhiChuNoiBo,
                 KhachHang = new OrderCustomer
                 {
                     MaNguoiDung = khachHangInfo?.MaNguoiDung ?? 0,
@@ -468,7 +474,7 @@ namespace Backend.Services.Order
                 TienGoc += (item.BienThe.GiaBan * item.SoLuong);
                 ThanhToan += (item.BienThe.GiaKhuyenMai ?? 0 * item.SoLuong);
             }
-            if (TienGoc > ThanhToan)
+            if (TienGoc < ThanhToan)
             {
                 throw new InvalidOperationException($"Giá sản phẩm đã thay đổi. Tổng tiền góc: {TienGoc:N0}đ.Tổng tiền thanh toán: {ThanhToan:N0}đ. Vui lòng tải lại giỏ hàng!");
             }
@@ -596,10 +602,12 @@ namespace Backend.Services.Order
             order.TinhThanh = request.TinhThanh;
             order.PhuongXa = request.PhuongXa;
             order.DiaChi = request.DiaChi;
+            order.GhiChu = request.GhiChu;
+            order.GhiChuNoiBo = request.GhiChuNoiBo;
             await _DbContext.SaveChangesAsync();
             return await GetByMaDHAsync(MaDH);
         }
-        public async Task<OrderResult> GetOrderByPhoneAsync(string Phone)
+        public async Task<List<OrderResult>> GetOrderByPhoneAsync(string Phone)
         {
             if (string.IsNullOrWhiteSpace(Phone) || Phone.Length < 10)
             {
@@ -619,6 +627,8 @@ namespace Backend.Services.Order
                     TrangThai = GetStatusText(dh.TrangThai),
                     NgayTao = dh.NgayTao == null ? "Chưa cập nhật"
                             : dh.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                    GhiChu = dh.GhiChu,
+                    GhiChuNoiBo = dh.GhiChuNoiBo,
                     KhachHang = new OrderCustomer
                     {
                         MaNguoiDung = dh.KhachHang.MaNguoiDung,
@@ -642,7 +652,7 @@ namespace Backend.Services.Order
 
                     }).ToList()
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
         }
         //public async Task<OrderResult> DeleteOrderAsync(int MaDH)
         //{

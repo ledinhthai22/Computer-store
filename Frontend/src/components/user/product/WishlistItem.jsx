@@ -47,9 +47,6 @@ export default function WishlistItem({ product, yeuThichId, onRemove, onAddToCar
         phanTramGiam = Math.round(((giaGoc - giaHienTai) / giaGoc) * 100);
     }
 
-    // Nếu API không trả về slug, dùng maSanPham để tạo link
-    const productLink = `/chi-tiet-san-pham/${product.slug || product.maSanPham}`;
-
     return (
         <div 
             className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 transition-all duration-300 ${isRemoving ? 'opacity-50' : 'hover:shadow-md'}`}
@@ -58,7 +55,7 @@ export default function WishlistItem({ product, yeuThichId, onRemove, onAddToCar
         >
             <div className="flex items-center gap-4">
                 {/* Hình ảnh sản phẩm */}
-                <Link to={productLink} className="flex-shrink-0">
+                <Link to={`/chi-tiet-san-pham/${product.slug}`} className="flex-shrink-0">
                     <img
                         src={getProductImage()}
                         alt={product.tenSanPham}
@@ -72,7 +69,7 @@ export default function WishlistItem({ product, yeuThichId, onRemove, onAddToCar
 
                 {/* Thông tin sản phẩm */}
                 <div className="flex-1 min-w-0">
-                    <Link to={productLink}>
+                    <Link to={`/chi-tiet-san-pham/${product.slug}`}>
                         <h3 className="font-semibold text-gray-900 hover:text-teal-600 transition-colors line-clamp-2 mb-1">
                             {product.tenSanPham}
                         </h3>
@@ -93,10 +90,6 @@ export default function WishlistItem({ product, yeuThichId, onRemove, onAddToCar
                             </>
                         )}
                     </div>
-
-                    <p className="text-sm text-gray-500 mt-1">
-                        Mã SP: {product.maSanPham}
-                    </p>
                 </div>
 
                 {/* Actions */}
