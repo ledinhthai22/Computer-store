@@ -19,9 +19,9 @@ namespace Backend.Controllers.Admin
 
         // GET /api/admin/brands
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAdminAll()
         {
-            var result = await _brandService.GetAllAsync();
+            var result = await _brandService.GetAllAdminAsync();
             return Ok(result);
         }
 
@@ -58,9 +58,7 @@ namespace Backend.Controllers.Admin
 
         // PUT /api/admin/brands/{id}
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(
-            int id,
-            [FromBody] UpdateBrandRequest request)
+        public async Task<IActionResult> Update(int id,[FromBody] UpdateBrandRequest request)
         {
             var result = await _brandService.UpdateAsync(id, request);
             if (result == null)
@@ -86,7 +84,7 @@ namespace Backend.Controllers.Admin
 
         // PUT /api/admin/brands/recover/{id}
         [HttpPut("recover/{id:int}")]
-        public async Task<IActionResult> Restore(int id)
+        public async Task<IActionResult> Recover(int id)
         {
             var success = await _brandService.RestoreAsync(id);
             if (!success)

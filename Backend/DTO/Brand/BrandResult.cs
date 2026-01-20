@@ -9,6 +9,8 @@ namespace Backend.DTO.Brand
     {
         public int MaThuongHieu { get; set; }
         public string TenThuongHieu { get; set; } = null!;
+
+        public bool TrangThai { get; set; }
         public DateTime? NgayXoa { get; set; } 
     }
 }

@@ -9,6 +9,7 @@ namespace Backend.DTO.Brand
     public class UpdateBrandRequest
     {
         [Required]
-        public string BrandName { get; set; } = null!;
+        public string TenThuongHieu { get; set; } = null!;
+        public bool TrangThai { get; set;}
     }
 }

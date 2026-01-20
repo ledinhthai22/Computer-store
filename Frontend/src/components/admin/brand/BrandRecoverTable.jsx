@@ -10,34 +10,60 @@ const BrandRecoverTable = ({ data = [], loading, onRecover }) => {
     const navigate = useNavigate();
 
     const filteredItems = data.filter(
-        item => item.brandName && item.brandName.toLowerCase().includes(filterText.toLowerCase()),
+        item =>
+            item.tenThuongHieu &&
+            item.tenThuongHieu.toLowerCase().includes(filterText.toLowerCase()),
     );
 
     const columns = [
         {
             name: 'STT',
             selector: (row, index) => index + 1,
-            width: '80px',
+            width: '300px',
             sortable: false,
         },
         {
             name: 'TÊN THƯƠNG HIỆU',
-            selector: row => row.brandName,
+            selector: row => row.tenThuongHieu, 
             sortable: true,
+             width: '300px',
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700">
-                    {row.brandName}
+                    {row.tenThuongHieu}
+                </span>
+            ),
+        },
+        {
+            name: "TRẠNG THÁI HIỂN THỊ",
+            selector: row => row.trangThai,
+            sortable: true,
+            center: true,
+            width: "200px",
+            cell: row => (
+                <span
+                    className={`
+                        inline-flex items-center gap-1.5
+                        px-5 py-1.5 text-sm font-semibold rounded-full
+                        border border-current whitespace-nowrap
+                        ${row.trangThai
+                            ? 'text-green-700 bg-green-100 border-green-400'
+                            : 'text-red-700 bg-red-100 border-red-400'
+                        }
+                    `}
+                >
+                    {row.trangThai ? 'Hiện' : 'Ẩn'}
                 </span>
             ),
         },
         {
             name: 'HÀNH ĐỘNG',
-            minWidth: '150px',
+            center: true,
+            width: '400px',
             cell: row => (
-                <div className="flex justify-start w-full"> 
-                    <button 
-                        onClick={() => onRecover(row.brandID)}
+                <div className="flex justify-start w-full">
+                    <button
+                        onClick={() => onRecover(row.maThuongHieu)}
                         className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm whitespace-nowrap cursor-pointer"
                     >
                         <History size={18} />
@@ -51,7 +77,7 @@ const BrandRecoverTable = ({ data = [], loading, onRecover }) => {
     return (
         <div className="w-full p-4 space-y-4">
             <div className="flex items-center w-full gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <button 
+                <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#2962ff] hover:bg-[#0039cb] text-white rounded-lg transition-colors text-sm font-medium shadow-md cursor-pointer whitespace-nowrap"
                 >
@@ -59,12 +85,13 @@ const BrandRecoverTable = ({ data = [], loading, onRecover }) => {
                     Quay lại
                 </button>
 
-                <TableSearch 
-                    filterText={filterText} 
-                    onFilter={e => setFilterText(e.target.value)} 
+                <TableSearch
+                    filterText={filterText}
+                    onFilter={e => setFilterText(e.target.value)}
                     placeholder="Tìm kiếm..."
                 />
             </div>
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
                 <DataTable
                     columns={columns}

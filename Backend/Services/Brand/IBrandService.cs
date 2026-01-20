@@ -6,6 +6,7 @@ namespace Backend.Services.Brand
     public interface IBrandService
     {
         Task<IEnumerable<BrandResult>>GetAllAsync();
+        Task<IEnumerable<BrandResult>> GetAllAdminAsync();
         Task<IEnumerable<BrandResult>> GetAllHidenAsync();
         Task<BrandResult?> GetByIdAsync(int id);
         Task<BrandResult> CreateAsync(CreateBrandRequest request);

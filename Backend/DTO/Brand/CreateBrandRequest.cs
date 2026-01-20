@@ -10,5 +10,6 @@ namespace Backend.DTO.Brand
     {
         [Required]
         public string TenThuongHieu { get; set; } = null!;
+        public bool TrangThai { get; set; }
     }
 }

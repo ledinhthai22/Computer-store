@@ -11,7 +11,7 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
 
     const filteredItems = data.filter(
         item => item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
-                item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()),
+            item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()),
     );
     const columns = [
         {
@@ -43,19 +43,49 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             ),
         },
         {
+            name: "TRẠNG THÁI HIỂN THỊ",
+            selector: row => row.trangThai,
+            sortable: true,
+            center: true,
+            width: "200px",
+            cell: row => (
+                <span
+                    className={`
+                inline-flex items-center gap-1.5
+                px-5 py-1.5 text-sm font-semibold rounded-full
+                border border-current whitespace-nowrap
+                ${row.trangThai
+                            ? 'text-green-700 bg-green-100 border-green-400'
+                            : 'text-red-700 bg-red-100 border-red-400'
+                        }
+            `}
+                >
+                    {row.trangThai ? (
+                        <>
+                            Hiện
+                        </>
+                    ) : (
+                        <>
+                            Ẩn
+                        </>
+                    )}
+                </span>
+            ),
+        },
+        {
             name: 'HÀNH ĐỘNG',
             center: true,
             width: '200px',
             cell: row => (
                 <div className="flex items-center gap-2">
-                    <button 
+                    <button
                         onClick={() => onEdit(row)}
                         className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Sửa"
                     >
                         <Edit size={18} /> Sửa
                     </button>
-                    <button 
+                    <button
                         onClick={() => onDelete(row.maDanhMuc)}
                         className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                         title="Xóa"
@@ -70,20 +100,20 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
     return (
         <div className="w-full space-y-4">
             <div className="flex items-center justify-end w-full gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <TableSearch 
-                    filterText={filterText} 
-                    onFilter={e => setFilterText(e.target.value)} 
+                <TableSearch
+                    filterText={filterText}
+                    onFilter={e => setFilterText(e.target.value)}
                     placeholder="Tìm kiếm..."
                 />
-                <button 
+                <button
                     onClick={onOpenAddModal}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
                 >
                     <Plus size={16} />
                     <span>Thêm mới</span>
                 </button>
-                
-                <button 
+
+                <button
                     onClick={() => navigate('/quan-ly/danh-muc/khoi-phuc')}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
                 >

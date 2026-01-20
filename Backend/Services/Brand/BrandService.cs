@@ -23,11 +23,26 @@ namespace Backend.Services.Brand
         public async Task<IEnumerable<BrandResult>> GetAllAsync()
         {
             return await _dbContext.ThuongHieu
-                .Where(x => x.NgayXoa == null)
+                .Where(x => x.NgayXoa == null && x.TrangThai == true)
                 .Select(b => new BrandResult
                 {
                     MaThuongHieu = b.MaThuongHieu,
                     TenThuongHieu = b.TenThuongHieu,
+                    TrangThai = b.TrangThai,
+                    NgayXoa = b.NgayXoa
+                })
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<BrandResult>> GetAllAdminAsync()
+        {
+            return await _dbContext.ThuongHieu
+                .Where(x => x.NgayXoa == null )
+                .OrderByDescending(x => x.MaThuongHieu)
+                .Select(b => new BrandResult
+                {
+                    MaThuongHieu = b.MaThuongHieu,
+                    TenThuongHieu = b.TenThuongHieu,
+                    TrangThai = b.TrangThai,
                     NgayXoa = b.NgayXoa
                 })
                 .ToListAsync();
@@ -40,7 +55,8 @@ namespace Backend.Services.Brand
                 {
                     MaThuongHieu = b.MaThuongHieu,
                     TenThuongHieu = b.TenThuongHieu,
-                    NgayXoa = b.NgayXoa
+                    NgayXoa = b.NgayXoa,
+                    TrangThai = b.TrangThai
                 })
                 .ToListAsync();
         }
@@ -65,7 +81,7 @@ namespace Backend.Services.Brand
             {
                 throw new InvalidOperationException($"Thương hiệu '{BrandName}' đã tồn tại!");
             }
-            var BrandNew = new ThuongHieu { TenThuongHieu = BrandName, NgayXoa = null };
+            var BrandNew = new ThuongHieu { TenThuongHieu = BrandName, NgayXoa = null ,TrangThai = false};
             _dbContext.ThuongHieu.Add(BrandNew);
             bool created = await _dbContext.SaveChangesAsync() > 0;
             if (!created)
@@ -76,6 +92,7 @@ namespace Backend.Services.Brand
             {
                 MaThuongHieu = BrandNew.MaThuongHieu,
                 TenThuongHieu = BrandNew.TenThuongHieu,
+                TrangThai = BrandNew.TrangThai,
                 NgayXoa = BrandNew.NgayXoa
             };
         }
@@ -83,7 +100,7 @@ namespace Backend.Services.Brand
         {
             var brand = await _dbContext.ThuongHieu.FindAsync(id);
             if (brand == null) return null;
-            string BrandName = request.BrandName.Trim();
+            string BrandName = request.TenThuongHieu.Trim();
 
             bool isDuplicate = await _dbContext.ThuongHieu
                 .AnyAsync(x => x.TenThuongHieu == BrandName && x.MaThuongHieu != id && x.NgayXoa == null);
@@ -92,11 +109,13 @@ namespace Backend.Services.Brand
                 throw new InvalidOperationException($"Thương hiệu '{BrandName}' đã tồn tại!");
             }
             brand.TenThuongHieu = BrandName;
+            brand.TrangThai = request.TrangThai;
             await _dbContext.SaveChangesAsync();
             return new BrandResult
             {
                 MaThuongHieu = brand.MaThuongHieu,
                 TenThuongHieu = brand.TenThuongHieu,
+                TrangThai = request.TrangThai,
                 NgayXoa = brand.NgayXoa
             };
         }

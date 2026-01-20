@@ -15,13 +15,14 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         {
             name: 'STT',
             selector: (row, index) => index + 1,
-            width: '80px',
+            width: '300px',
             sortable: false,
         },
         {
             name: 'TÊN THƯƠNG HIỆU',
             selector: row => row.tenThuongHieu,
             sortable: true,
+            width: '300px',
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
@@ -30,9 +31,39 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             ),
         },
         {
+            name: "TRẠNG THÁI HIỂN THỊ",
+            selector: row => row.trangThai,
+            sortable: true,
+            center: true,
+            width: "200px",
+            cell: row => (
+                <span
+                    className={`
+                inline-flex items-center gap-1.5
+                px-5 py-1.5 text-sm font-semibold rounded-full
+                border border-current whitespace-nowrap
+                ${row.trangThai
+                            ? 'text-green-700 bg-green-100 border-green-400'
+                            : 'text-red-700 bg-red-100 border-red-400'
+                        }
+            `}
+                >
+                    {row.trangThai ? (
+                        <>
+                            Hiện
+                        </>
+                    ) : (
+                        <>
+                            Ẩn
+                        </>
+                    )}
+                </span>
+            ),
+        },
+        {
             name: 'HÀNH ĐỘNG',
             center: true,
-            width: '200px',
+            width: '420px',
             cell: row => (
                 <div className="flex items-center gap-2">
                     <button 

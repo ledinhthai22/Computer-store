@@ -33,7 +33,7 @@ namespace Backend.Services.Category
         public async Task<IEnumerable<CategoryResult>> GetAllAdminAsync()
         {
             var categories =  await _DbContext.DanhMuc
-                .Where(x => x.TrangThai == true && x.NgayXoa == null)
+                .Where(x => x.NgayXoa == null)
                 .OrderByDescending(d => d.MaDanhMuc)
                 .Select(d => new CategoryResult
                 {
@@ -94,7 +94,7 @@ namespace Backend.Services.Category
             {
                 TenDanhMuc = ten,
                 Slug = uniqueSlug,
-                TrangThai = true,
+                TrangThai = false,
                 NgayXoa = null
             };
 
@@ -134,8 +134,9 @@ namespace Backend.Services.Category
                 category.Slug = await GenerateUniqueSlugAsync(baseSlug, id);
 
                 category.TenDanhMuc = tenMoi;
+                
             }
-
+            category.TrangThai = request.TrangThai;
             await _DbContext.SaveChangesAsync();
 
             return new CategoryResult
@@ -151,14 +152,12 @@ namespace Backend.Services.Category
         {
             var category = await _DbContext.DanhMuc.FindAsync(id);
             if (category == null) return false;
-
+ 
             bool isUsed = await _DbContext.SanPham
                 .AnyAsync(p => p.MaDanhMuc == id && p.TrangThai == true);
 
             if (isUsed)
                 throw new InvalidOperationException("Danh mục đang được sử dụng bởi sản phẩm, không thể xóa.");
-
-            category.TrangThai = false;
             category.NgayXoa = DateTime.Now;
                 
             await _DbContext.SaveChangesAsync();
@@ -180,7 +179,6 @@ namespace Backend.Services.Category
                 throw new InvalidOperationException("Tên danh mục bị trùng, không thể khôi phục.");
 
             category.NgayXoa = null;
-            category.TrangThai = true;
 
             await _DbContext.SaveChangesAsync();
             return true;
