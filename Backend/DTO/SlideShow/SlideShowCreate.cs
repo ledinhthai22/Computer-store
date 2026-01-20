@@ -8,7 +8,7 @@ namespace Ecommerce.DTO.SlideShow
         public IFormFile HinhAnh { get; set; } = null!;
 
         [Required]
-        public string TenSlideShow { get; set; } = null!;
+        public string TenTrinhChieu { get; set; } = null!;
 
         public string DuongDanSanPham { get; set; } = null!;
 

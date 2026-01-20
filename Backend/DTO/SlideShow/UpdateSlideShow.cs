@@ -3,8 +3,9 @@
     public class UpdateSlideShow
     {
         public IFormFile? HinhAnh { get; set; }
+        public int MaTrinhChieu { get; set; }
 
-        public string? TenSlideShow { get; set; }
+        public string TenTrinhChieu { get; set; } = null!;
 
         public string DuongDanSanPham { get; set; } = null!;
 

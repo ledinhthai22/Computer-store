@@ -15,38 +15,25 @@ namespace Ecommerce.Services.SlideShow
             _DbContext = dbContext;
             _Env = env;
         }
-        public async Task<List<SlideShowResult>> ShowAsyn()
-        {
-            return await _DbContext.TrinhChieu
-                .Where(t => t.NgayXoa == null && t.TrangThai == true)
-                .OrderBy(t => t.SoThuTu)
-                .Select(t => new SlideShowResult
-                {
-                    MaTrinhChieu = t.MaTrinhChieu,
-                    DuongDanHinh = t.DuongDanHinh,
-                    DuongDanSanPham = t.DuongDanSanPham,
-                    SoThuTu = t.SoThuTu,
-                    TrangThai = t.TrangThai
-                }).ToListAsync();
-        }
-
         public async Task<List<SlideShowResult>> GetAllAsync()
         {
             return await _DbContext.TrinhChieu
-                .Where(t  => t.NgayXoa == null)
-                .OrderBy(t => t.SoThuTu)
-                .Select(t => new SlideShowResult
-                {
-                    MaTrinhChieu = t.MaTrinhChieu,
-                    DuongDanHinh = t.DuongDanHinh,
-                    DuongDanSanPham = t.DuongDanSanPham,
-                    SoThuTu = t.SoThuTu,
-                    TrangThai = t.TrangThai
-                }).ToListAsync();
+               .Where(t => t.NgayXoa == null && t.TrangThai == true)
+               .OrderBy(t => t.SoThuTu)
+               .Select(t => new SlideShowResult
+               {
+                   MaTrinhChieu = t.MaTrinhChieu,
+                   TenTrinhChieu = t.TenTrinhChieu,
+                   DuongDanHinh = t.DuongDanHinh,
+                   DuongDanSanPham = t.DuongDanSanPham,
+                   SoThuTu = t.SoThuTu,
+                   TrangThai = t.TrangThai
+               }).ToListAsync();
         }
         public async Task<List<SlideShowResult>> GetAllAdminAsync()
         {
             return await _DbContext.TrinhChieu
+                .Where(t => t.NgayXoa == null)
                 .OrderByDescending(t => t.MaTrinhChieu)
                 .Select(t => new SlideShowResult
                 {
@@ -65,6 +52,7 @@ namespace Ecommerce.Services.SlideShow
             return new SlideShowResult
             {
                 MaTrinhChieu = slideShow.MaTrinhChieu,
+                TenTrinhChieu = slideShow.TenTrinhChieu,
                 DuongDanHinh = slideShow.DuongDanHinh,
                 DuongDanSanPham = slideShow.DuongDanSanPham,
                 SoThuTu = slideShow.SoThuTu,
@@ -74,7 +62,7 @@ namespace Ecommerce.Services.SlideShow
         }
         public async Task<bool> CreateAsync(SlideShowCreate request)
         {
-            var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenSlideShow}{Path.GetExtension(request.HinhAnh.FileName)}";
+            var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
             var FolderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
             Directory.CreateDirectory(FolderPath);
             var filePath = Path.Combine(FolderPath, fileName);
@@ -98,7 +86,7 @@ namespace Ecommerce.Services.SlideShow
                 return false;
             if (request.HinhAnh != null)
             {
-                var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenSlideShow}{Path.GetExtension(request.HinhAnh.FileName)}";
+                var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
                 var FolderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
                 Directory.CreateDirectory(FolderPath);
                 var filePath = Path.Combine(FolderPath, fileName);
