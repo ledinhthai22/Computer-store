@@ -12,3 +12,4 @@ export { default as User } from "./user/User";
 export { default as UserRecover } from "./user/UserRecover";
 export { default as Order } from "./order/Order";
 export { default as Dashboard } from "./dashboard";
+export { default as SlideShow } from "./slideshow/SlideShow";

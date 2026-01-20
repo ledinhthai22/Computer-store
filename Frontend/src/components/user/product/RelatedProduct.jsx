@@ -45,7 +45,7 @@ export default function RelatedProduct({ productId }) {
     };
 
     return (
-        <div className="mt-8 mb-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+        <div className="m-8 bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
             <div className="flex items-center gap-3 mb-8">
                 <h3 className="text-2xl font-bold text-gray-900">
                     CÓ THỂ BẠN CŨNG THÍCH

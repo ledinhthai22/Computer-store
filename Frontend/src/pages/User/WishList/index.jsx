@@ -66,7 +66,7 @@ export default function WishList() {
     if (user.vaiTro === "QuanTriVien") return <Navigate to="/quan-ly" />;
 
     return (
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4 m-8">
             <h1 className="text-2xl font-bold mb-6">Sản phẩm yêu thích</h1>
 
             {isLoading ? (
@@ -74,16 +74,18 @@ export default function WishList() {
             ) : wishlistItems.length === 0 ? (
                 <p className="text-gray-500">Bạn chưa có sản phẩm yêu thích nào</p>
             ) : (
-                <div className="space-y-4 mb-8 overflow-y-auto pr-2" style={{ maxHeight: '600px' }}>
-                    {wishlistItems.map(item => (
-                        <WishlistItem
-                            key={item.maYeuThich}
-                            product={item} 
-                            yeuThichId={item.maYeuThich} 
-                            onRemove={handleRemove}
-                            onAddToCart={handleAddToCart}
-                        />
-                    ))}
+                <div className="bg-white p-4 mb-8">
+                    <div className="space-y-4 overflow-y-auto pr-2" style={{ maxHeight: '600px' }}>
+                        {wishlistItems.map(item => (
+                            <WishlistItem
+                                key={item.maYeuThich}
+                                product={item} 
+                                yeuThichId={item.maYeuThich} 
+                                onRemove={handleRemove}
+                                onAddToCart={handleAddToCart}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
             <TopNew/>

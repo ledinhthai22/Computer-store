@@ -1,126 +1,118 @@
 import { Link } from "react-router-dom";
-import { IoMenu, IoSearch } from "react-icons/io5";
+import { IoMenu } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
-import { FaUser } from "react-icons/fa6";
+import { FaUser, FaPhone } from "react-icons/fa6";
 import MenuCategory from "./MenuCategory";
-import { useState, useEffect } from "react"; // Thêm useEffect
+import { useState, useEffect } from "react";
 import { useAuth } from "../../../contexts/AuthProvider";
-import { useModalLogin } from "../../../contexts/ModalLoginContext"; 
+import { useModalLogin } from "../../../contexts/ModalLoginContext";
 import UserDropdown from "./UserDropdown";
 import LoginModal from "../Auth/LoginModal";
 import RegisterModal from "../Auth/RegisterModal";
-import { WebInfoService } from "../../../services/api/webInfoService"; // Import Service
+import { WebInfoService } from "../../../services/api/webInfoService";
+import SearchBar from "./SearchBar";
 
 export default function NavBar() {
-    const { user } = useAuth();
-    
-    const { activeModal, openLogin, openRegister, closeModal } = useModalLogin();
-    
-    const [openDanhMuc, setOpenDanhMuc] = useState(false);
-    
-    // State lưu tên cửa hàng, mặc định là Computer-Store
-    const [storeName, setStoreName] = useState("Computer-Store");
+  const { user } = useAuth();
+  const { activeModal, openLogin, openRegister, closeModal } = useModalLogin();
+  const [openDanhMuc, setOpenDanhMuc] = useState(false);
+  const [storeName, setStoreName] = useState("Computer-Store");
 
-    // Lấy thông tin web khi component load
-    useEffect(() => {
-        const fetchWebInfo = async () => {
-            try {
-                const response = await WebInfoService.userGetAll();
-                // Xử lý nếu API trả về mảng hoặc object
-                const data = Array.isArray(response) ? response[0] : response;
-                
-                // Lấy tên từ key mapping (tenTrang) hoặc key gốc (Tên cửa hàng)
-                if (data) {
-                    const name = data.tenTrang || data["Tên cửa hàng"];
-                    if (name) {
-                        setStoreName(name);
-                    }
-                }
-            } catch (error) {
-                console.error("Lỗi lấy thông tin Header:", error);
-            }
-        };
-        fetchWebInfo();
-    }, []);
+  useEffect(() => {
+    const fetchWebInfo = async () => {
+      try {
+        const response = await WebInfoService.userGetAll();
+        const data = Array.isArray(response) ? response[0] : response;
+        if (data) {
+          const name = data.tenTrang || data["Tên cửa hàng"];
+          if (name) setStoreName(name);
+        }
+      } catch (error) {
+        console.error("Lỗi lấy thông tin Header:", error);
+      }
+    };
+    fetchWebInfo();
+  }, []);
 
-    return (
-        <> 
-            <nav className="bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-md py-2 md:py-3 transition-all">
-                <div className="container mx-auto px-4 max-w-7xl flex flex-wrap items-center justify-between gap-y-3 md:gap-y-0 md:gap-x-8">
+  return (
+    <>
+      <nav className="bg-[#2f9ea0] text-white sticky top-0 z-50 shadow-md">
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="h-16 flex items-center justify-between gap-4">
 
-                    {/* --- Logo & Danh mục --- */}
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                        <Link to="/" className="text-xl md:text-2xl font-bold hover:opacity-90 whitespace-nowrap tracking-tight" title="Trang chủ">
-                            {/* Hiển thị tên động từ API */}
-                            {storeName}
-                        </Link>
+            <div className="flex items-center gap-3 min-w-fit">
+              <Link
+                to="/"
+                title="Trang chủ"
+                className="text-xl font-bold whitespace-nowrap hover:opacity-90"
+              >
+                {storeName}
+              </Link>
 
-                        <div
-                            className="relative px-2 py-1 md:px-3 md:py-2 flex items-center gap-1 hover:bg-[#ffffff20] rounded-lg cursor-pointer transition-all duration-200"
-                            title="Danh mục sản phẩm"
-                            onMouseEnter={() => setOpenDanhMuc(true)}
-                            onMouseLeave={() => setOpenDanhMuc(false)}
-                        >
-                            <span className="hidden sm:inline font-medium">Danh mục</span>
-                            <IoMenu className="text-2xl" />
-                            {openDanhMuc && <MenuCategory onClose={() => setOpenDanhMuc(false)} />}
-                        </div>
-                        <Link to="/gui-lien-he" className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 group" title="Liên hệ">
-                            <span className="lg:inline font-medium">Liên hệ</span>
-                        </Link>
-                    </div>
+              <div
+                title="Danh mục sản phẩm"
+                className="relative flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg cursor-pointer"
+                onMouseEnter={() => setOpenDanhMuc(true)}
+                onMouseLeave={() => setOpenDanhMuc(false)}
+              >
+                <span className="hidden md:inline font-medium">Danh mục</span>
+                <IoMenu className="text-2xl" />
+                {openDanhMuc && <MenuCategory onClose={() => setOpenDanhMuc(false)} />}
+              </div>
 
-                    {/* --- Giỏ hàng & User --- */}
-                    <div className="flex items-center gap-3 md:gap-4 md:order-3 shrink-0">
-                        <Link to="/gio-hang" className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 group" title="Giỏ hàng">
-                            <div className="relative">
-                                <FaShoppingCart className="text-xl group-hover:scale-110 transition-transform" />
-                            </div>
-                            <span className="hidden lg:inline font-medium">Giỏ hàng</span>
-                        </Link>
+              <Link
+                to="/gui-lien-he"
+                title="Liên hệ"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg"
+              >
+                <FaPhone className="text-xl" />
+                <span>Liên hệ</span>
+              </Link>
+            </div>
 
-                        {user ? <UserDropdown /> : (
-                            <button 
-                                onClick={openLogin} 
-                                className="p-2 hover:bg-[#ffffff20] rounded-lg flex items-center gap-2 transition-all duration-200 font-medium" 
-                                title="Đăng nhập"
-                            >
-                                <FaUser className="text-lg" />
-                                <span className="hidden lg:inline">Đăng nhập</span>
-                            </button>
-                        )}
-                    </div>
-                    
-                    {/* --- Search Bar --- */}
-                    <div className="w-full order-last md:order-2 md:w-auto md:flex-1 flex justify-center md:justify-end lg:justify-center">
-                        <div className="w-full md:max-w-[600px] bg-white text-black rounded-lg flex items-center h-10 px-0 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-[#2f9ea0]/50 transition-all overflow-hidden">
-                            <input
-                                className="grow bg-transparent outline-none text-sm px-4 py-2 placeholder-gray-400"
-                                placeholder="Bạn đang tìm sản phẩm gì..."
-                                title="Nhập thông tin cần tìm"
-                            />
-                            <button className="bg-gray-100 hover:bg-[#2f9ea0] hover:text-white h-full px-4 flex items-center justify-center transition-colors duration-200" title="Tìm kiếm">
-                                <IoSearch className="text-xl" />
-                            </button>
-                        </div>
-                    </div>
+            <div className="flex-1 flex justify-center">
+              <div className="w-full max-w-[600px] bg-white text-black rounded-lg flex items-center h-10 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-[#2f9ea0]/50 overflow-hidden">
+                {/*  */}
+                <SearchBar />
+                {/*  */}
+              </div>
+            </div>
 
-                </div>
-            </nav>
+            <div className="flex items-center gap-3 min-w-fit">
+              <Link
+                to="/gio-hang"
+                title="Giỏ hàng"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg"
+              >
+                <FaShoppingCart className="text-xl" />
+                <span className="hidden lg:inline">Giỏ hàng</span>
+              </Link>
 
-            {activeModal === 'login' && (
-                <LoginModal 
-                    onClose={closeModal} 
-                    onSwitchToRegister={openRegister} 
-                />
-            )}
+              {user ? (
+                <UserDropdown />
+              ) : (
+                <button
+                  title="Đăng nhập"
+                  onClick={openLogin}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg"
+                >
+                  <FaUser className="text-lg" />
+                  <span className="hidden lg:inline">Đăng nhập</span>
+                </button>
+              )}
+            </div>
 
-            {activeModal === 'register' && (
-                <RegisterModal 
-                    onClose={closeModal} 
-                    onSwitchToLogin={openLogin} 
-                />
-            )}
-        </>
-    );
+          </div>
+        </div>
+      </nav>
+
+      {activeModal === "login" && (
+        <LoginModal onClose={closeModal} onSwitchToRegister={openRegister} />
+      )}
+
+      {activeModal === "register" && (
+        <RegisterModal onClose={closeModal} onSwitchToLogin={openLogin} />
+      )}
+    </>
+  );
 }

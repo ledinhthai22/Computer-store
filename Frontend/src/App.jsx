@@ -18,7 +18,8 @@ import {
   User,
   UserRecover,
   Order,
-  Dashboard
+  Dashboard,
+  SlideShow
 } from "./pages/Admin";
 
 import {
@@ -40,6 +41,7 @@ import {
   ChipProduct,
   ScreenProduct,
   NotFound,
+  SearchPage
 } from "./pages/User";
 
 function App() {
@@ -63,6 +65,7 @@ function App() {
           <Route path="/dang-ky" element={<Register />} /> */}
           <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/loc-theo-gia" element={<PriceProduct />} />
+          <Route path="/tim-kiem" element={<SearchPage />} />
           <Route element={<ProfileLayout/>}>
             <Route path="/thong-tin-ca-nhan" element={<Profile />} />
             <Route path="/doi-mat-khau" element={<UpdatePassword />} />
@@ -95,6 +98,8 @@ function App() {
             <Route path="nguoi-dung" element={<User />} />
             <Route path="nguoi-dung/khoi-phuc" element={<UserRecover />} />
             <Route path="don-hang" element={<Order />} />
+
+            <Route path="trinh-chieu" element={<SlideShow />} />
           </Route>
         </Route>
 
