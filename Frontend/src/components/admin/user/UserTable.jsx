@@ -110,7 +110,7 @@ const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeC
                     placeholder="Tìm kiếm..."
                 />
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
                         <Filter size={18} className="text-gray-400" />
                         <select 

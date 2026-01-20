@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import CategoryTable from "../../../components/admin/category/CategoryTable";
 import Toast from "../../../components/admin/Toast";
 import ConfirmModal from "../../../components/admin/DeleteConfirmModal";
@@ -22,25 +22,32 @@ const Category = () => {
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const [filterType, setFilterType] = useState('all');
+
     const showToast = (message, type = "success") => {
         setToast({ show: true, message, type });
     };
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await categoryService.getAll();
+            let res;
+            if (filterType === 'all') {
+                res = await categoryService.getAll();
+            }else if (filterType === 'active') {
+                res = await categoryService.getAll().then(data => data.filter(category => category.trangThai));
+            }else{
+                res = await categoryService.getAll().then(data => data.filter(category => !category.trangThai));
+            }
             setCategories(Array.isArray(res) ? res : []);
         } catch (err) {
             showToast(handleApiError(err, "Tải danh sách danh mục thất bại"), "error");
         } finally {
             setLoading(false);
         }
-    };
+    }, [filterType]);
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
+    useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
     // ===== XÓA =====
     const handleDeleteClick = (id) => {
@@ -124,6 +131,7 @@ const Category = () => {
                 loading={loading}
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
+                onFilterTypeChange={setFilterType}
                 onOpenAddModal={openAddModal}
             />
 

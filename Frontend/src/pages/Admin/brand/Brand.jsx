@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import BrandTable from "../../../components/admin/brand/BrandTable";
 import Toast from "../../../components/admin/Toast";
 import ConfirmModal from "../../../components/admin/DeleteConfirmModal";
@@ -19,6 +19,8 @@ const Brand = () => {
     const [isActive, setIsActive] = useState(true);
     const [editingBrand, setEditingBrand] = useState(null);
 
+    const [filterType, setFilterType] = useState('all');
+
     const [toast, setToast] = useState({
         show: false,
         message: "",
@@ -33,10 +35,17 @@ const Brand = () => {
         setToast({ show: true, message, type });
     };
 
-    const fetchBrands = async () => {
+    const fetchBrands = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await brandService.getAll();
+            let res;
+            if (filterType === 'all') {
+                res = await brandService.getAll();
+            }else if (filterType === 'active') {
+                res = await brandService.getAll().then(data => data.filter(brand => brand.trangThai));
+            }else{
+                res = await brandService.getAll().then(data => data.filter(brand => !brand.trangThai));
+            }
             setBrands(Array.isArray(res) ? res : []);
         } catch (err) {
             showToast(
@@ -47,11 +56,9 @@ const Brand = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filterType]);
 
-    useEffect(() => {
-        fetchBrands();
-    }, []);
+    useEffect(() => { fetchBrands(); }, [fetchBrands]);
 
     // XÓA 
     const handleDeleteClick = (id) => {
@@ -127,6 +134,7 @@ const Brand = () => {
                 loading={loading}
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
+                onFilterTypeChange={setFilterType}
                 onOpenAddModal={() => {
                     setEditingBrand(null);
                     setBrandNameInput("");

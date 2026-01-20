@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { Edit, Trash2, Plus, History, ArrowUpIcon } from "lucide-react";
+import { Edit, Trash2, Plus, History, ArrowUpIcon, Filter } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import TableSearch from '../../admin/TableSearch';
 import Pagination from '../Pagination';
-const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
+const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal, filterType, onFilterTypeChange }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
@@ -15,14 +15,13 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         {
             name: 'STT',
             selector: (row, index) => index + 1,
-            width: '300px',
+            width: '80px',
             sortable: false,
         },
         {
             name: 'TÊN THƯƠNG HIỆU',
             selector: row => row.tenThuongHieu,
             sortable: true,
-            width: '300px',
             grow: 2,
             cell: row => (
                 <span className="font-semibold text-gray-700 capitalize">
@@ -31,32 +30,18 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             ),
         },
         {
-            name: "TRẠNG THÁI HIỂN THỊ",
+            name: "TRẠNG THÁI",
             selector: row => row.trangThai,
-            sortable: true,
-            center: true,
-            width: "200px",
             cell: row => (
                 <span
-                    className={`
-                inline-flex items-center gap-1.5
-                px-5 py-1.5 text-sm font-semibold rounded-full
-                border border-current whitespace-nowrap
+                    className={`px-5 py-1.5 text-sm font-semibold rounded-full border border-current text-center w-18
                 ${row.trangThai
                             ? 'text-green-700 bg-green-100 border-green-400'
                             : 'text-red-700 bg-red-100 border-red-400'
                         }
             `}
                 >
-                    {row.trangThai ? (
-                        <>
-                            Hiện
-                        </>
-                    ) : (
-                        <>
-                            Ẩn
-                        </>
-                    )}
+                    {row.trangThai ? ('Hiện') : ('Ẩn')}
                 </span>
             ),
         },
@@ -93,6 +78,18 @@ const BrandTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     onFilter={e => setFilterText(e.target.value)} 
                     placeholder="Tìm kiếm..."
                 />
+                <div className="flex items-center gap-2">
+                        <Filter size={18} className="text-gray-400" />
+                        <select 
+                            className="border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                            value={filterType}
+                            onChange={(e) => onFilterTypeChange(e.target.value)}
+                        >
+                            <option value="all">Tất cả</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="inactive">Đang ẩn</option>
+                        </select>
+                    </div>
                 <button 
                     onClick={onOpenAddModal}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"
