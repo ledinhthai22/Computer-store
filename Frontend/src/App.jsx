@@ -41,6 +41,7 @@ import {
   ChipProduct,
   ScreenProduct,
   NotFound,
+  SearchPage
 } from "./pages/User";
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
           <Route path="/dang-ky" element={<Register />} /> */}
           <Route path="/yeu-thich" element={<WishList />} />
           <Route path="/san-pham/loc-theo-gia" element={<PriceProduct />} />
+          <Route path="/tim-kiem" element={<SearchPage />} />
           <Route element={<ProfileLayout/>}>
             <Route path="/thong-tin-ca-nhan" element={<Profile />} />
             <Route path="/doi-mat-khau" element={<UpdatePassword />} />

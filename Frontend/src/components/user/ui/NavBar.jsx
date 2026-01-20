@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { IoMenu, IoSearch } from "react-icons/io5";
+import { IoMenu } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaUser, FaPhone } from "react-icons/fa6";
 import MenuCategory from "./MenuCategory";
@@ -10,6 +10,7 @@ import UserDropdown from "./UserDropdown";
 import LoginModal from "../Auth/LoginModal";
 import RegisterModal from "../Auth/RegisterModal";
 import { WebInfoService } from "../../../services/api/webInfoService";
+import SearchBar from "./SearchBar";
 
 export default function NavBar() {
   const { user } = useAuth();
@@ -71,17 +72,9 @@ export default function NavBar() {
 
             <div className="flex-1 flex justify-center">
               <div className="w-full max-w-[600px] bg-white text-black rounded-lg flex items-center h-10 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-[#2f9ea0]/50 overflow-hidden">
-                <input
-                  title="Nhập thông tin cần tìm"
-                  className="flex-1 bg-transparent outline-none text-sm px-4 placeholder-gray-400"
-                  placeholder="Bạn đang tìm sản phẩm gì..."
-                />
-                <button
-                  title="Tìm kiếm"
-                  className="bg-gray-100 hover:bg-[#2f9ea0] hover:text-white h-full px-4 flex items-center justify-center transition"
-                >
-                  <IoSearch className="text-xl" />
-                </button>
+                {/*  */}
+                <SearchBar />
+                {/*  */}
               </div>
             </div>
 
