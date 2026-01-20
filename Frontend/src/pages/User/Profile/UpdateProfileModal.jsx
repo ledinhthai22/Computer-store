@@ -5,71 +5,96 @@ import { useToast } from "../../../contexts/ToastContext";
 const formatDateForInput = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  // Kiểm tra nếu ngày không hợp lệ
   if (isNaN(date.getTime())) return "";
-
-  const year = date.getFullYear();
-  // Tháng trong JS bắt đầu từ 0 nên phải +1
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  // Trả về định dạng chuẩn cho thẻ input type="date": YYYY-MM-DD
-  return `${year}-${month}-${day}`;
+  return date.toISOString().split("T")[0];
 };
 
 export default function UpdateProfileModal({ onClose, user }) {
   const { showToast } = useToast();
+
   const [formData, setFormData] = useState({
     hoTen: user?.hoTen || "",
-    gioiTinh: user?.gioiTinh === true ? "Nam" : "Nữ" || "",
-    ngaySinh: formatDateForInput(user?.ngaySinh) || "",
+    gioiTinh: user?.gioiTinh ? "Nam" : "Nữ",
+    ngaySinh: formatDateForInput(user?.ngaySinh),
     email: user?.email || "",
     soDienThoai: user?.soDienThoai || "",
-    // matKhau: "", 
   });
 
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    let { name, value } = e.target;
+
+    // Họ tên: không số, không ký tự đặc biệt, tối đa 100 ký tự
+    if (name === "hoTen") {
+      value = value.replace(/[^A-Za-zÀ-ỹ\s]/g, "").slice(0, 100);
+    }
+
+    // SĐT: chỉ số, tối đa 10 ký tự
+    if (name === "soDienThoai") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    setFormData({ ...formData, [name]: value });
+
+    // clear lỗi realtime
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
+  /* ================= VALIDATE ================= */
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.hoTen.trim()) {
+      newErrors.hoTen = "Họ tên không được để trống";
+    }
+
+    if (!formData.soDienThoai) {
+      newErrors.soDienThoai = "Số điện thoại không được để trống";
+    } else if (formData.soDienThoai.length !== 10) {
+      newErrors.soDienThoai = "Số điện thoại phải đủ 10 số";
+    }
+
+    if (!formData.ngaySinh) {
+      newErrors.ngaySinh = "Vui lòng chọn ngày sinh";
+    }
+
+    return newErrors;
+  };
+
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setErrors({});
 
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setLoading(true);
     try {
-      // 2. Tạo payload gửi đi
       const payload = {
         hoTen: formData.hoTen,
         email: formData.email,
         soDienThoai: formData.soDienThoai,
-        // matKhau: formData.matKhau,
         ngaySinh: formData.ngaySinh,
-        gioiTinh: formData.gioiTinh === "Nam" ? true : false,
-        maVaiTro: user.maVaiTro || 1
+        gioiTinh: formData.gioiTinh === "Nam",
+        maVaiTro: user.maVaiTro || 1,
       };
 
-      console.log("Payload gửi đi:", payload); 
-
-      await axiosClient.put("/me", payload, {
-      });
-      
+      await axiosClient.put("/me", payload);
       showToast("Cập nhật thông tin thành công!", "success");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000); 
+
+      setTimeout(() => window.location.reload(), 800);
       onClose();
-    } catch (error) {
-      // console.error("Lỗi chi tiết:", error.response?.data);
-      // if (error.response?.data?.errors?.MatKhau) {
-      //    alert("Lỗi: " + error.response.data.errors.MatKhau[0]);
-      // } else {
-         showToast("Cập nhật thông tin thất bại. Vui lòng thử lại.", "error");
-      // }
+    } catch {
+      showToast("Cập nhật thông tin thất bại!", "error");
     } finally {
       setLoading(false);
     }
@@ -83,113 +108,106 @@ export default function UpdateProfileModal({ onClose, user }) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Họ tên */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Họ tên</label>
+            <label className="text-sm font-medium">Họ tên</label>
             <input
               name="hoTen"
               value={formData.hoTen}
               onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-xl mt-1"
-              placeholder="Họ tên"
-              required
+              maxLength={100}
+              className={`w-full p-3 border-2 rounded-xl mt-1 ${
+                errors.hoTen ? "border-red-500" : "border-gray-200"
+              }`}
             />
+            {errors.hoTen && (
+              <p className="text-red-500 text-xs mt-1">{errors.hoTen}</p>
+            )}
           </div>
 
+          {/* Email */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-medium">Email</label>
             <input
-              name="email"
               value={formData.email}
-              onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-xl mt-1 bg-stone-200"
-              title="Bạn không thể chỉnh sửa email"
               readOnly
+              className="w-full p-3 border-2 border-gray-200 rounded-xl mt-1 bg-stone-200"
             />
           </div>
 
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
-            {/* Wrapper này giả lập style giống hệt thẻ input text */}
-            <div className="w-full p-3 border-2 border-gray-200 rounded-xl flex items-center gap-6">
-                <label className="flex items-center gap-2 cursor-pointer hover:text-[#2f9ea0] transition-colors">
-                    <input 
-                        type="radio" 
-                        name="gioiTinh" 
-                        value="Nam"
-                        checked={formData.gioiTinh === "Nam"}
-                        onChange={handleChange}
-                        className="w-5 h-5 accent-[#2f9ea0] cursor-pointer"
+          {/* Giới tính + Ngày sinh (SIZE BẰNG NHAU) */}
+          <div className="flex gap-3">
+            <div className="w-1/2">
+              <label className="text-sm font-medium block mb-1">Giới tính</label>
+              <div className="h-[48px] border-2 border-gray-200 rounded-xl flex items-center gap-5 px-3">
+                {["Nam", "Nữ"].map((gt) => (
+                  <label key={gt} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="gioiTinh"
+                      value={gt}
+                      checked={formData.gioiTinh === gt}
+                      onChange={handleChange}
+                      className="accent-[#2f9ea0]"
                     />
-                    <span className="font-medium">Nam</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer hover:text-[#2f9ea0] transition-colors">
-                    <input 
-                        type="radio" 
-                        name="gioiTinh" 
-                        value="Nữ"
-                        checked={formData.gioiTinh === "Nữ"}
-                        onChange={handleChange}
-                        className="w-5 h-5 accent-[#2f9ea0] cursor-pointer"
-                    />
-                    <span className="font-medium">Nữ</span>
-                </label>
+                    {gt}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700">Ngày Sinh</label>
-            <input
+            <div className="w-1/2">
+              <label className="text-sm font-medium block mb-1">Ngày sinh</label>
+              <input
                 type="date"
                 name="ngaySinh"
                 value={formData.ngaySinh}
                 onChange={handleChange}
-                className="w-full p-3 border-2 border-gray-200  rounded-xl mt-1"
-                required
+                onKeyDown={(e) => e.preventDefault()} // không cho gõ
+                max={new Date().toISOString().split("T")[0]}
+                className={`w-full h-[48px] border-2 rounded-xl px-3 ${
+                  errors.ngaySinh ? "border-red-500" : "border-gray-200"
+                }`}
               />
+              {errors.ngaySinh && (
+                <p className="text-red-500 text-xs mt-1">{errors.ngaySinh}</p>
+              )}
+            </div>
           </div>
 
+          {/* SĐT */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Số điện thoại</label>
+            <label className="text-sm font-medium">Số điện thoại</label>
             <input
               name="soDienThoai"
               value={formData.soDienThoai}
               onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-xl mt-1"
-              placeholder="Số điện thoại"
+              inputMode="numeric"
+              className={`w-full p-3 border-2 rounded-xl mt-1 ${
+                errors.soDienThoai ? "border-red-500" : "border-gray-200"
+              }`}
+              placeholder="10 chữ số"
             />
+            {errors.soDienThoai && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.soDienThoai}
+              </p>
+            )}
           </div>
 
-          {/* <div>
-            <label className="text-sm font-bold text-red-500">
-              Xác nhận mật khẩu <span className="text-red-600">*</span>
-            </label>
-            <input
-              name="matKhau"
-              type="password"
-              value={formData.matKhau}
-              onChange={handleChange}
-              className="w-full p-3 border-2 border-red-200 bg-red-50 rounded-xl mt-1 focus:border-red-500 focus:outline-none"
-              placeholder="Nhập mật khẩu hiện tại để lưu"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Bạn cần nhập mật khẩu hiện tại để xác nhận thay đổi.
-            </p>
-          </div> */}
-
+          {/* BUTTON */}
           <div className="flex gap-3 mt-6">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 p-3 bg-[#2f9ea0] text-white rounded-xl font-bold hover:bg-teal-600 transition disabled:bg-gray-400"
+              className="flex-1 p-3 bg-[#2f9ea0] text-white rounded-xl font-bold disabled:bg-gray-400"
             >
               {loading ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 p-3 border rounded-xl hover:bg-gray-50 transition"
+              className="flex-1 p-3 border rounded-xl"
             >
               Huỷ
             </button>

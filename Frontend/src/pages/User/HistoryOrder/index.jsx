@@ -1,10 +1,11 @@
-// src/pages/HistoryOrder.jsx
 import React, { useState, useEffect } from 'react';
 import { 
   Package, Search, Loader2, Clock, Truck, CheckCircle, XCircle, 
   Trash2 
 } from 'lucide-react';
 import { orderService, handleApiError } from '../../../services/api/orderService';
+import { useToast } from '../../../contexts/ToastContext';
+
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
@@ -99,6 +100,7 @@ const HistoryOrder = () => {
     if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) return;
 
     try {
+      const {showToast} = useToast();
       // Gọi API hủy đơn hàng (Cần đảm bảo orderService có hàm này hoặc thay bằng axios call tương ứng)
       // Ví dụ: await orderService.cancelOrder(orderId); 
       // Nếu chưa có hàm cancelOrder, bạn cần thêm vào service hoặc gọi trực tiếp ở đây.
@@ -106,10 +108,11 @@ const HistoryOrder = () => {
       
       await orderService.updateOrderStatus(orderId, 6); // Ví dụ gọi hàm update
       
-      alert("Đã hủy đơn hàng thành công!");
+      showToast("Đơn hàng đã được hủy thành công", "success");
       fetchOrders(activeStatus); // Tải lại danh sách
     } catch (err) {
-      alert(handleApiError(err, "Không thể hủy đơn hàng lúc này"));
+      const message = handleApiError(err, 'Hủy đơn hàng thất bại');
+      showToast(message, "error");
     }
   };
 
@@ -141,6 +144,7 @@ const HistoryOrder = () => {
         </span>
     );
   };
+  
 
   return (
     <div className="w-full py-6 px-4">
