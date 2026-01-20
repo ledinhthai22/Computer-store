@@ -97,7 +97,7 @@ export default function NavBar() {
                   className="flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg"
                 >
                   <FaUser className="text-lg" />
-                  <span className="hidden lg:inline">Đăng nhập</span>
+                  <span className="hidden lg:inline cursor-pointer">Đăng nhập</span>
                 </button>
               )}
             </div>

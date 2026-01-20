@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect, useCallback } from "react";
+import SessionLoading from "../components/user/ui/SessionLoading";
 import axiosClient from "../services/api/axiosClient";
 
 const AuthContext = createContext();
@@ -103,10 +104,10 @@ export function AuthProvider({ children }) {
     return () => clearInterval(interval);
   }, [user, logout]);
 
-  // Trong render
-  if (isCheckingSession) {
-    return <div>Đang kiểm tra phiên đăng nhập...</div>;
-  }
+  // // Trong render
+  // if (isCheckingSession) {
+  //   return <SessionLoading />;
+  // }
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
