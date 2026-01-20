@@ -4,44 +4,44 @@ import OrderTable from '../../../components/admin/order/OrderTable';
 import OrderDetailModal from '../../../components/admin/order/OrderDetailModal';
 import OrderUpdateModal from '../../../components/admin/order/OrderUpdateModal';
 import Toast from '../../../components/admin/Toast';
-// import { orderService } from '../../../services/api/orderService'; // TODO: Import service khi API ready
+import { orderService } from '../../../services/api/orderService'; // TODO: Import service khi API ready
 
 // ⚠️ MOCK DATA - Thay thế bằng API call sau này
-const MOCK_ORDERS = [
-    {
-        maHoaDon: "HD001",
-        tenKhachHang: "Nguyễn Văn A",
-        email: "nguyenvana@email.com",
-        soDienThoai: "0901234567",
-        diaChiGiaoHang: "123 Đường ABC, Quận 1, TP.HCM",
-        tongTien: 25000000,
-        trangThai: 1, // 0: Tất cả, 1: Chưa duyệt, 2: Đã duyệt, 3: Đang xử lý, 4: Đang giao, 5: Đã giao, 6: Hoàn thành, 7: Đã hủy, 8: Trả hàng
-        ngayDatHang: "2024-01-15T10:30:00",
-        ghiChu: "Giao hàng giờ hành chính"
-    },
-    {
-        maHoaDon: "HD002",
-        tenKhachHang: "Trần Thị B",
-        email: "tranthib@email.com",
-        soDienThoai: "0912345678",
-        diaChiGiaoHang: "456 Đường XYZ, Quận 3, TP.HCM",
-        tongTien: 15000000,
-        trangThai: 3,
-        ngayDatHang: "2024-01-14T14:20:00",
-        ghiChu: ""
-    },
-    {
-        maHoaDon: "HD003",
-        tenKhachHang: "Lê Văn C",
-        email: "levanc@email.com",
-        soDienThoai: "0923456789",
-        diaChiGiaoHang: "789 Đường DEF, Quận 5, TP.HCM",
-        tongTien: 35000000,
-        trangThai: 6,
-        ngayDatHang: "2024-01-13T09:15:00",
-        ghiChu: "Đã thanh toán"
-    }
-];
+// const MOCK_ORDERS = [
+//     {
+//         maHoaDon: "HD001",
+//         tenKhachHang: "Nguyễn Văn A",
+//         email: "nguyenvana@email.com",
+//         soDienThoai: "0901234567",
+//         diaChiGiaoHang: "123 Đường ABC, Quận 1, TP.HCM",
+//         tongTien: 25000000,
+//         trangThai: 1, // 0: Tất cả, 1: Chưa duyệt, 2: Đã duyệt, 3: Đang xử lý, 4: Đang giao, 5: Đã giao, 6: Hoàn thành, 7: Đã hủy, 8: Trả hàng
+//         ngayDatHang: "2024-01-15T10:30:00",
+//         ghiChu: "Giao hàng giờ hành chính"
+//     },
+//     {
+//         maHoaDon: "HD002",
+//         tenKhachHang: "Trần Thị B",
+//         email: "tranthib@email.com",
+//         soDienThoai: "0912345678",
+//         diaChiGiaoHang: "456 Đường XYZ, Quận 3, TP.HCM",
+//         tongTien: 15000000,
+//         trangThai: 3,
+//         ngayDatHang: "2024-01-14T14:20:00",
+//         ghiChu: ""
+//     },
+//     {
+//         maHoaDon: "HD003",
+//         tenKhachHang: "Lê Văn C",
+//         email: "levanc@email.com",
+//         soDienThoai: "0923456789",
+//         diaChiGiaoHang: "789 Đường DEF, Quận 5, TP.HCM",
+//         tongTien: 35000000,
+//         trangThai: 6,
+//         ngayDatHang: "2024-01-13T09:15:00",
+//         ghiChu: "Đã thanh toán"
+//     }
+// ];
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
@@ -60,33 +60,116 @@ const Order = () => {
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
     };
-
+    const mapStatusStringToNumber = (statusString) => {
+        const statusMap = {
+            'Chờ duyệt': 0,
+            'Đã duyệt': 1,
+            'Đang xử lý': 2,
+            'Đang giao': 3,
+            'Đã giao': 4,
+            'Hoàn thành': 5,
+            'Đã hủy': 6,
+            'Trả hàng': 7
+        };
+        return statusMap[statusString];
+    };
+    const transformOrderForUI = (backendOrder) => {
+        return {
+            maHoaDon: backendOrder.maDon,
+            maDonHang: backendOrder.maDonHang,
+            tenKhachHang: backendOrder.khachHang?.hoTen || 'N/A',
+            email: backendOrder.khachHang?.email || 'N/A',
+            soDienThoai: backendOrder.khachHang?.soDienThoai || 'N/A',
+            
+            diaChiGiaoHang: backendOrder.diaChi 
+                ? `${backendOrder.diaChi.diaChi}, ${backendOrder.diaChi.phuongXa}, ${backendOrder.diaChi.tinhThanh}`
+                : 'N/A',
+            
+            tongTien: backendOrder.tongTien || 0,
+            
+            trangThai: mapStatusStringToNumber(backendOrder.trangThai),
+            
+            ngayDatHang: convertVietnameseDateToISO(backendOrder.ngayTao),
+            
+            ghiChu: backendOrder.ghiChu || '',
+            
+            _backend: backendOrder
+        };
+    };
+    const convertVietnameseDateToISO = (vnDate) => {
+        if (!vnDate) return new Date().toISOString();
+        
+        try {
+            const [time, date] = vnDate.split(' ');
+            const [hours, minutes] = time.split(':');
+            const [day, month, year] = date.split('/');
+            
+            const isoDate = new Date(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                parseInt(hours || 0),
+                parseInt(minutes || 0)
+            );
+            
+            return isoDate.toISOString();
+        } catch (error) {
+            console.error('Error converting date:', error);
+            return new Date().toISOString();
+        }
+    };
     // TODO: Thay thế bằng API call
     const fetchOrders = useCallback(async () => {
         try {
-            setLoading(true);
+            // setLoading(true);
             
-            // TODO: Uncomment khi API ready
+            // // TODO: Uncomment khi API ready
             // const res = await orderService.getByStatus(filterType);
             // setOrders(Array.isArray(res) ? res : []);
-            
-            // ⚠️ MOCK: Filter data theo trạng thái
-            let filteredData = MOCK_ORDERS;
-            if (filterType !== 'all') {
-                const statusMap = {
-                    'unread': 1,      // Chưa duyệt
-                    'approved': 2,    // Đã duyệt
-                    'processing': 3,  // Đang xử lý
-                    'shipping': 4,    // Đang giao
-                    'delivered': 5,   // Đã giao
-                    'completed': 6,   // Hoàn thành
-                    'cancelled': 7,   // Đã hủy
-                    'returned': 8     // Trả hàng
-                };
-                filteredData = MOCK_ORDERS.filter(order => order.trangThai === statusMap[filterType]);
+            // const transformedOrders = Array.isArray(res) 
+            //     ? res.map(order => transformOrderForUI(order))
+            //     : [];
+            // // ⚠️ MOCK: Filter data theo trạng thái
+            // let filteredData = transformedOrders;
+            // if (filterType !== 'all') {
+            //     const statusMap = {
+            //         'unread': 0,      // Chưa duyệt
+            //         'approved': 1,    // Đã duyệt
+            //         'processing': 2,  // Đang xử lý
+            //         'shipping': 3,    // Đang giao
+            //         'delivered': 4,   // Đã giao
+            //         'completed': 5,   // Hoàn thành
+            //         'cancelled': 6,   // Đã hủy
+            //         'returned': 7    // Trả hàng
+            //     };
+            //     filteredData = transformedOrders.filter(order => order.trangThai === statusMap[filterType]);
+            // }
+            setLoading(true);
+            const statusMap = {
+                'unread': 0,      // Chưa duyệt
+                'approved': 1,    // Đã duyệt
+                'processing': 2,  // Đang xử lý
+                'shipping': 3,    // Đang giao
+                'delivered': 4,   // Đã giao
+                'completed': 5,   // Hoàn thành
+                'cancelled': 6,   // Đã hủy
+                'returned': 7     // Trả hàng
+            };
+
+            let res;
+
+            if (filterType === 'all') {
+                res = await orderService.getAdminList(); 
+            } else {
+                const statusId = statusMap[filterType]; 
+                res = await orderService.getByStatus(statusId);
             }
-            
-            setOrders(filteredData);
+            const transformedOrders = Array.isArray(res) 
+                ? res.map(order => transformOrderForUI(order))
+                : [];
+
+            setOrders(transformedOrders);
+            // setOrders(filteredData);
         } catch (err) {
             console.log(err)
             showToast("Tải danh sách đơn hàng thất bại", "error");

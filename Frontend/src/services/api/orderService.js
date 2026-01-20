@@ -11,6 +11,46 @@ export const orderService = {
     const res = await axiosClient.post(`/order/Tao-Don-Hang`, data);
     return res.data;
   },
+  updateOrderInfo: async (maDH, data) => {
+    const res = await axiosClient.put(`/order/Cap-nhat-thong-tin/${maDH}`, data);
+    return res.data;
+  },
+
+  /** Lấy chi tiết đơn hàng theo mã đơn (MaDon - dạng string) */
+  getOrderByCode: async (maDon) => {
+    const res = await axiosClient.get(`/order/Ma-Don/${maDon}`);
+    return res.data;
+  },
+
+  /** Lấy danh sách đơn hàng theo trạng thái (0=Chờ duyệt, 3=Đang giao, 5=Hoàn thành, 6=Đã hủy, ...) */
+  getOrdersByStatus: async (status) => {
+    const res = await axiosClient.get(`/order/by-status/${status}`);
+    return res.data;
+  },
+
+  /** Lấy tất cả đơn hàng đã hoàn thành */
+  getCompletedOrders: async () => {
+    const res = await axiosClient.get(`/order/completed`);
+    return res.data;
+  },
+
+  /** Lấy tất cả đơn hàng đã hủy */
+  getCancelledOrders: async () => {
+    const res = await axiosClient.get(`/order/cancelled`);
+    return res.data;
+  },
+
+  /** Lấy đơn hàng theo số điện thoại người nhận */
+  getOrdersByPhone: async (phone) => {
+    const res = await axiosClient.get(`/order/by-phone/${phone}`);
+    return res.data;
+  },
+
+  /** Lấy đơn hàng theo mã đơn (by-code) - thường dùng để tìm kiếm nhanh */
+  getOrderByMaDon: async (maDon) => {
+    const res = await axiosClient.get(`/order/by-code/${maDon}`);
+    return res.data;
+  },
 
   // ADMIN
   getAdminList: async () => {

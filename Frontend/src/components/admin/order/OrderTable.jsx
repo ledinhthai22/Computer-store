@@ -5,7 +5,7 @@ import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
 const OrderTable = ({ 
-    data, 
+    data , 
     loading,
     onView, 
     onUpdate, 
@@ -24,14 +24,14 @@ const OrderTable = ({
     // ✅ Map trạng thái số sang text và màu sắc
     const getStatusInfo = (status) => {
         const statusMap = {
-            1: { text: "Chưa duyệt", color: "bg-gray-400 text-white border-gray-500" },
-            2: { text: "Đã duyệt", color: "bg-orange-500 text-white border-orange-600" },
-            3: { text: "Đang xử lý", color: "bg-orange-300 text-gray-800 border-orange-400" },
-            4: { text: "Đang giao", color: "bg-yellow-400 text-gray-800 border-yellow-500" },
-            5: { text: "Đã giao", color: "bg-green-600 text-white border-green-700" },
-            6: { text: "Hoàn thành", color: "bg-green-400 text-white border-green-500" },
-            7: { text: "Đã hủy", color: "bg-red-400 text-white border-red-500" },
-            8: { text: "Trả hàng", color: "bg-red-600 text-white border-red-700" }
+            0: { text: "Chưa duyệt", color: "bg-gray-400 text-white border-gray-500" },
+            1: { text: "Đã duyệt", color: "bg-orange-500 text-white border-orange-600" },
+            2: { text: "Đang xử lý", color: "bg-orange-300 text-gray-800 border-orange-400" },
+            3: { text: "Đang giao", color: "bg-yellow-400 text-gray-800 border-yellow-500" },
+            4: { text: "Đã giao", color: "bg-green-600 text-white border-green-700" },
+            5: { text: "Hoàn thành", color: "bg-green-400 text-white border-green-500" },
+            6: { text: "Đã hủy", color: "bg-red-400 text-white border-red-500" },
+            7: { text: "Trả hàng", color: "bg-red-600 text-white border-red-700" }
         };
         return statusMap[status] || { text: "Không xác định", color: "bg-gray-200 text-gray-600" };
     };
@@ -191,7 +191,6 @@ const OrderTable = ({
                         <option value="approved">Đã duyệt</option>
                         <option value="processing">Đang xử lý</option>
                         <option value="shipping">Đang giao</option>
-                        <option value="delivered">Đã giao</option>
                         <option value="completed">Hoàn thành</option>
                         <option value="cancelled">Đã hủy</option>
                         <option value="returned">Trả hàng</option>
