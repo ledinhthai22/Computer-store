@@ -170,7 +170,7 @@ const OrderTable = ({
         <div className="space-y-4">
             {/* HEADER */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex-1 max-w-md">
+                <div className="flex-1 max-w">
                     <TableSearch 
                         filterText={filterText} 
                         onFilter={e => setFilterText(e.target.value)} 

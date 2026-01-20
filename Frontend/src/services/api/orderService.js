@@ -33,9 +33,9 @@ export const orderService = {
     return res.data;
   },
 
-  getBySoDienThoat: async (soDienThoat) => {
+  getBySoDienThoai: async (soDienThoai) => {
     const res = await axiosClient.get(
-      `/admin/order/So-Dien-Thoai/${soDienThoat}`,
+      `/admin/order/So-Dien-Thoai/${soDienThoai}`,
     );
     return res.data;
   },

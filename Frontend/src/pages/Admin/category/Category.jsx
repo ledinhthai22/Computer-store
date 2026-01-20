@@ -132,6 +132,7 @@ const Category = () => {
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
                 onFilterTypeChange={setFilterType}
+                filterType={filterType}
                 onOpenAddModal={openAddModal}
             />
 
