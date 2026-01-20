@@ -1,15 +1,11 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Backend.Models
+﻿namespace Ecommerce.DTO.SlideShow
 {
-    public class TrinhChieu
+    public class SlideShowResult
     {
-        [Key]
         public int MaTrinhChieu { get; set; }
         public string DuongDanHinh { get; set; } = null!;
         public string DuongDanSanPham { get; set; } = null!;
         public int SoThuTu { get; set; }
-        public bool TrangThai { get; set; } = true;
-        public DateTime? NgayXoa { get; set; }
+        public bool TrangThai { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 using Backend.DTO.Product;
-using Backend.Services.Product;
+using Ecommerce.Services.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

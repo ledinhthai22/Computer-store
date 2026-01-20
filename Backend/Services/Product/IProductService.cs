@@ -1,6 +1,6 @@
 using Backend.DTO.Product;
 
-namespace Backend.Services.Product
+namespace Ecommerce.Services.Product
 {
     public interface IProductService
     {
