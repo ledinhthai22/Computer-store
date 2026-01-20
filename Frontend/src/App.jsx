@@ -41,6 +41,7 @@ import {
   ChipProduct,
   ScreenProduct,
   SuccessCheckout,
+  HistoryOrder,
   NotFound,
   SearchPage
 } from "./pages/User";
@@ -71,6 +72,7 @@ function App() {
           <Route element={<ProfileLayout/>}>
             <Route path="/thong-tin-ca-nhan" element={<Profile />} />
             <Route path="/doi-mat-khau" element={<UpdatePassword />} />
+            <Route path="/lich-su-mua-hang" element={<HistoryOrder />} />
           </Route>
         </Route>
 
