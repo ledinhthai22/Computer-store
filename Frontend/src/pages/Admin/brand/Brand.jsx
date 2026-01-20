@@ -135,6 +135,7 @@ const Brand = () => {
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
                 onFilterTypeChange={setFilterType}
+                filterType={filterType}
                 onOpenAddModal={() => {
                     setEditingBrand(null);
                     setBrandNameInput("");

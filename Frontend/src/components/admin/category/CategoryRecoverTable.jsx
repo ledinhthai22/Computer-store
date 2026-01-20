@@ -44,43 +44,28 @@ const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
             ),
         },
         {
-            name: "TRẠNG THÁI HIỂN THỊ",
+            name: 'TRẠNG THÁI',
             selector: row => row.trangThai,
-            sortable: true,
-            center: true,
-            width: "200px",
             cell: row => (
-                <span
-                    className={`
-                inline-flex items-center gap-1.5
-                px-5 py-1.5 text-sm font-semibold rounded-full
-                border border-current whitespace-nowrap
+                <span className={`px-5 py-1.5 text-sm font-semibold rounded-full border border-current text-center w-18
                 ${row.trangThai
                             ? 'text-green-700 bg-green-100 border-green-400'
                             : 'text-red-700 bg-red-100 border-red-400'
-                        }
-            `}
+                        }`}
                 >
-                    {row.trangThai ? (
-                        <>
-                            Hiện
-                        </>
-                    ) : (
-                        <>
-                            Ẩn
-                        </>
-                    )}
+                    {row.trangThai ? ('Hiện') : ('Ẩn')}
                 </span>
             ),
         },
         {
             name: 'HÀNH ĐỘNG',
-            minWidth: '150px',
+            width: '400px',
+            center: true,
             cell: row => (
-                <div className="flex justify-start w-full"> 
+                <div className="flex justify-center w-full"> 
                     <button 
                         onClick={() => onRecover(row.maDanhMuc)}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm cursor-pointer whitespace-nowrap"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#00e676] hover:bg-[#00c853] text-white rounded-lg transition-all font-medium shadow-sm whitespace-nowrap cursor-pointer"
                     >
                         <History size={18} />
                         <span>Khôi phục</span>
