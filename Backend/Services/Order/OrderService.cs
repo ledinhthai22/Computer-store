@@ -288,8 +288,8 @@ namespace Backend.Services.Order
                 {
                     throw new InvalidOperationException("Số lượng sản phẩm mua lớn hơn số lượng tồn!");
                 }
-                TienGoc += (bt.GiaBan * BienThe.SoLuong);
-                ThanhToan += (bt.GiaKhuyenMai ?? 0 * BienThe.SoLuong);
+                TienGoc += ((decimal)bt.GiaBan * BienThe.SoLuong);
+                ThanhToan += (decimal)bt.GiaKhuyenMai * BienThe.SoLuong;
             }
             if (request.TongTienGoc < request.TongTienThanhToan)
             {
@@ -309,11 +309,11 @@ namespace Backend.Services.Order
             }
             if (request.TongTienGoc != TienGoc)
             {
-                throw new InvalidOperationException("Tổng tiền góc đã thay đổi!");
+                throw new InvalidOperationException($"Tổng tiền góc đã thay đổi!{TienGoc}");
             }
             if (request.TongTienThanhToan != ThanhToan)
             {
-                throw new InvalidOperationException("Tổng tiền thanh toán đã thay đổi!");
+                throw new InvalidOperationException($"Tổng tiền thanh toán đã thay đổi!{ThanhToan}");
             }
             if (request.TongTienThanhToan > request.TongTienGoc)
             {
