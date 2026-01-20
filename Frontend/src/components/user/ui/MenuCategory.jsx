@@ -14,7 +14,7 @@ export default function MenuCategory({ onClose }) {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const data = await brandService.usergetAll();
+        const data = await brandService.userGetAll();
         setBrand(data);
       } catch (error) {
         handleApiError(error, "Lỗi khi tải thương hiệu");

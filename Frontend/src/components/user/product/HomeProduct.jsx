@@ -29,7 +29,7 @@ export default function HomeProduct() {
       try {
         const [catsList, brandsList] = await Promise.all([
           categoryService.usergetAll(),
-          brandService.usergetAll()
+          brandService.userGetAll()
         ]);
 
         if (Array.isArray(catsList)) {
