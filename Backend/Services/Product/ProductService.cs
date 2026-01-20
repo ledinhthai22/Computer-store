@@ -8,7 +8,7 @@ using Ecommerce.DTO.Product;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using IOFile = System.IO.File;
-namespace Backend.Services.Product
+namespace Ecommerce.Services.Product
 {
     public class ProductService : IProductService
     {
@@ -219,20 +219,20 @@ namespace Backend.Services.Product
                  {
                      KichThuocManHinh = btReq.ThongSoKyThuat.KichThuocManHinh?.Trim() ?? "Đang cập nhật",
                      DungLuongRam = string.IsNullOrWhiteSpace(btReq.ThongSoKyThuat.DungLuongRam?.Trim())
-                                             ? (bienThe.Ram?.Trim() ?? "Đang cập nhật")
+                                             ? bienThe.Ram?.Trim() ?? "Đang cập nhật"
                                              : btReq.ThongSoKyThuat.DungLuongRam.Trim(),
                      SoKheRam = btReq.ThongSoKyThuat.SoKheRam?.Trim() ?? "1",
                      OCung = string.IsNullOrWhiteSpace(btReq.ThongSoKyThuat.OCung?.Trim())
-                                             ? (bienThe.OCung?.Trim() ?? "Đang cập nhật")
+                                             ? bienThe.OCung?.Trim() ?? "Đang cập nhật"
                                              : btReq.ThongSoKyThuat.OCung.Trim(),
                      Pin = btReq.ThongSoKyThuat.Pin?.Trim() ?? "Đang cập nhật",
                      HeDieuHanh = btReq.ThongSoKyThuat.HeDieuHanh?.Trim() ?? "Đang cập nhật",
                      DoPhanGiaiManHinh = btReq.ThongSoKyThuat.DoPhanGiaiManHinh?.Trim() ?? "Đang cập nhật",
                      LoaiXuLyTrungTam = string.IsNullOrWhiteSpace(btReq.ThongSoKyThuat.LoaiXuLyTrungTam?.Trim())
-                                             ? (bienThe.BoXuLyTrungTam?.Trim() ?? "Đang cập nhật")
+                                             ? bienThe.BoXuLyTrungTam?.Trim() ?? "Đang cập nhật"
                                              : btReq.ThongSoKyThuat.LoaiXuLyTrungTam.Trim(),
                      LoaiXuLyDoHoa = string.IsNullOrWhiteSpace(btReq.ThongSoKyThuat.LoaiXuLyDoHoa?.Trim())
-                                             ? (bienThe.BoXuLyDoHoa?.Trim() ?? "Đang cập nhật")
+                                             ? bienThe.BoXuLyDoHoa?.Trim() ?? "Đang cập nhật"
                                              : btReq.ThongSoKyThuat.LoaiXuLyDoHoa.Trim(),
                      CongGiaoTiep = btReq.ThongSoKyThuat.CongGiaoTiep?.Trim() ?? "Đang cập nhật"
                  }
@@ -266,7 +266,7 @@ namespace Backend.Services.Product
 
                     try
                     {
-                        var isAnhChinh = (stt == 1);
+                        var isAnhChinh = stt == 1;
 
                         var duongDanAnh = await _fileService.UploadProductImageAsync(
                             file,

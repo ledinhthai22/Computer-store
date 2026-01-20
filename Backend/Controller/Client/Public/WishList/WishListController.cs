@@ -18,7 +18,7 @@ namespace Ecommerce.Controller.Client.Public.WishList
         }
 
         [HttpGet("{userId}")]
-        [Authorize(Policy = "UserOnly")]  // giả sử bạn có policy này
+        [Authorize(Policy = "UserOnly")]  
         public async Task<IActionResult> GetByUserId(int userId)
         {
             var result = await _wishListService.GetByUserIdAsync(userId);
