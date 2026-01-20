@@ -607,7 +607,7 @@ namespace Backend.Services.Order
             await _DbContext.SaveChangesAsync();
             return await GetByMaDHAsync(MaDH);
         }
-        public async Task<OrderResult> GetOrderByPhoneAsync(string Phone)
+        public async Task<List<OrderResult>> GetOrderByPhoneAsync(string Phone)
         {
             if (string.IsNullOrWhiteSpace(Phone) || Phone.Length < 10)
             {
@@ -652,7 +652,7 @@ namespace Backend.Services.Order
 
                     }).ToList()
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
         }
         //public async Task<OrderResult> DeleteOrderAsync(int MaDH)
         //{
