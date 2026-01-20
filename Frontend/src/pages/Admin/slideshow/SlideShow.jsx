@@ -2,20 +2,17 @@ import { useEffect, useState } from "react";
 import SlideShowTable from '../../../components/admin/slideshow/SlideShowTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
-//import { slideShowService } from '../../../services/api/slideShowService';
+// import { slideShowService } from '../../../services/api/slideShowService'; // Giữ lại để dùng sau
 
 const SlideShow = () => {
     const [slideShows, setSlideShows] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [slideShowNameInput, setSlideShowNameInput] = useState('');
+    const [slideShowNameInput, setSlideShowNameInput] = useState(''); // Đây có thể là tên hoặc link sản phẩm tùy bạn điều chỉnh
     const [editingSlideShow, setEditingSlideShow] = useState(null);
-
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -23,35 +20,55 @@ const SlideShow = () => {
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
     };
+
+    // MOCK DATA dựa trên cấu trúc database của bạn
+    const mockData = [
+        { maTrinhChieu: 1, duongDanHinh: 'banner1.jpg', duongDanSanPham: '/san-pham-1', soThuTu: 1, trangThai: 1 },
+        { maTrinhChieu: 2, duongDanHinh: 'banner2.jpg', duongDanSanPham: '/san-pham-2', soThuTu: 2, trangThai: 1 },
+        { maTrinhChieu: 3, duongDanHinh: 'banner3.jpg', duongDanSanPham: '/san-pham-3', soThuTu: 3, trangThai: 0 },
+    ];
+
     const fetchSlideShows = async () => {
         try {
             setLoading(true);
+            
+            // --- KHI CÓ API THÌ MỞ ĐOẠN NÀY ---
+            /*
             const res = await slideShowService.getAll();
             const data = Array.isArray(res) ? res : [];
             setSlideShows(data);
+            */
+            // ---------------------------------
+
+            // HIỆN TẠI DÙNG MOCK DATA
+            setSlideShows(mockData);
+            setLoading(false);
         } catch (err) {
             console.log(err);
             showToast("Tải danh sách slide show thất bại", "error");
             setSlideShows([]);
-        } finally {
             setLoading(false);
         }
     };
-    useEffect(() => {fetchSlideShows(); }, []);
+
+    useEffect(() => { fetchSlideShows(); }, []);
 
     // MODAL XÓA
     const handleDeleteClick = (id) => {
         setDeleteId(id);
         setIsConfirmOpen(true);
     };
+
     const handleConfirmDelete = async () => {
         try {
             setIsDeleting(true);
-            await slideShowService.delete(deleteId);
+            // API CALL: await slideShowService.delete(deleteId);
+            
+            // Mock logic xóa
+            setSlideShows(slideShows.filter(item => item.maTrinhChieu !== deleteId));
             showToast("Xóa slide show thành công", "success");
-            await fetchSlideShows();
         } catch (err) {
-            console.log(err);
+            console.log(err)
             showToast("Xóa slide show thất bại", "error");
         } finally {
             setIsDeleting(false);
@@ -63,35 +80,33 @@ const SlideShow = () => {
     // MODAL SỬA
     const handleEditClick = (slideShow) => {
         setEditingSlideShow(slideShow);
-        setSlideShowNameInput(slideShow.tenSlideShow || '');
+        // Ở đây lấy DuongDanHinh làm ví dụ cho input
+        setSlideShowNameInput(slideShow.duongDanHinh || '');
         setError('');
         setIsModalOpen(true);
     };
-    // CHỨC NĂNG THÊM VÀ SỬA
+
     const handleSave = async (e) => {
         e.preventDefault();
-        const nameTrimmed = slideShowNameInput.trim();
-        if (!nameTrimmed) {
-            return setError('Tên slide show không được để trống');
-        }
+        if (!slideShowNameInput.trim()) return setError('Không được để trống');
+        
         try {
             setIsSubmitting(true);
-            const data = { tenSlideShow: nameTrimmed };
+            // API CALL: const data = { duongDanHinh: slideShowNameInput };
+            
             if (editingSlideShow) {
-                await slideShowService.update(editingSlideShow.maSlideShow, data)
-                showToast("Cập nhật slide show thành công", "success");
+                // await slideShowService.update(editingSlideShow.maTrinhChieu, data)
+                showToast("Cập nhật thành công (Mock)", "success");
             } else {
-                await slideShowService.create(data);
-                showToast("Thêm slide show thành công", "success");
+                // await slideShowService.create(data);
+                showToast("Thêm mới thành công (Mock)", "success");
             }
 
             await fetchSlideShows();
             setIsModalOpen(false);
-            setEditingSlideShow(null);
-            setSlideShowNameInput('');
         } catch (err) {
-            console.log(err);
-            showToast("Có lỗi xảy ra khi lưu slide show", "error");
+            console.log(err)
+            showToast("Có lỗi xảy ra", "error");
         } finally {
             setIsSubmitting(false);
         }

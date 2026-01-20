@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingBag, Layers, User, LogOut, Hexagon, Mail, AppWindow, Newspaper } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Layers, User, LogOut, Hexagon, Mail, AppWindow, Newspaper, Columns2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from "../../contexts/AuthProvider";
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +21,7 @@ const Sidebar = () => {
     { name: 'Thương hiệu', icon: Hexagon, path: '/quan-ly/thuong-hieu' },
     { name: 'Người dùng', icon: User, path: '/quan-ly/nguoi-dung' },
     { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
+    { name: 'Trình chiếu', icon: Columns2, path: '/quan-ly/trinh-chieu' },
     { name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
   ];
 

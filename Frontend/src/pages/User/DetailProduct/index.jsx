@@ -263,6 +263,7 @@ export default function Details() {
                   </div>
                 </div>
                 <div className="flex items-start">
+                  <span className="font-semibold text-gray-700 gap-2 mr-2">Lượt xem: <span className="text-gray-500">{product.luotXem}</span></span>
                   <span className="font-semibold text-gray-700 min-w-22">Đánh giá:</span>
                   <div className="flex items-center gap-2">
                     {renderStars(product.danhGiaTrungBinh || 0)}

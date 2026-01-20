@@ -124,7 +124,7 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-auto">
                 <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
                     {/* Header */}
                     <div className="p-6 border-b flex items-center justify-between">

@@ -35,11 +35,7 @@ const NavBar = () => {
           onClose={closeAll}
         />
 
-        <NavUser 
-          isOpen={activeMenu === 'user'} 
-          onToggle={() => toggleMenu('user')}
-          onClose={closeAll}
-        />
+        <NavUser />
 
       </div>
     </div>
