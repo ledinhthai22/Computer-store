@@ -13,7 +13,7 @@ const SlideShow = () => {
     
     const [formData, setFormData] = useState({
         tenTrinhChieu: '',
-        DuongDanSanPham: '',
+        duongDanSanPham: '',
         SoThuTu: 1,
         TrangThai: true, // Lưu trực tiếp vào đây
         HinhAnh: null
@@ -56,7 +56,7 @@ const SlideShow = () => {
         setEditingSlideShow(slideShow);
         setFormData({
             tenTrinhChieu: slideShow.tenTrinhChieu || '',
-            DuongDanSanPham: slideShow.duongDanSanPham || '',
+            duongDanSanPham: slideShow.duongDanSanPham || '',
             SoThuTu: slideShow.soThuTu || 1,
             TrangThai: slideShow.trangThai, // API trả về true/false
             HinhAnh: null 
@@ -84,7 +84,7 @@ const SlideShow = () => {
         try {
             const data = new FormData();
             data.append('TenTrinhChieu', formData.tenTrinhChieu);
-            data.append('DuongDanSanPham', formData.DuongDanSanPham);
+            data.append('DuongDanSanPham', formData.duongDanSanPham);
             data.append('SoThuTu', formData.SoThuTu);
             data.append('TrangThai', formData.TrangThai); // Boolean sẽ được convert sang string "true"/"false"
             
@@ -110,18 +110,40 @@ const SlideShow = () => {
         }
     };
 
+    // XÓA 
+        const handleDeleteClick = (id) => {
+            setDeleteId(id);
+            setIsConfirmOpen(true);
+        };
+    
+        const handleConfirmDelete = async () => {
+            try {
+                setIsDeleting(true);
+                await slideShowService.delete(deleteId);
+                showToast("Xóa trình chiếu thành công");
+                await fetchSlideShows();
+            } catch (err) {
+                console.log(err)
+                showToast("Xóa trình chiếu thất bại", "error");
+            } finally {
+                setIsDeleting(false);
+                setIsConfirmOpen(false);
+                setDeleteId(null);
+            }
+        };
+
     return (
         <div className="space-y-6">
             <SlideShowTable 
                 data={slideShows} 
                 loading={loading} 
                 onEdit={handleEditClick}
-                onDelete={(id) => { setDeleteId(id); setIsConfirmOpen(true); }}
+                onDelete={handleDeleteClick}
                 filterType={filterType}
                 onFilterTypeChange={setFilterType}
                 onOpenAddModal={() => {
                     setEditingSlideShow(null);
-                    setFormData({ tenTrinhChieu: '', DuongDanSanPham: '', SoThuTu: 1, TrangThai: true, HinhAnh: null });
+                    setFormData({ tenTrinhChieu: '', duongDanSanPham: '', SoThuTu: 1, TrangThai: true, HinhAnh: null });
                     setPreviewImage(null);
                     setIsModalOpen(true);
                 }}
@@ -237,17 +259,12 @@ const SlideShow = () => {
             )}
             
             {toast.show && <Toast {...toast} onClose={() => setToast({ ...toast, show: false })} />}
-            <ConfirmModal 
-                isOpen={isConfirmOpen} 
-                onConfirm={async () => {
-                    setIsDeleting(true);
-                    try {
-                        await slideShowService.delete(deleteId);
-                        showToast("Xóa thành công");
-                        fetchSlideShows();
-                    } catch { showToast("Lỗi khi xóa", "error"); }
-                    finally { setIsDeleting(false); setIsConfirmOpen(false); }
-                }}
+
+            {/* CONFIRM DELETE */}
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                message="Bạn có muốn xóa trình chiếu này không?"
+                onConfirm={handleConfirmDelete}
                 onCancel={() => setIsConfirmOpen(false)}
                 isLoading={isDeleting}
             />
