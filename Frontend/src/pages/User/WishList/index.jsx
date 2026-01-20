@@ -11,11 +11,13 @@ export default function WishList() {
     const { showToast } = useToast();
     const [wishlistItems, setWishlistItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [total, setTotal] = useState(0);
 
     const fetchWishlist = async () => {
         try {
             const data = await WishListService.getByUser(user.maNguoiDung);
             setWishlistItems(data);
+            setTotal(data.length);
         } catch (error) {
             console.log(error)
             showToast("Không thể tải danh sách", "error");
@@ -67,7 +69,8 @@ export default function WishList() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 m-8">
-            <h1 className="text-2xl font-bold mb-6">Sản phẩm yêu thích</h1>
+            <h1 className="text-2xl font-bold">Sản phẩm yêu thích</h1>
+            <p className="text-gray-500 mb-4">Số sản phẩm yêu thích: {total}</p>
 
             {isLoading ? (
                 <p>Đang tải...</p>
@@ -80,7 +83,7 @@ export default function WishList() {
                             <WishlistItem
                                 key={item.maYeuThich}
                                 product={item} 
-                                yeuThichId={item.maYeuThich} 
+                                yeuThichId={item.maYeuThich}
                                 onRemove={handleRemove}
                                 onAddToCart={handleAddToCart}
                             />
