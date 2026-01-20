@@ -7,14 +7,14 @@ const OrderUpdateModal = ({ isOpen, onClose, onConfirm, order }) => {
   const [selectedStatus, setSelectedStatus] = useState(order.trangThai);
 
   const statusOptions = [
-    { value: 1, label: "Chưa duyệt", color: "bg-gray-400" },
-    { value: 2, label: "Đã duyệt", color: "bg-orange-500" },
-    { value: 3, label: "Đang xử lý", color: "bg-orange-300" },
-    { value: 4, label: "Đang giao", color: "bg-yellow-400" },
-    { value: 5, label: "Đã giao", color: "bg-green-600" },
-    { value: 6, label: "Hoàn thành", color: "bg-green-400" },
-    { value: 7, label: "Đã hủy", color: "bg-red-400" },
-    { value: 8, label: "Trả hàng", color: "bg-red-600" }
+    { value: 0, label: "Chưa duyệt", color: "bg-gray-400" },
+    { value: 1, label: "Đã duyệt", color: "bg-orange-500" },
+    { value: 2, label: "Đang xử lý", color: "bg-orange-300" },
+    { value: 3, label: "Đang giao", color: "bg-yellow-400" },
+    { value: 4, label: "Đã giao", color: "bg-green-600" },
+    { value: 5, label: "Hoàn thành", color: "bg-green-400" },
+    { value: 6, label: "Đã hủy", color: "bg-red-400" },
+    { value: 7, label: "Trả hàng", color: "bg-red-600" }
   ];
 
   const handleConfirm = () => {
