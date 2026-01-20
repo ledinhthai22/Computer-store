@@ -320,22 +320,19 @@ namespace Backend.Services.Order
                 throw new InvalidOperationException("Tổng tiền góc nhỏ hơn tổng thanh toán!");
             }
         }
-        private string CreateMaDH(int PhuongThucThanhToan)
+        private async Task<string> CreateMaDH()
         {
-            DateTime now = DateTime.Now;
-            if (OrderToday.Date != now.Date)
+            string NgayThang = DateTime.Now.ToString("yyMMdd");
+
+            Random random = new Random();
+            string ngaunhien, maDon;
+            do
             {
-                OrderToday = now;
-                OrderCountToday = 1;
+                ngaunhien = random.Next(1000, 9999).ToString();
+                maDon = $"ORD{NgayThang}-{ngaunhien}";
             }
-            else
-            {
-                OrderCountToday++;
-            }
-            string phuongThuc = (PhuongThucThanhToan == 1) ? "01" : "02";
-            string MaDon = $"ORD{now:yyyyMMddHHmmss}{phuongThuc}{OrderCountToday:D3}";
-            Console.WriteLine(MaDon);
-            return MaDon;
+            while (await _DbContext.DonHang.AnyAsync(x => x.MaDon == maDon));
+            return maDon;
         }
         private async Task<List<ChiTietDonHang>> CreateOrderDetails(int MaDH, List<CreateOrderDetailRequest> request)
         {
@@ -359,7 +356,7 @@ namespace Backend.Services.Order
         {
             await CheckValidateCreateOrder(request);
 
-            string MaDon = CreateMaDH(request.PhuongThucThanhToan);
+            string MaDon = await CreateMaDH();
 
             var newOrder = new DonHang
             {
@@ -484,7 +481,7 @@ namespace Backend.Services.Order
         {
 
             var data = await ValidateAndPrepareData(userId, request);
-            string maDon = CreateMaDH(request.PhuongThucThanhToan);
+            string maDon = await CreateMaDH();
 
             var newOrder = new DonHang
             {
