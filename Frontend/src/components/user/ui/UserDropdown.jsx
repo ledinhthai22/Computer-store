@@ -47,13 +47,10 @@ export default function UserDropdown() {
           {user.vaiTro !== "QuanTriVien" && (
             <div>
               <Link to="/thong-tin-ca-nhan" className="block px-4 py-2 hover:text-blue-500">
-                Chỉnh sửa trang cá nhân
-              </Link>
-              <Link to="/don-hang" className="block px-4 py-2 hover:text-blue-500">
-                Quản lý đơn hàng
+                Trang cá nhân
               </Link>
               <Link to="/yeu-thich" className="block px-4 py-2 hover:text-blue-500">
-                Sản phẩm yêu thích
+                Danh sách yêu thích
               </Link>
             </div>
           )}

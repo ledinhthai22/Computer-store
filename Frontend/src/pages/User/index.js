@@ -17,3 +17,4 @@ export { default as PriceProduct } from "./PriceProduct";
 export { default as ScreenProduct } from "./ScreenProduct";
 export { default as ChipProduct } from "./ChipProduct";
 export { default as SearchPage } from "./SearchPage";
+export {default as SuccessCheckout} from "./Checkout/SuccessCheckout";

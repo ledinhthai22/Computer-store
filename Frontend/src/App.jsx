@@ -40,6 +40,7 @@ import {
   PriceProduct,
   ChipProduct,
   ScreenProduct,
+  SuccessCheckout,
   NotFound,
   SearchPage
 } from "./pages/User";
@@ -61,6 +62,7 @@ function App() {
           <Route path="/gui-lien-he" element={<LienHe />} />
           <Route path="/gio-hang" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/thanh-toan-thanh-cong" element={<SuccessCheckout />} />
           {/* <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} /> */}
           <Route path="/yeu-thich" element={<WishList />} />

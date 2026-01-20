@@ -2,6 +2,15 @@ import axiosClient from "./axiosClient";
 
 export const orderService = {
   // USER
+  checkoutFromCart: async (maKH, data) => {
+    const res = await axiosClient.post(`/order/Check-out-Cart/${maKH}`, data);
+    return res.data;
+  },
+
+  createOrder: async (data) => {
+    const res = await axiosClient.post(`/order/Tao-Don-Hang`, data);
+    return res.data;
+  },
 
   // ADMIN
   getAdminList: async () => {
