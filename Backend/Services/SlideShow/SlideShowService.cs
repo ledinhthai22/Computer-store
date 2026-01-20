@@ -38,6 +38,7 @@ namespace Ecommerce.Services.SlideShow
                 .Select(t => new SlideShowResult
                 {
                     MaTrinhChieu = t.MaTrinhChieu,
+                    TenTrinhChieu = t.TenTrinhChieu,
                     DuongDanHinh = t.DuongDanHinh,
                     DuongDanSanPham = t.DuongDanSanPham,
                     SoThuTu = t.SoThuTu,
