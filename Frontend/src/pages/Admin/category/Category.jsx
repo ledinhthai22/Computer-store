@@ -4,6 +4,8 @@ import Toast from "../../../components/admin/Toast";
 import ConfirmModal from "../../../components/admin/DeleteConfirmModal";
 import { categoryService, handleApiError } from "../../../services/api/categoryService";
 
+const BRAND_NAME_REGEX = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]*$/;
+
 const Category = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -84,9 +86,16 @@ const Category = () => {
         e.preventDefault();
         const nameTrimmed = newName.trim();
 
+        // Kiểm tra lại lần cuối trước khi gửi
         if (!nameTrimmed) {
             return setError("Tên danh mục không được để trống");
         }
+        if (!BRAND_NAME_REGEX.test(nameTrimmed)) {
+            return setError("Tên danh mục không được chứa ký tự đặc biệt");
+        }
+    
+    // Nếu có lỗi hiện tại thì không cho submit
+    if (error) return;
 
         try {
             setIsSubmitting(true);
@@ -153,8 +162,17 @@ const Category = () => {
                                 <input
                                     value={newName}
                                     onChange={(e) => {
-                                        setNewName(e.target.value);
-                                        if (error) setError("");
+                                        const value = e.target.value;
+                                        setNewName(value);
+                                        
+                                        // Kiểm tra lỗi theo thời gian thực (Real-time validation)
+                                        if (!value.trim()) {
+                                            setError("Tên danh mục không được để trống");
+                                        } else if (!BRAND_NAME_REGEX.test(value)) {
+                                            setError("Tên danh mục không được chứa ký tự đặc biệt");
+                                        } else {
+                                            setError(""); // Xóa lỗi nếu nhập đúng
+                                        }
                                     }}
                                     className={`w-full px-4 py-2 border rounded-lg outline-none ${error
                                             ? "border-red-500"
@@ -209,14 +227,14 @@ const Category = () => {
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
                                     disabled={isSubmitting}
-                                    className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                                    className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer"
                                 >
                                     Đóng
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 cursor-pointer"
                                 >
                                     {isSubmitting ? "Đang lưu..." : "Xác nhận"}
                                 </button>

@@ -4,7 +4,6 @@ import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import UserModalCreate from '../../../components/admin/user/UserModalCreate';
 import { userService, handleApiError } from '../../../services/api/userService';
-
 const User = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
