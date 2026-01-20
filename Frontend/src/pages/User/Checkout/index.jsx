@@ -409,40 +409,60 @@ export default function Checkout() {
 
               {/* PHƯƠNG THỨC THANH TOÁN */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-5 flex items-center gap-2">
-                  <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  Phương thức thanh toán
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    { id: "COD", label: "COD", desc: "Thanh toán khi nhận hàng", icon: "💵" },
-                    { id: "BANK", label: "Ngân hàng", desc: "Chuyển khoản", icon: "🏦" },
-                    { id: "WALLET", label: "Ví điện tử", desc: "Momo, ZaloPay", icon: "📱" }
-                  ].map((p) => (
+                  <h2 className="text-xl font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Phương thức thanh toán
+                  </h2>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* COD - Có thể chọn */}
                     <label
-                      key={p.id}
                       className={`flex flex-col items-center gap-2 p-4 rounded-xl cursor-pointer border-2 transition-all
-                        ${payment === p.id
+                        ${payment === "COD"
                           ? "border-teal-500 bg-teal-50 shadow-sm"
                           : "border-gray-200 hover:border-teal-300 hover:bg-teal-50/30"}`}
                     >
                       <input
                         type="radio"
-                        checked={payment === p.id}
-                        onChange={() => setPayment(p.id)}
+                        name="payment"
+                        checked={payment === "COD"}
+                        onChange={() => setPayment("COD")}
                         className="sr-only"
                       />
-                      <span className="text-3xl">{p.icon}</span>
+                      <span className="text-3xl">💵</span>
                       <div className="text-center">
-                        <p className="font-semibold text-gray-900">{p.label}</p>
-                        <p className="text-xs text-gray-600 mt-0.5">{p.desc}</p>
+                        <p className="font-semibold text-gray-900">COD</p>
+                        <p className="text-xs text-gray-600 mt-0.5">
+                          Thanh toán khi nhận hàng
+                        </p>
                       </div>
                     </label>
-                  ))}
+
+                    {/* Banking - Đang phát triển */}
+                    <div
+                      className="relative flex flex-col items-center gap-2 p-4 rounded-xl border-2
+                        border-gray-200 bg-gray-100 cursor-not-allowed opacity-70"
+                    >
+                      <span className="text-3xl">🏦</span>
+                      <div className="text-center">
+                        <p className="font-semibold text-gray-500">Ngân hàng</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Chuyển khoản
+                        </p>
+                      </div>
+
+                      {/* Badge đang phát triển */}
+                      <span className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full
+                        bg-yellow-100 text-yellow-700 border border-yellow-300">
+                        Đang phát triển
+                      </span>
+                    </div>
                 </div>
               </div>
+
             </div>
 
             {/* RIGHT - TÓM TẮT ĐƠN HÀNG */}
