@@ -333,7 +333,7 @@ namespace Backend.Services.Order
                 OrderCountToday++;
             }
             string phuongThuc = (PhuongThucThanhToan == 1) ? "01" : "02";
-            string MaDon = $"ORD{now:yyyyMMdd}{phuongThuc}{OrderCountToday:D3}";
+            string MaDon = $"ORD{now:yyyyMMddHHmmss}{phuongThuc}{OrderCountToday:D3}";
             Console.WriteLine(MaDon);
             return MaDon;
         }
