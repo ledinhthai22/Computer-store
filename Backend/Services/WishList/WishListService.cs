@@ -3,10 +3,7 @@ using Backend.DTO.WishList;
 using Backend.Models;
 using Ecommerce.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Backend.Services.WishList
 {
@@ -32,6 +29,7 @@ namespace Backend.Services.WishList
                     MaYeuThich = w.MaYeuThich,
                     MaNguoiDung = w.MaNguoiDung,
                     MaSanPham = w.MaSanPham,
+                    Slug = w.SanPham.Slug,
                     TenSanPham = w.SanPham.TenSanPham,
                     HinhAnhChinh = w.SanPham.HinhAnhSanPham
                         .Where(i => i.AnhChinh && i.NgayXoa == null)

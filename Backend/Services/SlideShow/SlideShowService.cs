@@ -62,50 +62,70 @@ namespace Ecommerce.Services.SlideShow
         }
         public async Task<bool> CreateAsync(SlideShowCreate request)
         {
-            var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
-            var FolderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
-            Directory.CreateDirectory(FolderPath);
-            var filePath = Path.Combine(FolderPath, fileName);
+            var fileName = $"{DateTime.Now:yyyyMMddHHmmss}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
+            var folderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
+            Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
             using var stream = new FileStream(filePath, FileMode.Create);
             await request.HinhAnh.CopyToAsync(stream);
+
             var slideShow = new TrinhChieu
             {
+                TenTrinhChieu = request.TenTrinhChieu,
                 DuongDanHinh = $"/SlideShow/Image/{fileName}",
                 DuongDanSanPham = request.DuongDanSanPham,
                 SoThuTu = request.SoThuTu,
                 TrangThai = request.TrangThai
             };
+
             _DbContext.TrinhChieu.Add(slideShow);
             await _DbContext.SaveChangesAsync();
             return true;
         }
+
         public async Task<bool> UpdateAsync(int id, UpdateSlideShow request)
         {
-            var slideShow = await _DbContext.TrinhChieu.FindAsync(id);
-            if (slideShow == null)
-                return false;
+            var slideShow = await _DbContext.TrinhChieu
+                .FirstOrDefaultAsync(x => x.MaTrinhChieu == id && x.NgayXoa == null);
+
+            if (slideShow == null) return false;
+
             if (request.HinhAnh != null)
             {
-                var fileName = $"{DateTime.Now:dd-MM-yy}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
-                var FolderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
-                Directory.CreateDirectory(FolderPath);
-                var filePath = Path.Combine(FolderPath, fileName);
+                // Xóa ảnh cũ
+                var oldPath = Path.Combine(_Env.WebRootPath, slideShow.DuongDanHinh.TrimStart('/'));
+                if (File.Exists(oldPath))
+                    File.Delete(oldPath);
+
+                var fileName = $"{DateTime.Now:yyyyMMddHHmmss}-{request.TenTrinhChieu}{Path.GetExtension(request.HinhAnh.FileName)}";
+                var folderPath = Path.Combine(_Env.WebRootPath, "SlideShow", "Image");
+                Directory.CreateDirectory(folderPath);
+
+                var filePath = Path.Combine(folderPath, fileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await request.HinhAnh.CopyToAsync(stream);
+
                 slideShow.DuongDanHinh = $"/SlideShow/Image/{fileName}";
             }
-            slideShow.DuongDanSanPham =  request.DuongDanSanPham;
+
+            slideShow.TenTrinhChieu = request.TenTrinhChieu;
+            slideShow.DuongDanSanPham = request.DuongDanSanPham;
             slideShow.SoThuTu = request.SoThuTu;
             slideShow.TrangThai = request.TrangThai;
+
             await _DbContext.SaveChangesAsync();
             return true;
         }
+
         public async Task<bool> DeleteAsync(int id)
         {
-            var slideShow = await _DbContext.TrinhChieu.FindAsync(id);
+            var slideShow = await _DbContext.TrinhChieu
+                .FirstOrDefaultAsync(x => x.MaTrinhChieu == id && x.NgayXoa == null);
+
             if (slideShow == null) return false;
 
-            slideShow.NgayXoa = DateAndTime.Now;
+            slideShow.NgayXoa = DateTime.Now;
             await _DbContext.SaveChangesAsync();
             return true;
         }

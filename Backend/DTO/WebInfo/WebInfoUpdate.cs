@@ -6,5 +6,6 @@
         public string? GiaTriCaiDat { get; set; }
         public bool TrangThaiHienThi { get; set; }
         public string? MoTa { get; set; }
+        public string? TomTat { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace Backend.Services.WebInfo
     {
         // Client
         Task<Dictionary<string, string?>> GetForClientAsync();
+        Task<List<WebInfoResult>> GetAllAsync();
 
         // Admin
         Task<List<WebInfoResult>> GetForAdminAsync();

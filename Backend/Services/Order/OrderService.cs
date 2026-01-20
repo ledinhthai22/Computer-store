@@ -929,5 +929,31 @@ namespace Backend.Services.Order
                 })
                 .ToListAsync();
         }
+        public async Task<bool> CancelOrderByUserAsync(int userId, int maDH)
+        {
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            var order = await _DbContext.DonHang
+                .FirstOrDefaultAsync(dh => dh.MaDH == maDH && dh.MaKH == userId);
+
+            if (order == null)
+                throw new InvalidOperationException("Không tìm thấy đơn hàng hoặc bạn không có quyền hủy đơn hàng này!");
+
+            if (order.TrangThai != 0)
+                throw new InvalidOperationException("Chỉ có thể hủy đơn hàng đang ở trạng thái 'Chờ duyệt'. Đơn hàng này đã được xử lý, vui lòng liên hệ Admin!");
+
+            order.TrangThai = 6;
+
+            _DbContext.DonHang.Update(order);
+
+            if (!(await _DbContext.SaveChangesAsync() > 0))
+                throw new InvalidOperationException("Hủy đơn hàng không thành công!");
+
+            return true;
+        }
     }
 }

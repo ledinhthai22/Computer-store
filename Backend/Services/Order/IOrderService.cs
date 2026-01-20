@@ -26,5 +26,7 @@ namespace Backend.Services.Order
 
         // Xem lịch sử các đơn hàng đã hoàn thành
         Task<List<OrderResult>> GetCompletedOrdersAsync(int userId);
+        //hủy đơn hàng khi admin chưa xác nhận
+        Task<bool> CancelOrderByUserAsync(int userId, int maDH);
     }
 }

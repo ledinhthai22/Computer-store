@@ -12,9 +12,11 @@ namespace Backend.DTO.WebInfo
         public string TenKhoaCaiDat { get; set; } = null!;
         public string? GiaTriCaiDat { get; set; }
         public string? MoTa { get; set; }
+        public string? TomTat { get; set; }
         public bool TrangThaiHienThi { get; set; }
         public DateTime NgayCapNhat { get; set; }
         public DateTime? NgayXoa { get; set; }
+
         public string Message { get; set; } = null!;
     }
 }

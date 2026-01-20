@@ -21,9 +21,27 @@ namespace Backend.Services.WebInfo
                 .Where(x => x.NgayXoa == null && x.TrangThai == true)
                 .ToDictionaryAsync(
                     x => x.TenKhoaCaiDat,
-                    x => x.GiaTriCaiDat
+                    x => x.TomTat
                 );
         }
+        public async Task<List<WebInfoResult>> GetAllAsync()
+        {
+            return await _DbContext.ThongTinTrang
+                .OrderByDescending(x => x.NgayCapNhat)
+                .Select(x => new WebInfoResult
+                {
+                    MaThongTinTrang = x.MaThongTinTrang,
+                    TenKhoaCaiDat = x.TenKhoaCaiDat,
+                    GiaTriCaiDat = x.GiaTriCaiDat,
+                    TomTat = x.TomTat,
+                    MoTa = x.MoTa,
+                    TrangThaiHienThi = x.TrangThai,
+                    NgayCapNhat = x.NgayCapNhat,
+                    NgayXoa = x.NgayXoa
+                })
+                .ToListAsync();
+        }
+
 
         public async Task<List<WebInfoResult>> GetForAdminAsync()
         {
