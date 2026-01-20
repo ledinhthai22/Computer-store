@@ -40,11 +40,6 @@ export default function ProductCard({ product }) {
 
     return (
         <div className="relative group w-full h-full">
-            {/* Nút yêu thích */}
-            <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <Wishlist product={product} />
-            </div>
-
             {/* Tem giảm giá */}
             {phanTramGiam > 0 && (
                 <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
@@ -108,14 +103,10 @@ export default function ProductCard({ product }) {
                                 {formatCurrency(giaHienTai)}
                             </span>
                         </div>
-
-                        <button 
-                            onClick={handleAddToCart} 
-                            title="Thêm vào giỏ"
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#2f9ea0] hover:text-white transition-all duration-300 shadow-sm cursor-pointer"
-                        >
-                            <FaCartPlus size={14} />
-                        </button>
+                        <div title="Yêu thích" className="flex items-center gap-1 cursor-pointer group/wishlist z-10">
+                            {/* Component Wishlist (Icon trái tim) */}
+                            <Wishlist product={product} />
+                        </div>
                     </div>
                 </div>
             </div>
