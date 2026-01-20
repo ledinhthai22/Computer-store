@@ -3,9 +3,19 @@ import { X, Eye, EyeOff } from "lucide-react"; // Thêm icon mắt
 import { userService } from "../../../services/api/userService";
 import Toast from '../Toast';
 
+// Chỉ cho phép chữ cái (có dấu) và khoảng trắng, KHÔNG có số và ký tự đặc biệt
+const NAME_REGEX = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+
+// Regex kiểm tra email chuẩn (không cho phép 2 dấu @@ và định dạng sai)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Chỉ cho phép nhập 8 số trở lên, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
 const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [showPassword, setShowPassword] = useState(false);
+    const [showCFPassword, setShowCFPassword] = useState(false);
     const [formData, setFormData] = useState({
         hoTen: "",
         email: "",
@@ -34,36 +44,55 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Xóa lỗi khi người dùng bắt đầu nhập lại
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
         if (errorMessage) setErrorMessage("");
     };
 
     const validateForm = () => {
         const newErrors = {};
-        // Email regex chuẩn hơn
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        // SĐT regex (đầu số VN)
-        const phoneRegex = /^(0|84)(3|5|7|8|9)([0-9]{8})$/;
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        const today = new Date();
+        const currentYear = today.getFullYear();
 
-        if (!formData.hoTen.trim()) newErrors.hoTen = "Họ tên không được để trống";
-        if (!formData.ngaySinh) newErrors.ngaySinh = "Vui lòng chọn ngày sinh";
+        // 1. Validate Họ tên: Không số, không ký tự đặc biệt
+        if (!formData.hoTen.trim()) {
+            newErrors.hoTen = "Họ tên không được để trống";
+        } else if (!NAME_REGEX.test(formData.hoTen)) {
+            newErrors.hoTen = "Họ tên không được chứa số hoặc ký tự đặc biệt";
+        }
+
+        // 2. Validate Ngày sinh: Không vượt quá hiện tại và năm không vô lý (ví dụ > 2099)
+        if (!formData.ngaySinh) {
+            newErrors.ngaySinh = "Vui lòng chọn ngày sinh";
+        } else {
+            const birthDateObj = new Date(formData.ngaySinh);
+            if (birthDateObj > today) {
+                newErrors.ngaySinh = "Ngày sinh không được vượt quá ngày hiện tại";
+            } else if (birthDateObj.getFullYear() > currentYear || birthDateObj.getFullYear() < 1900) {
+                newErrors.ngaySinh = "Năm sinh không hợp lệ";
+            }
+        }
+
+        // 3. Validate Email: Regex chặn @@ và định dạng sai
         if (!formData.email.trim()) {
             newErrors.email = "Email không được để trống";
-        } else if (!emailRegex.test(formData.email)) {
-            newErrors.email = "Email không đúng định dạng";
+        } else if (!EMAIL_REGEX.test(formData.email)) {
+            newErrors.email = "Email không hợp lệ (ví dụ: example@gmail.com)";
         }
 
+        // 4. Validate Số điện thoại: Đã chặn nhập text ở input, giờ check độ dài
         if (!formData.soDienThoai.trim()) {
             newErrors.soDienThoai = "Số điện thoại không được để trống";
-        } else if (!phoneRegex.test(formData.soDienThoai)) {
-            newErrors.soDienThoai = "Số điện thoại VN không hợp lệ (10 số)";
+        } else if (!formData.soDienThoai.length == 10 ) {
+            newErrors.soDienThoai = "Số điện thoại phải đủ 10 số";
         }
 
+        // 5. Validate Mật khẩu
         if (!formData.matKhau) {
             newErrors.matKhau = "Mật khẩu không được để trống";
-        } else if (!passwordRegex.test(formData.matKhau)) {
-            newErrors.matKhau = "Mật khẩu yếu: Cần 8 ký tự, hoa, thường, số và ký tự đặc biệt";
+        } else if (!PASSWORD_REGEX.test(formData.matKhau)) {
+            newErrors.matKhau = "Cần ít nhất 8 ký tự, 1 hoa, 1 thường, 1 số, 1 ký tự đặc biệt";
         }
 
         if (formData.matKhau !== formData.xacNhanMatKhau) {
@@ -88,15 +117,14 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
             birthDate.setHours(0, 0, 0, 0);
 
             const submitData = {
-                hoTen: (formData.hoTen || "").trim(),
-                email: (formData.email || "").trim(),
-                matKhau: formData.matKhau || "",
+                hoTen: formData.hoTen.trim(),
+                email: formData.email.trim(),
+                matKhau: formData.matKhau,
                 trangThai: true,
                 ngaySinh: birthDate.toISOString(),
-                soDienThoai: (formData.soDienThoai || "").trim(),
+                soDienThoai: formData.soDienThoai.trim(),
             };
-            
-            console.log("Dữ liệu gửi đi:", submitData);
+
             await userService.create(submitData);
             if (onSuccess) onSuccess("Thêm người dùng thành công");          
             handleClose();
@@ -145,48 +173,60 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
                         <div className="grid grid-cols-1 md:grid-cols gap-4">
                             {/* Họ tên - Full width */}
                             <div className="md:col-span-1">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Họ và tên *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Họ và tên</label>
                                 <input
-                                    name="hoTen" value={formData.hoTen} onChange={handleChange}
-                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none transition-all ${errors.hoTen ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
+                                    name="hoTen" value={formData.hoTen} 
+                                    onChange={handleChange}
+                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none transition-all ${errors.hoTen ? "border-red-500" : "border-gray-200 focus:border-[#2F9EA0]"}`}
                                 />
-                                {errors.hoTen && <p className="text-red-500 text-xs mt-1">{errors.hoTen}</p>}
+                                {errors.hoTen && <p className="text-red-500 text-xs mt-1 italic">{errors.hoTen}</p>}
                             </div>
+                            {/* Ngày sinh */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Ngày sinh *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Ngày sinh</label>
                                 <input
                                     type="date"
-                                    name="ngaySinh" value={formData.ngaySinh} onChange={handleChange}
-                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.ngaySinh ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
+                                    name="ngaySinh" 
+                                    max={new Date().toISOString().split("T")[0]} // Giới hạn chọn trên lịch
+                                    value={formData.ngaySinh} 
+                                    onChange={handleChange}
+                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.ngaySinh ? "border-red-500" : "border-gray-200 focus:border-[#2F9EA0]"}`}
                                 />
-                                {errors.ngaySinh && <p className="text-red-500 text-xs mt-1">{errors.ngaySinh}</p>}
+                                {errors.ngaySinh && <p className="text-red-500 text-xs mt-1 italic">{errors.ngaySinh}</p>}
                             </div>
                             {/* Email */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
                                 <input
-                                    name="email" value={formData.email} onChange={handleChange}
-                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.email ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
+                                    name="email" value={formData.email} 
+                                    onChange={handleChange}
+                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.email ? "border-red-500" : "border-gray-200 focus:border-[#2F9EA0]"}`}
                                 />
-                                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                                {errors.email && <p className="text-red-500 text-xs mt-1 italic">{errors.email}</p>}
                             </div>
 
                             {/* SĐT */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại</label>
                                 <input
-                                    name="soDienThoai" value={formData.soDienThoai} onChange={handleChange}
-                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.soDienThoai ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
+                                    name="soDienThoai" value={formData.soDienThoai}
+                                    onInput={(e) => {
+                                        // CHẶN NHẬP TEXT: Chỉ cho phép số và tối đa 10 số
+                                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                                        handleChange(e);
+                                    }}
+                                    className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.soDienThoai ? "border-red-500" : "border-gray-200 focus:border-[#2F9EA0]"}`}
                                 />
-                                {errors.soDienThoai && <p className="text-red-500 text-xs mt-1">{errors.soDienThoai}</p>}
+                                {errors.soDienThoai && <p className="text-red-500 text-xs mt-1 italic">{errors.soDienThoai}</p>}
                             </div>
 
                             {/* Mật khẩu */}
                             <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu *</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu</label>
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    name="matKhau" value={formData.matKhau} onChange={handleChange}
+                                    name="matKhau" value={formData.matKhau} 
+                                    onChange={handleChange}
                                     className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.matKhau ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
                                 />
                                 <button 
@@ -196,17 +236,26 @@ const UserModalCreate = ({ isOpen, onClose, onSuccess }) => {
                                 >
                                     {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
                                 </button>
-                                {errors.matKhau && <p className="text-red-500 text-xs mt-1 leading-tight">{errors.matKhau}</p>}
+                                {errors.matKhau && <p className="text-red-500 text-xs mt-1 italic">{errors.matKhau}</p>}
                             </div>
 
                             {/* Xác nhận */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Xác nhận mật khẩu *</label>
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Xác nhận mật khẩu</label>
                                 <input
-                                    type="password"
-                                    name="xacNhanMatKhau" value={formData.xacNhanMatKhau} onChange={handleChange}
+                                    type={showCFPassword ? "text" : "password"}
+                                    name="xacNhanMatKhau" 
+                                    value={formData.xacNhanMatKhau} 
+                                    onChange={handleChange}
                                     className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.xacNhanMatKhau ? "border-red-500" : "border-gray-200 focus:border-[#2f9ea0]"}`}
                                 />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowCFPassword(!showCFPassword)}
+                                    className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600"
+                                >
+                                    {showCFPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                </button>
                                 {errors.xacNhanMatKhau && <p className="text-red-500 text-xs mt-1">{errors.xacNhanMatKhau}</p>}
                             </div>
                         </div>

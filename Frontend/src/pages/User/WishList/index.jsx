@@ -91,7 +91,6 @@ export default function WishList() {
                     </div>
                 </div>
             )}
-            <TopNew/>
         </div>
     );
 }

@@ -7,6 +7,8 @@ import {
     handleApiError,
 } from "../../../services/api/brandService";
 
+const BRAND_NAME_REGEX = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]*$/;
+
 const Brand = () => {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -92,42 +94,50 @@ const Brand = () => {
     };
 
     // LƯU (THÊM / SỬA)
-    const handleSave = async (e) => {
-        e.preventDefault();
+const handleSave = async (e) => {
+    e.preventDefault();
 
-        const nameTrimmed = brandNameInput.trim();
-        if (!nameTrimmed) {
-            return setError("Tên thương hiệu không được để trống");
+    const nameTrimmed = brandNameInput.trim();
+    
+    // Kiểm tra lại lần cuối trước khi gửi
+    if (!nameTrimmed) {
+        return setError("Tên thương hiệu không được để trống");
+    }
+    if (!BRAND_NAME_REGEX.test(nameTrimmed)) {
+        return setError("Tên thương hiệu không được chứa ký tự đặc biệt");
+    }
+    
+    // Nếu có lỗi hiện tại thì không cho submit
+    if (error) return;
+
+    try {
+        setIsSubmitting(true);
+
+        const data = {
+            tenThuongHieu: nameTrimmed,
+            ...(isEditMode && { trangThai: isActive }),
+        };
+
+        if (editingBrand) {
+            await brandService.update(editingBrand.maThuongHieu, data);
+            showToast("Cập nhật thương hiệu thành công");
+        } else {
+            await brandService.create(data);
+            showToast("Thêm thương hiệu thành công");
         }
 
-        try {
-            setIsSubmitting(true);
-
-            const data = {
-                tenThuongHieu: nameTrimmed,
-                ...(isEditMode && { trangThai: isActive }), // Chỉ gửi trạng thái khi chỉnh sửa
-            };
-
-            if (editingBrand) {
-                await brandService.update(editingBrand.maThuongHieu, data);
-                showToast("Cập nhật thương hiệu thành công");
-            } else {
-                await brandService.create(data);
-                showToast("Thêm thương hiệu thành công");
-            }
-
-            await fetchBrands();
-            setIsModalOpen(false);
-            setEditingBrand(null);
-            setBrandNameInput("");
-            setIsActive(true);
-            setIsEditMode(false);
-        } catch (err) {
-            showToast(handleApiError(err, "Có lỗi xảy ra khi lưu thương hiệu"), "error");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+        await fetchBrands();
+        setIsModalOpen(false);
+        setEditingBrand(null);
+        setBrandNameInput("");
+        setIsActive(true);
+        setIsEditMode(false);
+    } catch (err) {
+        showToast(handleApiError(err, "Có lỗi xảy ra khi lưu thương hiệu"), "error");
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
     return (
         <div className="space-y-6">
@@ -166,18 +176,28 @@ const Brand = () => {
                                     type="text"
                                     value={brandNameInput}
                                     onChange={(e) => {
-                                        setBrandNameInput(e.target.value);
-                                        if (error) setError("");
+                                        const val = e.target.value;
+                                        setBrandNameInput(val);
+
+                                        // Kiểm tra lỗi theo thời gian thực (Real-time validation)
+                                        if (!val.trim()) {
+                                            setError("Tên thương hiệu không được để trống");
+                                        } else if (!BRAND_NAME_REGEX.test(val)) {
+                                            setError("Tên không được chứa ký tự đặc biệt");
+                                        } else {
+                                            setError(""); // Xóa lỗi nếu nhập đúng
+                                        }
                                     }}
-                                    className={`w-full px-4 py-2 border rounded-lg outline-none ${
+                                    className={`w-full px-4 py-2 border rounded-lg outline-none transition-all ${
                                         error
-                                            ? "border-red-500"
+                                            ? "border-red-500 bg-red-50"
                                             : "border-gray-300 focus:ring-2 focus:ring-blue-500"
                                     }`}
                                     autoFocus
                                 />
                                 {error && (
-                                    <p className="text-red-500 text-xs mt-2 font-medium">
+                                    <p className="text-red-500 text-xs mt-2 font-medium flex items-center gap-1">
+                                        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
                                         {error}
                                     </p>
                                 )}
@@ -216,14 +236,14 @@ const Brand = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer"
                                 >
                                     Đóng
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:bg-blue-300 font-medium"
+                                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:bg-blue-300 font-medium cursor-pointer"
                                 >
                                     {isSubmitting ? "Đang lưu..." : "Xác nhận"}
                                 </button>

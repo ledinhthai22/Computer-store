@@ -58,7 +58,7 @@ const BrandTable = ({
       name: "TRẠNG THÁI",
       selector: (row) => row.trangThai,
       sortable: true,
-      width: "140px",
+      width: "150px",
       center: true,
       cell: (row) => {
         const isActive = row.trangThai === true;
