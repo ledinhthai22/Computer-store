@@ -86,6 +86,41 @@ namespace Backend.Controller.Admin.Order
             if (order == null) return Ok(new { message = "Mã đơn không tồn tại" });
             return Ok(order);
         }
+        [HttpGet("detail/{maDH}")]
+        public async Task<IActionResult> GetOrderDetail(int maDH)
+        {
+            try
+            {
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userIdString))
+                {
+                    return Unauthorized(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy thông tin người dùng trong Token."
+                    });
+                }
+
+                var userId = int.Parse(userIdString);
+                var order = await _orderService.GetUserOrderDetailAsync(userId, maDH);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy chi tiết đơn hàng thành công",
+                    data = order
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
 
         [HttpPut("cancel/{maDH}")]
         public async Task<IActionResult> CancelOrder(int maDH)
