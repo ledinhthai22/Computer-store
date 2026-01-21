@@ -44,18 +44,26 @@ const CategoryRecoverTable = ({ data = [], loading, onRecover }) => {
             ),
         },
         {
-            name: 'TRẠNG THÁI',
-            selector: row => row.trangThai,
-            cell: row => (
-                <span className={`px-5 py-1.5 text-sm font-semibold rounded-full border border-current text-center w-18
-                ${row.trangThai
-                            ? 'text-green-700 bg-green-100 border-green-400'
-                            : 'text-red-700 bg-red-100 border-red-400'
-                        }`}
+            name: "TRẠNG THÁI",
+            selector: (row) => row.trangThai,
+            sortable: true,
+            width: "150px",
+            center: true,
+            cell: (row) => {
+                const isActive = row.trangThai === true;
+
+                return (
+                <span
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center ${
+                    isActive
+                        ? "bg-green-100 text-green-700 border-green-200"
+                        : "bg-gray-100 text-gray-600 border-gray-200"
+                    }`}
                 >
-                    {row.trangThai ? ('Hiện') : ('Ẩn')}
+                    {isActive ? "Hoạt động" : "Ẩn"}
                 </span>
-            ),
+                );
+            },
         },
         {
             name: 'HÀNH ĐỘNG',

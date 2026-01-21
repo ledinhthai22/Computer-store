@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import CategoryRecoverTable from '../../../components/admin/category/CategoryRecoverTable';
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
-import { categoryService, handleApiError } from '../../../services/api/categoryService';
+import { categoryService } from '../../../services/api/categoryService';
 
 const CategoryRecover = () => {
     const [categories, setCategories] = useState([]);
@@ -24,8 +24,8 @@ const CategoryRecover = () => {
             const formattedData = Array.isArray(data) ? data : [];
             setCategories(formattedData);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách danh mục đã xóa thất bại");
-            showToast(errorMessage, "error");
+            console.log(err);
+            showToast("Tải danh sách danh mục đã xóa thất bại", "error");
         } finally {
             setLoading(false);
         }
@@ -48,8 +48,8 @@ const CategoryRecover = () => {
             showToast("Khôi phục danh mục thành công", "success");
             await fetchCategoriesRecover();
         } catch (err) {
-            const errorMessage = handleApiError(err, "Khôi phục danh mục thất bại");
-            showToast(errorMessage, "error");
+            console.log(err)
+            showToast("Khôi phục danh mục thất bại", "error");
         } finally {
             setIsRecovering(false);
             setIsConfirmOpen(false);
