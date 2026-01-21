@@ -16,6 +16,19 @@ export const orderService = {
     return res.data;
   },
 
+  getOrderDetail: async (maDH) => {
+    const res = await axiosClient.get(`/order/detail/${maDH}`);
+    return res.data;
+  },
+
+  /**
+   * Hủy đơn hàng (người dùng tự hủy - thường chỉ áp dụng khi trạng thái còn "Chờ duyệt")
+   */
+  cancelOrder: async (maDH) => {
+    const res = await axiosClient.put(`/order/cancel/${maDH}`);
+    return res.data;
+  },
+
   /** Lấy chi tiết đơn hàng theo mã đơn (MaDon - dạng string) */
   getOrderByCode: async (maDon) => {
     const res = await axiosClient.get(`/order/Ma-Don/${maDon}`);
