@@ -2,6 +2,7 @@ import { useCart } from "../../../contexts/CartContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import AddressFormModal from "../../../components/user/AddressFormModal";
+import ConfirmModal from "../../../components/user/ConfirmModal";
 import addressService from "../../../services/api/addressService";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { orderService, handleApiError } from "../../../services/api/orderService";
@@ -14,10 +15,7 @@ export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Danh sách maBienThe được chọn từ trang Cart
   const selectedVariantIds = location.state?.selectedItems || [];
-
-  // Kiểm tra nếu từ "Mua ngay"
   const buyNowItem = location.state?.buyNowItem;
 
   const [addresses, setAddresses] = useState([]);
@@ -28,55 +26,105 @@ export default function Checkout() {
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [initialFormData, setInitialFormData] = useState({});
 
-  // Ghi chú đơn hàng
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [addressIdToDelete, setAddressIdToDelete] = useState(null);
+
   const [orderNote, setOrderNote] = useState("");
   const [payment, setPayment] = useState("COD");
 
-  // Normalize item để xử lý nhiều format từ API
+  // Kiểm tra đăng nhập
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+      showToast("Vui lòng đăng nhập!", "error");
+    }
+  }, [user, navigate, showToast]);
+
+  if (!user) return null;
+
+  // --- HÀM ĐÃ SỬA (FIX LỖI ẢNH) ---
   const normalizeItem = (item) => {
     const variantId = item.maBienThe || item.MaBienThe;
     const qty = item.soLuong || item.SoLuong || item.qty || 0;
     const name = item.tenSanPham || item.TenSanPham || item.tenBienThe || "Sản phẩm";
-    const giaGoc = Number(item.giaBan) || Number(item.gia) || Number(item.giaKhuyenMai) || 0;
-    const giaThanhToan = Number(item.giaKhuyenMai) || Number(item.giaBan) || Number(item.gia) || 0;
-    const image = item.hinhAnh || item.duongDanAnh
-      ? `https://localhost:7012/Product/Image/${item.hinhAnh || item.duongDanAnh}`
-      : "https://via.placeholder.com/400";
 
-    return { 
-      variantId, 
-      qty, 
-      name, 
+    const giaGoc = Number(item.giaBan || item.GiaBan || item.gia || 0);
+    const giaKhuyenMai = Number(
+      item.giaKhuyenMai || item.GiaKhuyenMai || item.giaKhuyenMai || giaGoc
+    );
+
+    // Lấy đường dẫn ảnh thô
+    let rawImagePath = item.hinhAnh || item.duongDanAnh || item.HinhAnh || "";
+
+    if (typeof rawImagePath === "object" && rawImagePath !== null) {
+      rawImagePath = rawImagePath.duongDan || rawImagePath.path || rawImagePath.url || "";
+    }
+
+    const imagePath = String(rawImagePath || "").trim();
+
+    // --- FIX LOGIC TẠO URL ẢNH ---
+    let image = "https://via.placeholder.com/400"; // Ảnh mặc định
+
+    if (imagePath) {
+      if (imagePath.startsWith("http")) {
+        // Nếu đã là link đầy đủ (ví dụ từ Buy Now), giữ nguyên
+        image = imagePath;
+      } else {
+        // Nếu là đường dẫn tương đối, nối thêm domain server
+        // Lưu ý: Đảm bảo server backend đang chạy ở port 7012
+        image = `https://localhost:7012/Product/Image/${imagePath}`;
+      }
+    }
+    // -----------------------------
+
+    return {
+      variantId,
+      qty,
+      name,
       giaGoc,
-      giaThanhToan,
+      giaKhuyenMai,
+      discountPerItem: giaGoc - giaKhuyenMai,
       image,
-      originalItem: item 
+      originalItem: item,
     };
   };
 
-  // Lọc sản phẩm checkout từ cart context hoặc từ buyNowItem
   const checkoutItems = useMemo(() => {
     if (buyNowItem) {
       return [normalizeItem(buyNowItem)];
     }
 
     if (!cart || cart.length === 0) return [];
-    
-    // Nếu không có selectedVariantIds, lấy tất cả
+
     if (selectedVariantIds.length === 0) {
       return cart.map(normalizeItem);
     }
 
-    // Lọc theo maBienThe đã chọn
     return cart
-      .filter(item => {
+      .filter((item) => {
         const variantId = item.maBienThe || item.MaBienThe;
         return selectedVariantIds.includes(variantId);
       })
       .map(normalizeItem);
   }, [cart, selectedVariantIds, buyNowItem]);
 
-  // Load danh sách địa chỉ
+  const { totalOriginal, totalDiscount, finalTotal } = useMemo(() => {
+    return checkoutItems.reduce(
+      (acc, item) => {
+        const original = item.giaGoc * item.qty;
+        const discount = item.discountPerItem * item.qty;
+        const discounted = item.giaKhuyenMai * item.qty;
+
+        return {
+          totalOriginal: acc.totalOriginal + original,
+          totalDiscount: acc.totalDiscount + discount,
+          finalTotal: acc.finalTotal + discounted,
+        };
+      },
+      { totalOriginal: 0, totalDiscount: 0, finalTotal: 0 }
+    );
+  }, [checkoutItems]);
+
   useEffect(() => {
     const fetchAddresses = async () => {
       setLoadingAddresses(true);
@@ -93,10 +141,12 @@ export default function Checkout() {
       }
     };
 
-    fetchAddresses();
-  }, []);
+    if (user) {
+        fetchAddresses();
+    }
+  }, [user]);
 
-  const selectedAddress = addresses.find(a => a.maDiaChiNhanHang === selectedAddressId);
+  const selectedAddress = addresses.find((a) => a.maDiaChiNhanHang === selectedAddressId);
 
   const openAddForm = () => {
     setIsEditing(false);
@@ -126,7 +176,7 @@ export default function Checkout() {
       const updated = await addressService.getUserAddresses();
       setAddresses(updated);
 
-      const newDefault = updated.find(a => a.diaChiMacDinh) || updated[0];
+      const newDefault = updated.find((a) => a.diaChiMacDinh) || updated[0];
       if (newDefault) {
         setSelectedAddressId(newDefault.maDiaChiNhanHang);
       } else {
@@ -137,40 +187,53 @@ export default function Checkout() {
     }
   };
 
-  const handleDeleteAddress = async () => {
-    if (!selectedAddressId || !window.confirm("Xác nhận xóa địa chỉ này?")) return;
+  const handleRequestDelete = (addressId) => {
+    setAddressIdToDelete(addressId);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!addressIdToDelete) return;
+
     try {
-      await addressService.deleteAddress(selectedAddressId);
+      await addressService.deleteAddress(addressIdToDelete);
       const updated = await addressService.getUserAddresses();
       setAddresses(updated);
-      const newSelected = updated[0]?.maDiaChiNhanHang || null;
+
+      const newSelected =
+        updated.find((a) => a.diaChiMacDinh)?.maDiaChiNhanHang ||
+        updated[0]?.maDiaChiNhanHang ||
+        null;
       setSelectedAddressId(newSelected);
+
+      showToast("Đã xóa địa chỉ thành công", "success");
     } catch (err) {
       showToast("Xóa địa chỉ thất bại. Vui lòng thử lại!", "error");
+    } finally {
+      setShowDeleteConfirm(false);
+      setAddressIdToDelete(null);
     }
   };
 
-  // Tính tổng tiền
-  const totalPrice = useMemo(
-    () => checkoutItems.reduce((sum, item) => sum + (item.giaThanhToan * item.qty), 0),
-    [checkoutItems]
-  );
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setAddressIdToDelete(null);
+  };
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) return showToast("Vui lòng chọn địa chỉ giao hàng!", "error");
     if (checkoutItems.length === 0) return showToast("Giỏ hàng trống!", "error");
     if (!user?.maNguoiDung) return showToast("Vui lòng đăng nhập để đặt hàng!", "error");
 
-    const phuongThuc = payment === "COD" ? 1 : 2;  // Map payment method: 1 = COD, 2 = Online
+    const phuongThuc = payment === "COD" ? 1 : 2;
 
     try {
       let result;
       if (buyNowItem) {
-        // Từ "Mua ngay" - Sử dụng CreateOrderAsync
         const item = checkoutItems[0];
         const request = {
           TongTienGoc: item.giaGoc * item.qty,
-          TongTienThanhToan: item.giaThanhToan * item.qty,
+          TongTienThanhToan: item.giaKhuyenMai * item.qty,
           PhuongThucThanhToan: phuongThuc,
           MaKH: user.maNguoiDung,
           MaDiaChiNhanHang: selectedAddress.maDiaChiNhanHang,
@@ -185,31 +248,26 @@ export default function Checkout() {
         };
         result = await orderService.createOrder(request);
       } else {
-        // Từ giỏ hàng - Sử dụng CreateOrderFromCartAsync
         const request = {
           SelectedVariantIds: checkoutItems.map((i) => i.variantId),
           MaDiaChiNhanHang: selectedAddress.maDiaChiNhanHang,
           PhuongThucThanhToan: phuongThuc,
-          TongTienGoc: checkoutItems.reduce((sum, i) => sum + i.giaGoc * i.qty, 0),
-          TongTienThanhToan: checkoutItems.reduce((sum, i) => sum + i.giaThanhToan * i.qty, 0),
+          TongTienGoc: totalOriginal,
+          TongTienThanhToan: finalTotal,
           GhiChu: orderNote.trim(),
         };
         result = await orderService.checkoutFromCart(user.maNguoiDung, request);
-        // Refresh giỏ hàng sau khi tạo đơn từ giỏ
         await fetchCart();
       }
 
       showToast("Đặt hàng thành công!", "success");
-      console.log("Đơn hàng:", result);
-      // Redirect đến trang đơn hàng hoặc trang chủ
-      navigate("/thanh-toan-thanh-cong");  // Giả sử có trang /orders để xem đơn hàng
+      navigate("/thanh-toan-thanh-cong");
     } catch (error) {
       const errorMessage = handleApiError(error, "Đặt hàng thất bại. Vui lòng thử lại!");
       showToast(errorMessage, "error");
     }
   };
 
-  // Loading state
   if (loadingAddresses) {
     return (
       <div className="bg-gray-50 min-h-screen py-8 px-4">
@@ -237,15 +295,16 @@ export default function Checkout() {
             </svg>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Không có sản phẩm nào được chọn</h2>
             <p className="text-gray-600 mb-6">Vui lòng quay lại giỏ hàng và chọn sản phẩm để thanh toán</p>
-            <a href="/cart" className="inline-block px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition">
+            <a
+              href="/cart"
+              className="inline-block px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition cursor-pointer"
+            >
               Quay lại giỏ hàng
             </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* LEFT - Nội dung chính */}
             <div className="lg:col-span-2 space-y-6">
-
               {/* ĐỊA CHỈ GIAO HÀNG */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <div className="flex justify-between items-center mb-5">
@@ -258,7 +317,7 @@ export default function Checkout() {
                   </h2>
                   <button
                     onClick={openAddForm}
-                    className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition"
+                    className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition cursor-pointer"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -276,7 +335,7 @@ export default function Checkout() {
                     <p className="text-lg font-medium mb-2">Chưa có địa chỉ giao hàng</p>
                     <button
                       onClick={openAddForm}
-                      className="text-teal-600 hover:text-teal-700 font-medium hover:underline"
+                      className="text-teal-600 hover:text-teal-700 font-medium hover:underline cursor-pointer"
                     >
                       Thêm địa chỉ ngay →
                     </button>
@@ -286,11 +345,11 @@ export default function Checkout() {
                     {addresses.length > 1 && (
                       <div>
                         <select
-                          value={selectedAddressId || ''}
+                          value={selectedAddressId || ""}
                           onChange={(e) => setSelectedAddressId(Number(e.target.value))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition cursor-pointer"
                         >
-                          {addresses.map(addr => (
+                          {addresses.map((addr) => (
                             <option key={addr.maDiaChiNhanHang} value={addr.maDiaChiNhanHang}>
                               {addr.tenNguoiNhan} - {addr.soDienThoai} - {addr.phuongXa}, {addr.tinhThanh}
                               {addr.diaChiMacDinh && " (Mặc định)"}
@@ -304,9 +363,7 @@ export default function Checkout() {
                       <div className="p-5 bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-lg text-gray-900">
-                              {selectedAddress.tenNguoiNhan}
-                            </h3>
+                            <h3 className="font-bold text-lg text-gray-900">{selectedAddress.tenNguoiNhan}</h3>
                             {selectedAddress.diaChiMacDinh && (
                               <span className="px-2.5 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
                                 Mặc định
@@ -316,7 +373,7 @@ export default function Checkout() {
                           <div className="flex gap-2">
                             <button
                               onClick={openEditForm}
-                              className="p-2 text-teal-600 hover:bg-teal-100 rounded-lg transition"
+                              className="p-2 text-teal-600 hover:bg-teal-100 rounded-lg transition cursor-pointer"
                               title="Chỉnh sửa địa chỉ"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,8 +382,8 @@ export default function Checkout() {
                             </button>
                             {!selectedAddress.diaChiMacDinh && addresses.length > 1 && (
                               <button
-                                onClick={handleDeleteAddress}
-                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
+                                onClick={() => handleRequestDelete(selectedAddress.maDiaChiNhanHang)}
+                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition cursor-pointer"
                                 title="Xóa địa chỉ"
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,10 +440,12 @@ export default function Checkout() {
                       <img
                         src={item.image}
                         onError={(e) => {
+                          console.warn("Ảnh không tải được:", item.image);
+                          e.target.onerror = null;
                           e.target.src = "https://via.placeholder.com/400";
                         }}
                         alt={item.name}
-                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer"
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 line-clamp-2 mb-1">{item.name}</h3>
@@ -395,12 +454,20 @@ export default function Checkout() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-lg text-red-600">
-                          {(item.giaThanhToan * item.qty).toLocaleString("vi-VN")} ₫
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {item.giaThanhToan.toLocaleString("vi-VN")} ₫
-                        </p>
+                        {item.giaKhuyenMai < item.giaGoc ? (
+                          <>
+                            <p className="font-bold text-lg text-red-600">
+                              {(item.giaKhuyenMai * item.qty).toLocaleString("vi-VN")} ₫
+                            </p>
+                            <p className="text-sm text-gray-500 line-through">
+                              {(item.giaGoc * item.qty).toLocaleString("vi-VN")} ₫
+                            </p>
+                          </>
+                        ) : (
+                          <p className="font-bold text-lg text-gray-900">
+                            {(item.giaGoc * item.qty).toLocaleString("vi-VN")} ₫
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -409,40 +476,33 @@ export default function Checkout() {
 
               {/* PHƯƠNG THỨC THANH TOÁN */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-5 flex items-center gap-2">
-                    <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                    Phương thức thanh toán
-                  </h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Phương thức thanh toán
+                </h2>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                    {/* COD - Có thể chọn */}
-                    <label
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl cursor-pointer border-2 transition-all
-                        ${payment === "COD"
-                          ? "border-teal-500 bg-teal-50 shadow-sm"
-                          : "border-gray-200 hover:border-teal-300 hover:bg-teal-50/30"}`}
-                    >
-                      <input
-                        type="radio"
-                        name="payment"
-                        checked={payment === "COD"}
-                        onChange={() => setPayment("COD")}
-                        className="sr-only"
-                      />
-                      <span className="text-3xl">💵</span>
-                      <div className="text-center">
-                        <p className="font-semibold text-gray-900">COD</p>
-                        <p className="text-xs text-gray-600 mt-0.5">
-                          Thanh toán khi nhận hàng
-                        </p>
-                      </div>
-                    </label>
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                  <label
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl cursor-pointer border-2 transition-all
+                      ${payment === "COD" ? "border-teal-500 bg-teal-50 shadow-sm" : "border-gray-200 hover:border-teal-300 hover:bg-teal-50/30"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={payment === "COD"}
+                      onChange={() => setPayment("COD")}
+                      className="sr-only"
+                    />
+                    <span className="text-3xl">💵</span>
+                    <div className="text-center">
+                      <p className="font-semibold text-gray-900">COD</p>
+                      <p className="text-xs text-gray-600 mt-0.5">Thanh toán khi nhận hàng</p>
+                    </div>
+                  </label>
                 </div>
               </div>
-
             </div>
 
             {/* RIGHT - TÓM TẮT ĐƠN HÀNG */}
@@ -455,19 +515,29 @@ export default function Checkout() {
                   Đơn Hàng
                 </h2>
 
-                <div className="space-y-3 mb-5">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Tạm tính</span>
-                    <span className="font-semibold">{totalPrice.toLocaleString("vi-VN")} ₫</span>
+                <div className="space-y-3 mb-5 text-sm text-gray-700">
+                  <div className="flex justify-between">
+                    <span>Tổng tiền</span>
+                    <span>{totalOriginal.toLocaleString("vi-VN")} ₫</span>
                   </div>
-                  <div className="flex justify-between text-gray-700">
+
+                  {totalDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Đã giảm</span>
+                      <span>-{totalDiscount.toLocaleString("vi-VN")} ₫</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between">
                     <span>Phí vận chuyển</span>
                     <span className="text-green-600 font-semibold">Miễn phí</span>
                   </div>
-                  <hr className="border-gray-200" />
-                  <div className="flex justify-between text-xl font-bold pt-2">
+
+                  <hr className="border-gray-200 my-2" />
+
+                  <div className="flex justify-between text-xl font-bold pt-1">
                     <span>Tổng cộng</span>
-                    <span className="text-red-600">{totalPrice.toLocaleString("vi-VN")} ₫</span>
+                    <span className="text-red-600">{finalTotal.toLocaleString("vi-VN")} ₫</span>
                   </div>
                 </div>
 
@@ -481,7 +551,7 @@ export default function Checkout() {
                 <button
                   onClick={handlePlaceOrder}
                   disabled={!selectedAddress || checkoutItems.length === 0}
-                  className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -491,7 +561,7 @@ export default function Checkout() {
 
                 <p className="text-xs text-gray-500 text-center mt-4 leading-relaxed">
                   Bằng cách đặt hàng, bạn đồng ý với{" "}
-                  <a href="#" className="text-teal-600 hover:underline">Điều khoản dịch vụ</a>
+                  <a href="#" className="text-teal-600 hover:underline cursor-pointer">Điều khoản dịch vụ</a>
                 </p>
               </div>
             </div>
@@ -499,7 +569,6 @@ export default function Checkout() {
         )}
       </div>
 
-      {/* Modal Form Địa Chỉ */}
       <AddressFormModal
         isOpen={showAddressForm}
         onClose={() => setShowAddressForm(false)}
@@ -507,6 +576,14 @@ export default function Checkout() {
         initialData={initialFormData}
         isEditing={isEditing}
         editingAddressId={editingAddressId}
+      />
+
+      <ConfirmModal
+        show={showDeleteConfirm}
+        title="Xác nhận xóa địa chỉ"
+        message="Bạn có chắc chắn muốn xóa địa chỉ này không? Hành động này không thể hoàn tác."
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

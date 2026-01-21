@@ -56,7 +56,7 @@ const AddressFormModal = ({
         const data = await addressService.getProvinces(true);
         setProvinces(data || []);
       } catch (err) {
-        setError(err.message || "Không tải được danh sách tỉnh/thành");
+        setError(err.message || "Không tải được danh sách tỉnh/thành"); 
       } finally {
         setLoading(false);
       }

@@ -33,12 +33,6 @@ const WebInfoTable = ({
     const handleDelete = (row) => {
         if (row.trangThaiHienThi === true) return;
 
-        const confirmDelete = window.confirm(
-            `Bạn có chắc chắn muốn xóa cấu hình "${row.tenKhoaCaiDat}" không?`
-        );
-
-        if (!confirmDelete) return;
-
         onDelete(row.maThongTinTrang);
     };
 

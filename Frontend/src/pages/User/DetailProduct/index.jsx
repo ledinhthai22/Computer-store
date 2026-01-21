@@ -3,6 +3,9 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { productService } from "../../../services/api/productService";
 import useAddToCart from "../../../hooks/useAddToCart";
 import RelatedProduct from "../../../components/user/product/RelatedProduct";
+import { useAuth } from "../../../contexts/AuthProvider";
+import { useToast } from "../../../contexts/ToastContext";
+import { useModalLogin } from "../../../contexts/ModalLoginContext";
 import { 
   ShoppingCart, 
   Star, 
@@ -22,6 +25,9 @@ import {
 const API_BASE_URL = "https://localhost:7012"; 
 
 export default function Details() {
+  const {user} = useAuth(); 
+  const {showToast} = useToast();
+  const { openLogin } = useModalLogin();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -130,13 +136,18 @@ export default function Details() {
   };
 
   const handleBuyNow = () => {
+    if(!user) {
+      showToast("Vui lòng đăng nhập để mua hàng.", "info");
+      openLogin();
+      return;
+    }
     const item = {
       maBienThe: selectedVariant.maBTSP,
       soLuong: quantity,
       tenBienThe: selectedVariant.tenBienThe || product.tenSanPham,
       giaKhuyenMai: selectedVariant.giaKhuyenMai || selectedVariant.giaBan,
       giaBan: selectedVariant.giaBan,
-      hinhAnh: product.hinhAnh[0],  // Sử dụng ảnh đầu tiên
+      hinhAnh: getImageUrl(product.hinhAnh[0]),  // Sử dụng ảnh đầu tiên
     };
     navigate("/checkout", { state: { buyNowItem: item } });
   };
@@ -384,7 +395,7 @@ export default function Details() {
                 
                 <button 
                   onClick={handleBuyNow}
-                  className="block w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-xl font-semibold text-lg text-center shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                  className="block w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-xl font-semibold text-lg text-center shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
                 >
                   Mua ngay
                 </button>

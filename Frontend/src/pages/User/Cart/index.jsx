@@ -241,7 +241,7 @@ export default function Cart() {
 
                 <div className="space-y-3 text-sm text-gray-700">
                   <div className="flex justify-between">
-                    <span>Tạm tính</span>
+                    <span>Tổng tiền</span>
                     <span>{subTotal.toLocaleString()}₫</span>
                   </div>
 
