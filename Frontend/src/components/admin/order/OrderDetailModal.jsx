@@ -48,28 +48,38 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
   };
 
  const handleSave = () => {
+    const fullAddressString = formData.diaChi || "";
+    
+    const parts = fullAddressString.split(",").map(p => p.trim()).filter(p => p !== "");
 
-    const currentAddress = formData.diaChi || "";
+    let finalTinhThanh = order.tinhThanh || "";
+    let finalPhuongXa = order.phuongXa || "";
+    let finalDiaChiCuThe = fullAddressString; 
+    if (parts.length >= 3) {
+        finalTinhThanh = parts[parts.length - 1]; 
+        finalPhuongXa = parts[parts.length - 2]; 
+        
+        finalDiaChiCuThe = parts.slice(0, parts.length - 2).join(", ");
+    } 
+    else if (parts.length === 2) {
+        finalTinhThanh = parts[1];
+        finalPhuongXa = parts[0]; 
+        finalDiaChiCuThe = parts[0];
+    }
 
-    const parts = currentAddress.split(",").map(p => p.trim());
-
-    const finalTinhThanh = parts.length > 0 ? parts[parts.length - 1] : (order.tinhThanh || "Khác");
-    const finalPhuongXa = parts.length > 1 ? parts[parts.length - 2] : (order.phuongXa || "Khác");
-
-    // 4. Tạo gói dữ liệu chuẩn để gửi
     const payload = {
       ...formData,
+      diaChi: finalDiaChiCuThe,
       tinhThanh: finalTinhThanh, 
       phuongXa: finalPhuongXa,   
     };
 
     try {
+        console.log("Payload gửi đi:", payload);
         onUpdate(order.maDonHang, payload); 
-       
         setIsEditing(false); 
     } catch (error) {
         console.error("Lỗi update ở modal", error);
-        // Không tắt form edit nếu lỗi
     }
   };
   const getStatusInfo = (status) => {
