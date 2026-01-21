@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; // Thêm useEffect
+import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 
 const OrderUpdateModal = ({ isOpen, onClose, onConfirm, order }) => {
@@ -21,8 +21,11 @@ const OrderUpdateModal = ({ isOpen, onClose, onConfirm, order }) => {
     { value: 7, label: "Trả hàng", color: "bg-red-600" }
   ];
 
-  // ✅ LOGIC LỌC TRẠNG THÁI Ở ĐÂY
   const filteredOptions = statusOptions.filter((status) => {
+    if (order.trangThai === 0) {
+      return [0, 1, 6].includes(status.value);
+    }
+
     return status.value >= order.trangThai;
   });
   
@@ -61,13 +64,11 @@ const OrderUpdateModal = ({ isOpen, onClose, onConfirm, order }) => {
               Chọn trạng thái mới:
             </label>
             
-            {/* ✅ Dùng filteredOptions thay vì statusOptions */}
             <div className="grid grid-cols-2 gap-3">
               {filteredOptions.map((status) => (
                 <button
                   key={status.value}
                   onClick={() => setSelectedStatus(status.value)}
-                  // Disable nút trạng thái hiện tại để tránh click nhầm
                   disabled={status.value === order.trangThai} 
                   className={`p-3 rounded-xl border-2 transition-all text-sm font-semibold 
                     ${status.value === order.trangThai ? 'opacity-50 cursor-not-allowed' : ''}
