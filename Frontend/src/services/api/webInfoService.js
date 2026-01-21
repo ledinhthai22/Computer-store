@@ -2,8 +2,11 @@ import axiosClient from "./axiosClient";
 
 export const WebInfoService = {
   // CLIENT
-  userGetAll: () =>
+  userGetHeader: () =>
     axiosClient.get("/webinfo").then((res) => res.data),
+    
+  userGetAll: () =>
+    axiosClient.get("/webinfo/all").then((res) => res.data),
 
   // ADMIN
   getAll: () =>
