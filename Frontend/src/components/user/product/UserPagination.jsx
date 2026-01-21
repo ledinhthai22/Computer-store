@@ -50,7 +50,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors  cursor-pointer"
       >
         <ChevronsLeft size={18} />
       </button>
@@ -59,7 +59,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors  cursor-pointer"
       >
         <ChevronLeft size={18} />
       </button>
@@ -79,7 +79,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
                   value={jumpPage}
                   onChange={(e) => setJumpPage(e.target.value)}
                   onKeyDown={handleJumpSubmit}
-                  className="hidden group-hover:block w-12 h-9 border border-blue-300 rounded-md text-center text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="hidden group-hover:block w-12 h-9 border border-blue-300 rounded-md text-center text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white  cursor-pointer"
                 />
               </div>
             );
@@ -105,7 +105,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer"
       >
         <ChevronRight size={18} />
       </button>
@@ -114,7 +114,7 @@ const UserPagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(totalPages)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors cursor-pointer"
       >
         <ChevronsRight size={18} />
       </button>

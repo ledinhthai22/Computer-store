@@ -3,7 +3,7 @@ import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { slideShowService } from "../../../services/api/slideShowService"; 
 
-const API_IMAGE_BASE_URL = "https://localhost:7012/SlideShow/Image/"; 
+const API_IMAGE_BASE_URL = "https://localhost:7012"; 
 
 export default function Slideshow() {
   const [slides, setSlides] = useState([]);
