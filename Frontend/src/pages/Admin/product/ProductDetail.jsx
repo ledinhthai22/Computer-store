@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Trash2, Camera, X, Edit3, Save, ArrowLeft, Plus, ChevronDown, ChevronUp,
-  Image as ImageIcon, Package, Settings, DollarSign, AlertCircle
+  Image as ImageIcon, Package, Settings, DollarSign, AlertCircle, Check
 } from 'lucide-react';
 import DeleteConfirmModal from '../../../components/admin/DeleteConfirmModal';
 import UpdateConfirmModal from '../../../components/admin/UpdateConfirmModal';
@@ -10,7 +10,7 @@ import { productService } from "../../../services/api/productService";
 import { categoryService } from "../../../services/api/categoryService";
 import { brandService } from "../../../services/api/brandService";
 
-const InputField = ({ label, value, onChange, type = "text", disabled, placeholder, error }) => (
+const InputField = ({ label, value, onChange, type = "text", disabled, placeholder, error, min, step }) => (
   <div className="flex flex-col gap-1.5 w-full text-left">
     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">{label}</label>
     <input
@@ -19,12 +19,15 @@ const InputField = ({ label, value, onChange, type = "text", disabled, placehold
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${error
-        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-        : disabled
+      min={min}
+      step={step}
+      className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+        error
+          ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+          : disabled
           ? 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'
           : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
-        }`}
+      }`}
     />
     {error && (
       <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
@@ -47,6 +50,7 @@ const ProductDetail = () => {
   const [openSpecs, setOpenSpecs] = useState({});
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [errors, setErrors] = useState({});
+  const [imageError, setImageError] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -65,6 +69,8 @@ const ProductDetail = () => {
 
   const [productImages, setProductImages] = useState([]);
   const [deletedImageIds, setDeletedImageIds] = useState([]);
+
+  const currentImageCount = productImages.filter(img => img !== null && (img.duongDan || img.preview)).length;
 
   const formatImageUrl = (rawPath) => {
     if (!rawPath) return '';
@@ -97,14 +103,10 @@ const ProductDetail = () => {
 
         if (product.hinhAnh?.length) {
           const formatted = product.hinhAnh
-            // Bước 1: Lọc ảnh chưa xóa (nếu backend chưa lọc)
-            .filter(img => !img.ngayXoa) // tùy backend có trả về trường này không
-            // Bước 2: Sắp xếp - Ưu tiên ảnh chính (AnhChinh = true) lên đầu, sau đó theo ThuTuAnh
+            .filter(img => !img.ngayXoa)
             .sort((a, b) => {
-              if (a.anhChinh !== b.anhChinh) {
-                return b.anhChinh ? 1 : -1;           // true → lên đầu
-              }
-              return (a.thuTuAnh || 0) - (b.thuTuAnh || 0); // cùng loại thì theo thứ tự
+              if (a.anhChinh !== b.anhChinh) return b.anhChinh ? 1 : -1;
+              return (a.thuTuAnh || 0) - (b.thuTuAnh || 0);
             })
             .map(img => ({
               id: img.maHinhAnh || `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -113,7 +115,6 @@ const ProductDetail = () => {
               anhChinh: img.anhChinh || false,
               isNew: false,
             }));
-
           setProductImages(formatted);
         }
 
@@ -151,9 +152,9 @@ const ProductDetail = () => {
     };
   }, [productImages]);
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = 'success', duration = 4000) => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), duration);
   };
 
   const validateImageFile = (file) => {
@@ -164,8 +165,22 @@ const ProductDetail = () => {
     return null;
   };
 
+  const isValidColorName = (value) => {
+    return /^[\p{L}\s-]+$/u.test(value.trim()) || value === '';
+  };
+
+  const isValidInteger = (value) => {
+    return value === '' || (/^\d+$/.test(value) && Number(value) >= 0);
+  };
+
   const handleProductImageUpload = (e) => {
     const files = Array.from(e.target.files || []);
+    if (currentImageCount + files.length > 10) {
+      showToast(`Chỉ có thể thêm tối đa ${10 - currentImageCount} ảnh nữa`, 'error');
+      setImageError(`Tối đa 10 ảnh (đã có ${currentImageCount}/10)`);
+      return;
+    }
+
     const newImages = files.map(file => {
       const err = validateImageFile(file);
       if (err) {
@@ -181,28 +196,9 @@ const ProductDetail = () => {
       };
     }).filter(Boolean);
 
-    if (newImages.length > 0) {
-      setProductImages(prev => [...prev, ...newImages]);
-    }
+    setProductImages(prev => [...prev, ...newImages]);
+    setImageError('');
     e.target.value = '';
-  };
-
-  const removeImage = (index) => {
-    setProductImages(prev => {
-      const imgToRemove = prev[index];
-      if (imgToRemove?.maHinhAnh && !imgToRemove.isNew) {
-        setDeletedImageIds(ids => [...new Set([...ids, imgToRemove.maHinhAnh])]);
-      }
-      if (imgToRemove?.preview) URL.revokeObjectURL(imgToRemove.preview);
-
-      if (index === 0) {
-        const updated = [...prev];
-        updated[0] = null;
-        return updated;
-      } else {
-        return prev.filter((_, i) => i !== index);
-      }
-    });
   };
 
   const handleReplaceImage = (e, index) => {
@@ -229,18 +225,51 @@ const ProductDetail = () => {
     e.target.value = '';
   };
 
+  const removeImage = (index) => {
+    setProductImages(prev => {
+      const imgToRemove = prev[index];
+      if (imgToRemove?.maHinhAnh && !imgToRemove.isNew) {
+        setDeletedImageIds(ids => [...new Set([...ids, imgToRemove.maHinhAnh])]);
+      }
+      if (imgToRemove?.preview) URL.revokeObjectURL(imgToRemove.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+    setImageError('');
+  };
+
   const updateVariant = (id, field, value) => {
+    // Validate realtime cho các trường số
+    if (['giaBan', 'phanTramGiam', 'soLuongTon'].includes(field)) {
+      if (value !== '' && !isValidInteger(value)) {
+        let msg = '';
+        if (field === 'giaBan') msg = 'Giá bán chỉ được nhập số nguyên không âm';
+        else if (field === 'phanTramGiam') msg = 'Phần trăm giảm chỉ được nhập số nguyên từ 0-100';
+        else if (field === 'soLuongTon') msg = 'Số lượng tồn chỉ được nhập số nguyên không âm';
+        showToast(msg, 'error', 3000);
+        return;
+      }
+      if (field === 'phanTramGiam' && value !== '' && Number(value) > 100) {
+        showToast('Phần trăm giảm phải từ 0 đến 100', 'error', 3000);
+        return;
+      }
+    }
+
+    // Validate màu sắc
+    if (field === 'mauSac') {
+      if (value !== '' && !isValidColorName(value)) {
+        showToast('Màu sắc chỉ được chứa chữ cái, khoảng trắng và gạch nối (-)', 'error', 3000);
+        return;
+      }
+    }
+
     setVariants(prev =>
       prev.map(v => {
         if (v.id !== id && v.maBTSP !== id) return v;
 
         let updated = { ...v, [field]: value };
 
-        // Tự động tính giaKhuyenMai
         if (field === 'giaBan' || field === 'phanTramGiam') {
           const giaBan = Number(updated.giaBan) || 0;
-
-          // ❗ Không nhập % giảm → KHÔNG có KM
           if (updated.phanTramGiam === '' || updated.phanTramGiam === null) {
             updated.giaKhuyenMai = null;
           } else {
@@ -254,7 +283,6 @@ const ProductDetail = () => {
       })
     );
 
-    // Xóa lỗi cũ nếu sửa đúng
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[`variant_${id}_${field}`];
@@ -263,6 +291,13 @@ const ProductDetail = () => {
   };
 
   const updateVariantSpec = (id, field, value) => {
+    if (field === 'soKheRam') {
+      if (value !== '' && !isValidInteger(value)) {
+        showToast('Số khe RAM chỉ được nhập số nguyên không âm (ví dụ: 1, 2, 4)', 'error', 3000);
+        return;
+      }
+    }
+
     setVariants(prev =>
       prev.map(v => {
         if (v.id === id || v.maBTSP === id) {
@@ -325,33 +360,48 @@ const ProductDetail = () => {
       if (!v.tenBienThe?.trim()) {
         newErrors[`variant_${vid}_tenBienThe`] = 'Vui lòng nhập tên biến thể';
       }
-      if (!v.giaBan || Number(v.giaBan) <= 0) {
-        newErrors[`variant_${vid}_giaBan`] = 'Giá bán phải lớn hơn 0';
-      }
-      if (Number(v.soLuongTon) < 0) {
-        newErrors[`variant_${vid}_soLuongTon`] = 'Số lượng tồn không hợp lệ';
+
+      const giaBanNum = Number(v.giaBan);
+      if (!v.giaBan || giaBanNum <= 0 || !Number.isInteger(giaBanNum)) {
+        newErrors[`variant_${vid}_giaBan`] = 'Giá bán phải là số nguyên lớn hơn 0';
       }
 
       const phanTram = Number(v.phanTramGiam);
-      if (v.phanTramGiam !== '' && (phanTram < 0 || phanTram > 100)) {
-        newErrors[`variant_${vid}_phanTramGiam`] = 'Phần trăm giảm phải từ 0 đến 100';
+      if (v.phanTramGiam !== '' && (phanTram < 0 || phanTram > 100 || !Number.isInteger(phanTram))) {
+        newErrors[`variant_${vid}_phanTramGiam`] = 'Phần trăm giảm phải là số nguyên từ 0-100';
       }
 
-      // ✅ FIX: Chỉ validate nếu có % giảm > 0
+      if (v.mauSac && !isValidColorName(v.mauSac)) {
+        newErrors[`variant_${vid}_mauSac`] = 'Màu sắc chỉ được chứa chữ cái, khoảng trắng và gạch nối';
+      }
+
+      const soLuong = Number(v.soLuongTon);
+      if (!v.soLuongTon || soLuong < 0 || !Number.isInteger(soLuong)) {
+        newErrors[`variant_${vid}_soLuongTon`] = 'Số lượng tồn phải là số nguyên không âm';
+      }
+
+      const soKheRam = v.thongSoKyThuat?.soKheRam || '';
+      if (soKheRam !== '' && (!isValidInteger(soKheRam) || !Number.isInteger(Number(soKheRam)))) {
+        newErrors[`variant_${vid}_soKheRam`] = 'Số khe RAM phải là số nguyên không âm';
+      }
+
       if (
         v.phanTramGiam !== '' &&
         Number(v.phanTramGiam) > 0 &&
         Number(v.giaKhuyenMai) >= Number(v.giaBan)
       ) {
-        newErrors[`variant_${vid}_giaKhuyenMai`] =
-          'Giá khuyến mãi phải nhỏ hơn giá bán';
+        newErrors[`variant_${vid}_giaKhuyenMai`] = 'Giá khuyến mãi phải nhỏ hơn giá bán';
       }
     });
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      showToast('Vui lòng kiểm tra lại các trường phần trăm giảm và thông tin bắt buộc', 'error');
+      const errorList = Object.values(newErrors);
+      const toastMsg = errorList.length > 1
+        ? `${errorList[0]} (và ${errorList.length - 1} lỗi khác)`
+        : errorList[0] || 'Vui lòng kiểm tra lại thông tin';
+      showToast(toastMsg, 'error', 5000);
       return false;
     }
 
@@ -361,8 +411,6 @@ const ProductDetail = () => {
   const handleUpdateClick = () => {
     if (validateForm()) {
       setIsConfirmUpdateOpen(true);
-    } else {
-      showToast("Vui lòng kiểm tra lại thông tin biến thể", "error");
     }
   };
 
@@ -399,11 +447,9 @@ const ProductDetail = () => {
         formData.append(`BienThe[${i}].TenBienThe`, v.tenBienThe?.trim() || fallback);
         formData.append(`BienThe[${i}].GiaBan`, Number(v.giaBan) || 0);
 
-        // ✅ FIX: Chỉ gửi GiaKhuyenMai nếu có giá trị hợp lệ
         if (v.phanTramGiam !== '' && v.phanTramGiam != null && v.giaKhuyenMai != null) {
           formData.append(`BienThe[${i}].GiaKhuyenMai`, Number(v.giaKhuyenMai));
         }
-        // Nếu không có phần trăm giảm, KHÔNG gửi field GiaKhuyenMai → backend nhận null
 
         formData.append(`BienThe[${i}].MauSac`, v.mauSac?.trim() || fallback);
         formData.append(`BienThe[${i}].Ram`, v.ram?.trim() || fallback);
@@ -433,10 +479,10 @@ const ProductDetail = () => {
       setDeletedImageIds([]);
       setDeletedVariantIds([]);
 
-      // Reload để đồng bộ
-      // Reload để đồng bộ
+      // Reload data
       const refreshed = await productService.getDetailProduct(maSanPham);
       if (refreshed) {
+        // ... (giữ nguyên phần reload như cũ của bạn)
         setBasicInfo({
           maSanPham: refreshed.maSanPham,
           tenSanPham: refreshed.tenSanPham || basicInfo.tenSanPham,
@@ -446,10 +492,9 @@ const ProductDetail = () => {
           soLuongTon: refreshed.soLuongTon || basicInfo.soLuongTon,
         });
 
-        // Xử lý ảnh - có sort
         if (refreshed.hinhAnh?.length) {
           const formatted = refreshed.hinhAnh
-            .filter(img => !img.ngayXoa) // nếu có
+            .filter(img => !img.ngayXoa)
             .sort((a, b) => {
               if (a.anhChinh !== b.anhChinh) return b.anhChinh ? 1 : -1;
               return (a.thuTuAnh || 0) - (b.thuTuAnh || 0);
@@ -466,7 +511,6 @@ const ProductDetail = () => {
           setProductImages([]);
         }
 
-        // Biến thể (giữ nguyên)
         if (refreshed.bienThe) {
           const formattedVariants = refreshed.bienThe.map(bt => {
             let phanTramGiam = '';
@@ -588,19 +632,29 @@ const ProductDetail = () => {
 
             {/* Hình Ảnh */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <ImageIcon size={20} className="text-blue-600" />
-                <h2 className="text-lg font-bold text-gray-900">Hình Ảnh Sản Phẩm</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ImageIcon size={20} className="text-blue-600" />
+                  <h2 className="text-lg font-bold text-gray-900">Hình Ảnh Sản Phẩm</h2>
+                </div>
+                <span className={`text-sm font-medium ${currentImageCount === 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                  {currentImageCount}/10
+                </span>
               </div>
+
+              {imageError && (
+                <p className="text-xs text-red-600 flex items-center gap-1 mb-3">
+                  <AlertCircle size={14} /> {imageError}
+                </p>
+              )}
 
               <div className="grid grid-cols-4 gap-4">
                 {productImages.map((imgObj, index) => (
                   <div
                     key={imgObj?.id || `empty-${index}`}
-                    className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${imgObj
-                      ? 'border-gray-200 hover:border-blue-500'
-                      : 'border-dashed border-gray-300 hover:border-blue-500 bg-gray-50'
-                      }`}
+                    className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      imgObj ? 'border-gray-200 hover:border-blue-500' : 'border-dashed border-gray-300 hover:border-blue-500 bg-gray-50'
+                    }`}
                   >
                     {imgObj ? (
                       <>
@@ -638,7 +692,7 @@ const ProductDetail = () => {
                   </div>
                 ))}
 
-                {isEditing && (
+                {isEditing && currentImageCount < 10 && (
                   <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                     <Camera size={24} className="text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
                     <span className="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors">Thêm ảnh</span>
@@ -678,8 +732,7 @@ const ProductDetail = () => {
                       value={basicInfo.maDanhMuc}
                       onChange={(e) => setBasicInfo({ ...basicInfo, maDanhMuc: e.target.value })}
                       disabled={!isEditing}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${!isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'
-                        }`}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${!isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'}`}
                     >
                       <option value="">Chọn danh mục</option>
                       {categories.map(cat => (
@@ -696,8 +749,7 @@ const ProductDetail = () => {
                       value={basicInfo.maThuongHieu}
                       onChange={(e) => setBasicInfo({ ...basicInfo, maThuongHieu: e.target.value })}
                       disabled={!isEditing}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${!isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'
-                        }`}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm transition-all ${!isEditing ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' : 'bg-white border focus:border-blue-500'}`}
                     >
                       <option value="">Chọn thương hiệu</option>
                       {brands.map(brand => (
@@ -742,7 +794,6 @@ const ProductDetail = () => {
                 const id = variant.maBTSP || variant.id;
                 const isOpen = openSpecs[id];
 
-                // Hiển thị giá KM realtime
                 const giaBanNum = Number(variant.giaBan) || 0;
                 const phanTramNum = Number(variant.phanTramGiam) || 0;
                 const giaKMHienThi = (giaBanNum > 0 && phanTramNum >= 0 && phanTramNum <= 100)
@@ -802,6 +853,8 @@ const ProductDetail = () => {
                           <InputField
                             label="Giá bán (VNĐ) *"
                             type="number"
+                            min="1"
+                            step="1"
                             value={variant.giaBan}
                             onChange={(val) => updateVariant(id, 'giaBan', val)}
                             disabled={!isEditing}
@@ -818,25 +871,12 @@ const ProductDetail = () => {
                               max="100"
                               step="1"
                               value={variant.phanTramGiam ?? ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                updateVariant(id, 'phanTramGiam', val);
-
-                                // Validate realtime ngay khi gõ
-                                const phanTram = Number(val);
-                                if (val !== '' && (phanTram < 0 || phanTram > 100)) {
-                                  setErrors(prev => ({
-                                    ...prev,
-                                    [`variant_${id}_phanTramGiam`]: 'Phần trăm giảm phải từ 0 đến 100'
-                                  }));
-                                }
-                              }}
+                              onChange={(e) => updateVariant(id, 'phanTramGiam', e.target.value)}
                               disabled={!isEditing}
                               placeholder="0 - 100"
-                              className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${errors[`variant_${id}_phanTramGiam`]
-                                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-                                : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 shadow-sm'
-                                }`}
+                              className={`w-full px-4 py-2.5 rounded-xl outline-none transition-all duration-200 border ${
+                                errors[`variant_${id}_phanTramGiam`] ? 'border-red-500 bg-red-50' : 'bg-white border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
+                              }`}
                             />
                             {errors[`variant_${id}_phanTramGiam`] && (
                               <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
@@ -857,42 +897,21 @@ const ProductDetail = () => {
                             value={variant.mauSac}
                             onChange={(val) => updateVariant(id, 'mauSac', val)}
                             disabled={!isEditing}
+                            error={errors[`variant_${id}_mauSac`]}
                             placeholder="VD: Đen"
                           />
-                          <InputField
-                            label="RAM"
-                            value={variant.ram}
-                            onChange={(val) => updateVariant(id, 'ram', val)}
-                            disabled={!isEditing}
-                            placeholder="VD: 16GB"
-                          />
-                          <InputField
-                            label="Ổ cứng"
-                            value={variant.oCung}
-                            onChange={(val) => updateVariant(id, 'oCung', val)}
-                            disabled={!isEditing}
-                            placeholder="VD: 512GB SSD"
-                          />
+                          <InputField label="RAM" value={variant.ram} onChange={(val) => updateVariant(id, 'ram', val)} disabled={!isEditing} placeholder="VD: 16GB" />
+                          <InputField label="Ổ cứng" value={variant.oCung} onChange={(val) => updateVariant(id, 'oCung', val)} disabled={!isEditing} placeholder="VD: 512GB SSD" />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <InputField
-                            label="CPU"
-                            value={variant.boXuLyTrungTam}
-                            onChange={(val) => updateVariant(id, 'boXuLyTrungTam', val)}
-                            disabled={!isEditing}
-                            placeholder="VD: Intel Core i7-12700H"
-                          />
-                          <InputField
-                            label="GPU"
-                            value={variant.boXuLyDoHoa}
-                            onChange={(val) => updateVariant(id, 'boXuLyDoHoa', val)}
-                            disabled={!isEditing}
-                            placeholder="VD: NVIDIA RTX 3060"
-                          />
+                          <InputField label="CPU" value={variant.boXuLyTrungTam} onChange={(val) => updateVariant(id, 'boXuLyTrungTam', val)} disabled={!isEditing} placeholder="VD: Intel Core i7-12700H" />
+                          <InputField label="GPU" value={variant.boXuLyDoHoa} onChange={(val) => updateVariant(id, 'boXuLyDoHoa', val)} disabled={!isEditing} placeholder="VD: NVIDIA RTX 3060" />
                           <InputField
                             label="Số lượng tồn *"
                             type="number"
+                            min="0"
+                            step="1"
                             value={variant.soLuongTon}
                             onChange={(val) => updateVariant(id, 'soLuongTon', val)}
                             disabled={!isEditing}
@@ -904,48 +923,22 @@ const ProductDetail = () => {
                         <div className="border-t pt-6">
                           <h4 className="text-lg font-bold text-gray-800 mb-4">Thông số kỹ thuật</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <InputField
-                              label="Kích thước màn hình"
-                              value={variant.thongSoKyThuat?.kichThuocManHinh || ''}
-                              onChange={(val) => updateVariantSpec(id, 'kichThuocManHinh', val)}
-                              disabled={!isEditing}
-                              placeholder='VD: 15.6"'
-                            />
-                            <InputField
-                              label="Độ phân giải"
-                              value={variant.thongSoKyThuat?.doPhanGiaiManHinh || ''}
-                              onChange={(val) => updateVariantSpec(id, 'doPhanGiaiManHinh', val)}
-                              disabled={!isEditing}
-                              placeholder="VD: 1920x1080 (Full HD)"
-                            />
-                            <InputField
-                              label="Hệ điều hành"
-                              value={variant.thongSoKyThuat?.heDieuHanh || ''}
-                              onChange={(val) => updateVariantSpec(id, 'heDieuHanh', val)}
-                              disabled={!isEditing}
-                              placeholder="VD: Windows 11 Home"
-                            />
-                            <InputField
-                              label="Pin"
-                              value={variant.thongSoKyThuat?.pin || ''}
-                              onChange={(val) => updateVariantSpec(id, 'pin', val)}
-                              disabled={!isEditing}
-                              placeholder="VD: 56Wh"
-                            />
+                            <InputField label="Kích thước màn hình" value={variant.thongSoKyThuat?.kichThuocManHinh || ''} onChange={(val) => updateVariantSpec(id, 'kichThuocManHinh', val)} disabled={!isEditing} placeholder='VD: 15.6"' />
+                            <InputField label="Độ phân giải" value={variant.thongSoKyThuat?.doPhanGiaiManHinh || ''} onChange={(val) => updateVariantSpec(id, 'doPhanGiaiManHinh', val)} disabled={!isEditing} placeholder="VD: 1920x1080" />
+                            <InputField label="Hệ điều hành" value={variant.thongSoKyThuat?.heDieuHanh || ''} onChange={(val) => updateVariantSpec(id, 'heDieuHanh', val)} disabled={!isEditing} placeholder="VD: Windows 11 Home" />
+                            <InputField label="Pin" value={variant.thongSoKyThuat?.pin || ''} onChange={(val) => updateVariantSpec(id, 'pin', val)} disabled={!isEditing} placeholder="VD: 56Wh" />
                             <InputField
                               label="Số khe RAM"
+                              type="number"
+                              min="0"
+                              step="1"
                               value={variant.thongSoKyThuat?.soKheRam || ''}
                               onChange={(val) => updateVariantSpec(id, 'soKheRam', val)}
                               disabled={!isEditing}
+                              error={errors[`variant_${id}_soKheRam`]}
                               placeholder="VD: 2"
                             />
-                            <InputField
-                              label="Cổng giao tiếp"
-                              value={variant.thongSoKyThuat?.congGiaoTiep || ''}
-                              onChange={(val) => updateVariantSpec(id, 'congGiaoTiep', val)}
-                              disabled={!isEditing}
-                              placeholder="VD: USB-C, HDMI, USB 3.0"
-                            />
+                            <InputField label="Cổng giao tiếp" value={variant.thongSoKyThuat?.congGiaoTiep || ''} onChange={(val) => updateVariantSpec(id, 'congGiaoTiep', val)} disabled={!isEditing} placeholder="VD: USB-C, HDMI" />
                           </div>
                         </div>
                       </div>
@@ -971,19 +964,27 @@ const ProductDetail = () => {
                 </div>
                 <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Tổng số lượng tồn:</span>
-                  <span className="font-bold text-blue-600">{totalStock.toLocaleString()}</span>
+                  <span className={`font-bold ${totalStock <= 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                    {totalStock.toLocaleString('vi-VN')} cái
+                  </span>
                 </div>
                 <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Số lượng ảnh:</span>
-                  <span className="font-bold text-gray-900">
-                    {productImages.filter(img => img !== null).length}
+                  <span className={`font-bold ${currentImageCount === 0 ? 'text-red-600' : currentImageCount < 3 ? 'text-orange-600' : 'text-green-600'}`}>
+                    {currentImageCount} / 10
+                  </span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Khuyến mãi:</span>
+                  <span className={`font-bold ${variants.some(v => Number(v.giaKhuyenMai) > 0) ? 'text-green-600' : 'text-gray-500'}`}>
+                    {variants.some(v => Number(v.giaKhuyenMai) > 0) ? 'Có áp dụng' : 'Chưa có'}
                   </span>
                 </div>
 
                 <div className="pt-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-xs text-blue-800 leading-relaxed">
-                      <strong>Lưu ý:</strong> Ảnh đầu tiên sẽ là ảnh chính. Chỉ chấp nhận file ảnh ≤ 5MB.
+                      <strong>Lưu ý:</strong> Ảnh đầu là ảnh chính • Tối đa 10 ảnh • Các trường số chỉ chấp nhận số nguyên
                     </p>
                   </div>
                 </div>
@@ -993,14 +994,30 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Toast */}
+      {/* Toast - trên cùng bên phải, đẹp hơn */}
       {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
-          <div className={`px-6 py-4 rounded-lg shadow-lg border-l-4 ${toast.type === 'success' ? 'bg-green-50 border-green-500 text-green-800' : 'bg-red-50 border-red-500 text-red-800'
-            }`}>
-            <div className="flex items-center gap-3">
-              <AlertCircle size={20} />
-              <span className="font-medium">{toast.message}</span>
+        <div className="fixed top-6 right-6 z-50 animate-fade-in">
+          <div
+            className={`px-6 py-4 rounded-xl shadow-2xl border-l-6 min-w-[320px] ${
+              toast.type === 'success'
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-600 text-green-900'
+                : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-600 text-red-900'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              {toast.type === 'success' ? (
+                <div className="mt-0.5 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <Check size={16} className="text-green-700" />
+                </div>
+              ) : (
+                <AlertCircle size={24} className="text-red-700 flex-shrink-0" />
+              )}
+              <div>
+                <p className="font-semibold text-base">
+                  {toast.type === 'success' ? 'Thành công' : 'Lỗi nhập liệu'}
+                </p>
+                <p className="text-sm mt-1">{toast.message}</p>
+              </div>
             </div>
           </div>
         </div>
