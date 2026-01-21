@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Package, User, Phone, MapPin, CreditCard, Calendar, FileText, Edit, Save, RotateCcw } from "lucide-react";
+import { X, Package, User, Phone, MapPin, CreditCard, Calendar, FileText, Edit, Save, RotateCcw,Wallet } from "lucide-react";
 
 // ✅ Thêm prop onUpdate vào component
 const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
@@ -239,7 +239,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
              <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <CreditCard size={20} className="text-green-600" />
-              Thông tin thanh toán
+              Thông tin đơn hàng
             </h4>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
@@ -249,6 +249,56 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                   <p className="font-semibold text-gray-800">{formatDateTime(order.ngayDatHang)}</p>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+              <Wallet size={18} className="text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-xs text-gray-500">Phương thức thanh toán</p>
+                <p className="font-semibold text-gray-800">
+                  {order.phuongThucThanhToan === 1 
+                    ? 'Thanh toán khi nhận hàng (COD)' 
+                    : 'Thanh toán Online / Chuyển khoản'}
+                </p>
+                </div>
+              </div>
+              <div className="border-t border-green-200 border-dashed my-2"></div>
+
+              {/* 3. DANH SÁCH SẢN PHẨM (Mới thêm vào) */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package size={18} className="text-gray-400" />
+                  <p className="text-xs font-bold text-gray-500 uppercase">
+                      Chi tiết sản phẩm ({order.chiTietDonHang?.length || 0})
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-3 pl-7"> {/* pl-7 để thụt đầu dòng thẳng hàng với text trên */}
+                  {order.chiTietDonHang?.map((item, index) => (
+                    <div key={index} className="flex justify-between items-start text-sm group">
+                      <div className="flex gap-2 items-start">
+                        {/* Ảnh nhỏ (nếu có) */}
+                        {item.hinhAnh && (
+                            <img 
+                              src={item.hinhAnh} 
+                              alt="sp" 
+                              className="w-8 h-8 rounded object-cover border border-green-200"
+                            />
+                        )}
+                        <div className="flex flex-col">
+                            <span className="font-medium text-gray-800 line-clamp-2">
+                              {item.tenSanPham}
+                            </span>
+                        </div>
+                      </div>
+                      <span className="font-semibold text-gray-700 whitespace-nowrap">
+                        {item.soLuong}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* --- ĐƯỜNG KẺ NGĂN CÁCH --- */}
+              <div className="border-t border-green-200 border-dashed my-2"></div>
               <div className="flex items-start gap-3">
                 <CreditCard size={18} className="text-gray-400 mt-0.5" />
                 <div>

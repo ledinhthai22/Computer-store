@@ -9,7 +9,7 @@ export default function MenuCategory({ onClose }) {
   const [categories, setCategory] = useState([]);
 
   const chipList = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'];
-  const screenList = ['13 inch', '14 inch', '15.6 inch', '16 inch'];
+  const screenList = ['14 inch','15 inch', '15.6 inch', '16 inch', '17 inch'];
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -102,7 +102,7 @@ export default function MenuCategory({ onClose }) {
                                 onClick={onClose} 
                                 className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
                             >
-                                Laptop {chip}
+                                {chip}
                             </Link>
                         </li>
                     ))}
@@ -120,7 +120,7 @@ export default function MenuCategory({ onClose }) {
                                 onClick={onClose} 
                                 className="block hover:text-[#2f9ea0] hover:translate-x-1 transition-transform"
                             >
-                                Laptop {size}
+                                {size}
                             </Link>
                         </li>
                     ))}

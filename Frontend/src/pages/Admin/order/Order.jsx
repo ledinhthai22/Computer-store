@@ -93,7 +93,16 @@ const Order = () => {
             
             ghiChu: backendOrder.ghiChu || '',
             ghiChuNoiBo: backendOrder.ghiChuNoiBo || '',
-            _backend: backendOrder
+            chiTietDonHang: backendOrder.chiTietDonHang?.map(item => ({
+                maBienThe: item.maBienThe,
+                tenSanPham: item.tenBienThe, 
+                soLuong: item.soLuong,
+                donGia: item.giaBan,
+                giaKhuyenMai: item.giaKhuyenMai,
+                thanhTien: item.thanhTien,
+                hinhAnh: item.hinhAnh
+            })) || [],
+            _backend: backendOrder,
         };
     };
     const convertVietnameseDateToISO = (vnDate) => {

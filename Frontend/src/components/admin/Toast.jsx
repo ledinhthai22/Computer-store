@@ -22,7 +22,7 @@ const Toast = ({ message, type = 'success', onClose }) => {
     };
 
     return (
-        <div className={`fixed top-5 right-5 z-[2000] flex items-center gap-3 p-4 rounded-lg border shadow-lg transition-all animate-in fade-in slide-in-from-right-4 ${styles[type]}`}>
+        <div className={`fixed top-5 right-5 z-[9999] flex items-center gap-3 p-4 rounded-lg border shadow-lg transition-all animate-in fade-in slide-in-from-right-4 ${styles[type]}`}>
             {icons[type]}
             <p className="text-sm font-medium">{message}</p>
             <button 

@@ -173,17 +173,17 @@ export default function Details() {
           </ol>
         </nav>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Images */}
-          <div className="lg:w-1/2">
-            <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Left Column - Images - Fixed Height */}
+          <div className="lg:w-1/2 h-[600px] lg:h-[800px]">
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 h-full flex flex-col">
               {/* Main Image */}
-              <div className="relative group">
-                <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-100">
+              <div className="relative group flex-1 min-h-0">
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-100 h-full flex items-center justify-center">
                   <img
                   src={getImageUrl(product.hinhAnh[selectedImage])}
                   alt={product.tenSanPham}
-                  className="w-full h-140 object-contain transition-all duration-500 ease-in-out"
+                  className="max-w-full max-h-full object-contain transition-all duration-500 ease-in-out"
                 />
                 </div>
                 <button 
@@ -225,8 +225,8 @@ export default function Details() {
                 )}
               </div>
 
-              {/* Thumbnail Images */}
-              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {/* Thumbnail Images - Fixed at bottom */}
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide flex-shrink-0">
                 {product.hinhAnh.map((img, index) => (
                   <button
                     key={index}
@@ -246,8 +246,8 @@ export default function Details() {
             </div>
           </div>
 
-          {/* Right Column - Details */}
-          <div className="lg:w-1/2">
+          {/* Right Column - Details - Fixed Height with Scroll */}
+          <div className="lg:w-1/2 h-[600px] lg:h-[800px]">
             {/* Product Info - Moved to top */}
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-6">{product.tenSanPham}</h1>
@@ -318,7 +318,7 @@ export default function Details() {
             </div>
 
             {/* Price Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6">
               <div className="flex items-end gap-4 mb-2">
                 <span className="text-4xl font-bold text-gray-900">
                   {formatPrice(selectedVariant.giaKhuyenMai)}
@@ -337,8 +337,8 @@ export default function Details() {
 
               {/* Quantity Selector */}
               <div className="mb-8">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Số lượng</label>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mt-4">
+                <label className="flex items-center font-medium text-gray-700 mb-1">Số lượng</label>
                   <div className="flex items-center border border-gray-300 rounded-lg">
                     <button
                       onClick={decreaseQuantity}
@@ -350,7 +350,7 @@ export default function Details() {
                       type="number"
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 text-center py-2 border-0 focus:ring-0 focus:outline-none"
+                      className="w-16 text-center py-2 border-0 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min="1"
                     />
                     <button
@@ -360,14 +360,15 @@ export default function Details() {
                       +
                     </button>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Còn {selectedVariant.soLuongTon} sản phẩm trong kho
-                  </div>
                 </div>
+                
+              <div className="text-sm text-gray-500 mt-1">
+                    Còn {selectedVariant.soLuongTon} sản phẩm trong kho
+              </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <button 
                   onClick={handleAddToCart}
                   disabled={!selectedVariant.trangThai || selectedVariant.soLuongTon <= 0}
