@@ -39,8 +39,8 @@ export default function Cart() {
       id,
       qty,
       name,
-      price: giaKhuyenMai,       // giá KM
-      originalPrice: giaBan,     // giá bán
+      price: giaKhuyenMai,
+      originalPrice: giaBan,
       discount: giaBan - giaKhuyenMai,
       image,
     };
@@ -62,7 +62,7 @@ export default function Cart() {
     );
   };
 
-  // ================== TẠM TÍNH (GIÁ BÁN) ==================
+  // ================== PRICE CALC ==================
   const subTotal = useMemo(() => {
     return cart
       .map(normalizeItem)
@@ -70,7 +70,6 @@ export default function Cart() {
       .reduce((sum, item) => sum + item.originalPrice * item.qty, 0);
   }, [cart, selectedItems]);
 
-  // ================== ĐÃ GIẢM ==================
   const totalDiscount = useMemo(() => {
     return cart
       .map(normalizeItem)
@@ -78,7 +77,6 @@ export default function Cart() {
       .reduce((sum, item) => sum + item.discount * item.qty, 0);
   }, [cart, selectedItems]);
 
-  // ================== TỔNG CỘNG ==================
   const totalPrice = subTotal - totalDiscount;
 
   // ================== DELETE ==================
@@ -117,7 +115,7 @@ export default function Cart() {
                     type="checkbox"
                     checked={isAllSelected}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 accent-[#2f9ea0]"
+                    className="w-4 h-4 accent-[#2f9ea0] cursor-pointer"
                   />
                   <span>Chọn tất cả ({cart.length} sản phẩm)</span>
                 </div>
@@ -128,7 +126,7 @@ export default function Cart() {
                       setDeleteMode("multiple");
                       setShowConfirm(true);
                     }}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600 hover:underline cursor-pointer"
                   >
                     Xoá ({selectedItems.length})
                   </button>
@@ -148,7 +146,7 @@ export default function Cart() {
                         type="checkbox"
                         checked={selectedItems.includes(item.id)}
                         onChange={() => toggleSelectItem(item.id)}
-                        className="w-4 h-4 accent-[#2f9ea0]"
+                        className="w-4 h-4 accent-[#2f9ea0] cursor-pointer"
                       />
 
                       <img
@@ -165,7 +163,6 @@ export default function Cart() {
                           {item.name}
                         </h3>
 
-                        {/* ===== PRICE ===== */}
                         <div className="text-sm mt-1">
                           {item.price < item.originalPrice ? (
                             <>
@@ -188,7 +185,7 @@ export default function Cart() {
                       <div className="mr-12 flex items-center bg-white rounded-lg shadow-sm">
                         <button
                           onClick={() => decrease(item.id, item.qty)}
-                          className="px-2 py-1 hover:bg-gray-100 rounded-l-lg"
+                          className="px-2 py-1 hover:bg-gray-100 rounded-l-lg cursor-pointer"
                         >
                           −
                         </button>
@@ -197,7 +194,7 @@ export default function Cart() {
                         </span>
                         <button
                           onClick={() => increase(item.id, item.qty)}
-                          className="px-2 py-1 hover:bg-gray-100 rounded-r-lg"
+                          className="px-2 py-1 hover:bg-gray-100 rounded-r-lg cursor-pointer"
                         >
                           +
                         </button>
@@ -210,8 +207,10 @@ export default function Cart() {
                           setDeleteId(item.id);
                           setShowConfirm(true);
                         }}
-                        className="text-sm text-red-600 hover:underline absolute right-3 top-1/2 -translate-y-1/2
-                        opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition"
+                        className="text-sm text-red-600 hover:underline absolute right-3 top-1/2
+                                   -translate-y-1/2 opacity-0 translate-x-2
+                                   group-hover:opacity-100 group-hover:translate-x-0
+                                   transition cursor-pointer"
                       >
                         Xoá
                       </button>
@@ -259,7 +258,7 @@ export default function Cart() {
                 <Link
                   to="/checkout"
                   state={{ selectedItems }}
-                  className={`block mt-5 w-full text-center py-2.5 rounded-xl font-medium transition
+                  className={`block mt-5 w-full text-center py-2.5 rounded-xl font-medium transition cursor-pointer
                     ${
                       selectedItems.length === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
