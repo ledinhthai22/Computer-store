@@ -260,6 +260,7 @@ namespace Backend.Services.Order
                     }
                     bt.SanPham.SoLuongTon -= chiTiet.SoLuong;
                     bt.SoLuongTon -= chiTiet.SoLuong;
+                    bt.SanPham.LuotMua += chiTiet.SoLuong;
                 }
             }
             order.TrangThai = request.TrangThai;
