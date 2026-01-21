@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import OrderTable from '../../../components/admin/order/OrderTable';
 import OrderDetailModal from '../../../components/admin/order/OrderDetailModal';
 import OrderUpdateModal from '../../../components/admin/order/OrderUpdateModal';
+import OrderDeleteModal from '../../../components/admin/order/OrderDeleteModal';
 import Toast from '../../../components/admin/Toast';
 import { orderService } from '../../../services/api/orderService'; // TODO: Import service khi API ready
 
@@ -56,7 +57,38 @@ const Order = () => {
 
     // ✅ State quản lý trạng thái đang được cập nhật
     const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null); // { maHoaDon, newStatus }
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [orderToDelete, setOrderToDelete] = useState(null);
 
+    // ... (giữ nguyên fetchOrders, v.v...)
+
+    // 👇 3. Sửa lại hàm handleDeleteClick (Chỉ mở modal, không xóa ngay)
+    const handleDeleteClick = (order) => {
+        setOrderToDelete(order);
+        setIsDeleteModalOpen(true);
+    };
+
+    // 👇 4. Thêm hàm Xử lý xóa thật sự (Gọi khi bấm nút Xóa trong Modal)
+    const handleConfirmDelete = async () => {
+        if (!orderToDelete) return;
+
+        try {
+            // Gọi service softDelete
+            await orderService.softDelete(orderToDelete.maDonHang);
+            
+            showToast("Đã chuyển đơn hàng vào thùng rác!", "success");
+            
+            // Đóng modal và reset
+            setIsDeleteModalOpen(false);
+            setOrderToDelete(null);
+
+            // Reload lại danh sách
+            await fetchOrders();
+        } catch (error) {
+            console.error("Delete error:", error);
+            showToast("Xóa thất bại: " + (error.response?.data?.message || error.message), "error");
+        }
+    };
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
     };
@@ -184,24 +216,6 @@ const Order = () => {
         setSelectedOrder(order);
         setIsViewModalOpen(true);
     };
-    const handleDeleteClick = async (order) => {
-        // ✅ Thông báo trước khi xóa
-        const confirmMsg = `CẢNH BÁO:\nBạn có chắc chắn muốn xóa đơn hàng ${order.maHoaDon}?\nĐơn hàng sẽ được chuyển vào mục "Đã xóa".`;
-        if (!window.confirm(confirmMsg)) return;
-
-        try {
-            // Gọi service softDelete với ID int (maDonHang)
-            await orderService.softDelete(order.maDonHang);
-            
-            showToast("Đã chuyển đơn hàng vào thùng rác!", "success");
-            
-            // Reload lại danh sách
-            await fetchOrders();
-        } catch (error) {
-            console.error("Delete error:", error);
-            showToast("Xóa thất bại: " + (error.response?.data?.message || error.message), "error");
-        }
-    };
     // ✅ Mở modal cập nhật trạng thái
     const handleUpdateClick = (order) => {
         // ⚠️ Kiểm tra xem có đang cập nhật order khác không
@@ -302,6 +316,15 @@ const Order = () => {
                     setSelectedOrder(null);
                 }}
             /> */}
+            <OrderDeleteModal 
+                isOpen={isDeleteModalOpen}
+                order={orderToDelete}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setOrderToDelete(null);
+                }}
+                onConfirm={handleConfirmDelete}
+            />
             <OrderDetailModal
                 isOpen={isViewModalOpen}
                 order={selectedOrder}
