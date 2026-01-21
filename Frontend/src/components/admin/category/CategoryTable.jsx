@@ -1,11 +1,11 @@
 import { useState } from "react";
 import DataTable from "react-data-table-component";
-import { Edit, Trash2, Plus, History, ArrowUpIcon } from "lucide-react";
+import { Edit, Trash2, Plus, History, ArrowUpIcon, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
+const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal, showToast, filterType, onFilterTypeChange }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
@@ -13,6 +13,19 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
         item => item.tenDanhMuc && item.tenDanhMuc.toLowerCase().includes(filterText.toLowerCase()) ||
             item.slug && item.slug.toLowerCase().includes(filterText.toLowerCase()),
     );
+
+    const handleDeleteAttempt = (row) => {
+    if (row.trangThai === true) {
+      // Không cho xóa, hiển thị Toast cảnh báo
+      showToast("Không thể xóa danh mục đang hoạt động", "error");
+      return;
+    }
+
+    // Gọi onDelete (xóa thực tế)
+    onDelete(row.maDanhMuc);
+    // Toast thành công sẽ do component cha xử lý (sau khi API delete xong)
+  };
+
     const columns = [
         {
             name: 'STT',
@@ -43,40 +56,34 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
             ),
         },
         {
-            name: "TRẠNG THÁI HIỂN THỊ",
-            selector: row => row.trangThai,
+            name: "TRẠNG THÁI",
+            selector: (row) => row.trangThai,
             sortable: true,
+            width: "150px",
             center: true,
-            width: "200px",
-            cell: row => (
+            cell: (row) => {
+                const isActive = row.trangThai === true;
+
+                return (
                 <span
-                    className={`
-                inline-flex items-center gap-1.5
-                px-5 py-1.5 text-sm font-semibold rounded-full
-                border border-current whitespace-nowrap
-                ${row.trangThai
-                            ? 'text-green-700 bg-green-100 border-green-400'
-                            : 'text-red-700 bg-red-100 border-red-400'
-                        }
-            `}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center ${
+                    isActive
+                        ? "bg-green-100 text-green-700 border-green-200"
+                        : "bg-gray-100 text-gray-600 border-gray-200"
+                    }`}
                 >
-                    {row.trangThai ? (
-                        <>
-                            Hiện
-                        </>
-                    ) : (
-                        <>
-                            Ẩn
-                        </>
-                    )}
+                    {isActive ? "Hoạt động" : "Ẩn"}
                 </span>
-            ),
+                );
+            },
         },
         {
             name: 'HÀNH ĐỘNG',
             center: true,
             width: '200px',
-            cell: row => (
+            cell: row => {
+                const isDisabled = row.trangThai === true;
+                return (
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onEdit(row)}
@@ -86,14 +93,26 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                         <Edit size={18} /> Sửa
                     </button>
                     <button
-                        onClick={() => onDelete(row.maDanhMuc)}
-                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Xóa"
-                    >
-                        <Trash2 size={18} /> Xóa
+                        onClick={() => handleDeleteAttempt(row)}
+                        title={
+                            isDisabled
+                            ? "Thương hiệu đang hoạt động, không thể xóa"
+                            : "Xóa thương hiệu (xóa mềm)"
+                        }
+                        className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
+                            ${
+                            isDisabled
+                                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                                : "text-red-500 hover:bg-red-100"
+                            }
+                        `}
+                        >
+                        <Trash2 size={18} />
+                        <span className="hidden sm:inline">Xóa</span>
                     </button>
                 </div>
-            ),
+                )
+            },
         },
     ];
 
@@ -105,6 +124,18 @@ const CategoryTable = ({ data, loading, onEdit, onDelete, onOpenAddModal }) => {
                     onFilter={e => setFilterText(e.target.value)}
                     placeholder="Tìm kiếm..."
                 />
+                <div className="flex items-center gap-2">
+                    <Filter size={18} className="text-gray-400" />
+                    <select
+                    className="border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                    value={filterType}
+                    onChange={(e) => onFilterTypeChange(e.target.value)}
+                    >
+                    <option value="all">Tất cả</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đang ẩn</option>
+                    </select>
+                </div>
                 <button
                     onClick={onOpenAddModal}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all font-medium shadow-md cursor-pointer"

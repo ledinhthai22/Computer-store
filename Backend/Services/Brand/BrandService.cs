@@ -142,6 +142,15 @@ namespace Backend.Services.Brand
             {
                 return true;
             }
+            bool isDuplicate = await _dbContext.ThuongHieu
+                .AnyAsync(x => x.MaThuongHieu != id
+                            && x.TenThuongHieu == brand.TenThuongHieu
+                            && x.TrangThai == true
+                            && x.NgayXoa == null);
+
+            if (isDuplicate) { 
+                throw new InvalidOperationException("Tên thương hiệu bị trùng, không thể khôi phục.");
+            }
             brand.NgayXoa = null;
             bool restored = await _dbContext.SaveChangesAsync() > 0;
             if (!restored)

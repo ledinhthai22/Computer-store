@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Toast from '../../../components/admin/Toast';
 import ConfirmModal from '../../../components/admin/RecoverConfirmModal';
 import BrandRecoverTable from '../../../components/admin/brand/BrandRecoverTable';
-import { brandService, handleApiError } from '../../../services/api/brandService';
+import { brandService } from '../../../services/api/brandService';
 
 const BrandRecover = () => {
     const [brands, setBrands] = useState([]);
@@ -28,8 +28,8 @@ const BrandRecover = () => {
             const data = Array.isArray(res) ? res : res?.data || [];
             setBrands(data);
         } catch (err) {
-            const errorMessage = handleApiError(err, "Tải danh sách thương hiệu đã xóa thất bại");
-            showToast(errorMessage, "error");
+            console.log(err)
+            showToast("Tải danh sách thương hiệu đã xóa thất bại", "error");
             console.error("Fetch deleted brands error:", err);
         } finally {
             setLoading(false);
@@ -61,9 +61,8 @@ const BrandRecover = () => {
             // Optional: Nếu muốn xóa ngay mà không chờ API (nhanh hơn)
             // setBrands(prev => prev.filter(b => b.maThuongHieu !== recoverId));
         } catch (err) {
-            const errorMessage = handleApiError(err, "Khôi phục thương hiệu thất bại");
-            showToast(errorMessage, "error");
-            console.error("Recover error:", err?.response?.data || err);
+            console.log(err)
+            showToast("Khôi phục thương hiệu thất bại", "error");
         } finally {
             setIsRecovering(false);
             setIsConfirmOpen(false);
