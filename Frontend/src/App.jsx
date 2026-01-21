@@ -13,7 +13,6 @@ import {
   Contact,
   AddProduct,
   ProductDetail,
-  WebInfo,
   WebInfoRecover,
   User,
   UserRecover,
@@ -93,9 +92,9 @@ function App() {
 
             <Route path="lien-he" element={<Contact />} />
 
-            <Route path="thong-tin-trang" element={<WebInfo />} />
+            {/* <Route path="thong-tin-trang" element={<WebInfo />} /> */}
             <Route
-              path="thong-tin-trang/khoi-phuc"
+              path="thong-ke/khoi-phuc"
               element={<WebInfoRecover />}
             />
 

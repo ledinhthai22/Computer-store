@@ -22,7 +22,7 @@ const Sidebar = () => {
     { name: 'Người dùng', icon: User, path: '/quan-ly/nguoi-dung' },
     { name: 'Liên hệ', icon: Mail, path: '/quan-ly/lien-he' },
     { name: 'Trình chiếu', icon: Columns2, path: '/quan-ly/trinh-chieu' },
-    { name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
+    //{ name: 'Thông tin trang', icon: AppWindow, path: '/quan-ly/thong-tin-trang' },
   ];
 
   return (
