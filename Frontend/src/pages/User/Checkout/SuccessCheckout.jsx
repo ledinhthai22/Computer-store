@@ -23,7 +23,7 @@ export default function SuccessCheckout() {
                 </div>
 
                 <h1 className="text-2xl font-bold text-green-600 mb-2">
-                    Thanh toán thành công!
+                    Đặt hàng thành công!
                 </h1>
 
                 <p className="text-gray-600 mb-6">
