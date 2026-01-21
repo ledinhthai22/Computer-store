@@ -6,9 +6,9 @@ export default function FilterSidebar({
     
     // --- DỮ LIỆU MẶC ĐỊNH ---
     chips = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'],
-    screens = ['13 inch', '14 inch', '15.6 inch', '16 inch'],
+    screens = ['14 inch', '15 inch', '15.6 inch', '16 inch', '17 inch'],
     // Thêm danh sách GPU phổ biến dựa trên ảnh database của bạn
-    gpus = ['Intel Iris Xe', 'RTX 1050','RTX 2050','RTX 3050', 'RTX 4050', 'RTX 4060', 'AMD Radeon'], 
+    gpus = ['RTX 2050','RTX 3050', 'RTX 4050', 'RTX 4060', 'RTX 5070', 'AMD Radeon'], 
     
     filters={},
     onFilterChange, 
