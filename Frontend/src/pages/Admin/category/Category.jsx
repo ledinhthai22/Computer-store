@@ -16,7 +16,7 @@ const Category = () => {
 
     const [newName, setNewName] = useState("");
     const [editing, setEditing] = useState(null);
-    const [trangThai, setTrangThai] = useState(true); // 👈 trạng thái
+    const [trangThai, setTrangThai] = useState(true);
 
     const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
@@ -76,7 +76,7 @@ const Category = () => {
     const handleEditClick = (category) => {
         setEditing(category);
         setNewName(category.tenDanhMuc);
-        setTrangThai(category.trangThai); // 👈 load trạng thái
+        setTrangThai(category.trangThai);
         setError("");
         setIsModalOpen(true);
     };
@@ -102,7 +102,7 @@ const Category = () => {
 
             const categoryData = {
                 tenDanhMuc: nameTrimmed,
-                trangThai: trangThai, // 👈 gửi trạng thái
+                trangThai: trangThai,
             };
 
             if (editing) {
