@@ -28,5 +28,6 @@ namespace Backend.Services.Order
         Task<List<OrderResult>> GetCompletedOrdersAsync(int userId);
         //hủy đơn hàng khi admin chưa xác nhận
         Task<bool> CancelOrderByUserAsync(int userId, int maDH);
+        Task<OrderResult> GetUserOrderDetailAsync(int userId, int maDH);
     }
 }

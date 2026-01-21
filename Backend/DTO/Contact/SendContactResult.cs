@@ -10,7 +10,7 @@ namespace Backend.DTO.Contact
         public int MaLienHe { get; set; }
         public string Email { get; set; } = null!;
         public string NoiDung { get; set; } = null!; 
-        public DateTime NgayGui { get; set; } = DateTime.Now; 
+        public DateTime NgayGui { get; set; } 
         public bool TrangThai { get; set; }
         public string Message {get;set;} = null!;
     }
