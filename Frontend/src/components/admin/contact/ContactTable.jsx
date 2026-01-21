@@ -4,7 +4,7 @@ import { Eye, Trash2, ArrowUpIcon, Filter } from "lucide-react";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
-const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeChange }) => { 
+const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTypeChange, showToast  }) => { 
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
@@ -36,6 +36,17 @@ const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTyp
         return `${hours}:${minutes} - ${day}/${month}/${year}`;
     };
 
+    const handleDeleteAttempt = (row) => {
+        if (row.trangThai === false) {
+        // Không cho xóa, hiển thị Toast cảnh báo
+        showToast("Không thể xóa liên hệ chưa đọc", "error");
+        return;
+        }
+
+        // Gọi onDelete (xóa thực tế)
+        onDelete(row.maLienHe);
+        // Toast thành công sẽ do component cha xử lý (sau khi API delete xong)
+    };
     const columns = [
         {
             name: 'STT',
@@ -66,7 +77,7 @@ const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTyp
             ),
         },
         {
-            name: 'NGÀY',
+            name: 'NGÀY LIÊN HỆ',
             selector: row => row.ngayGui,
             sortable: true,
             grow: 2,
@@ -85,7 +96,7 @@ const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTyp
                 const isRead = row.message?.toLowerCase() === "đã đọc";
                 
                 return (
-                    <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+                    <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border w-25 text-center ${
                         isRead 
                             ? "bg-green-100 text-green-700 border-green-200"
                             : "bg-red-100 text-red-700 border-red-200"
@@ -99,7 +110,9 @@ const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTyp
             name: 'HÀNH ĐỘNG',
             center: true,
             width: '200px',
-            cell: row => (
+            cell: row => {
+                const isDisabled = row.trangThai === false;
+                return (
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => onView(row)}
@@ -108,15 +121,27 @@ const ContactTable = ({ data, loading, onDelete, onView, filterType, onFilterTyp
                     >
                         <Eye size={18} /> Xem
                     </button>
-                    <button 
-                        onClick={() => onDelete(row.maLienHe)}
-                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Xóa"
-                    >
-                        <Trash2 size={18} /> Xóa
+                    <button
+                        onClick={() => handleDeleteAttempt(row)}
+                        title={
+                            isDisabled
+                            ? "Liên hệ đang hiển thị (Chưa đọc), không thể xóa"
+                            : "Xóa liên hệ"
+                        }
+                        className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
+                            ${
+                            isDisabled
+                                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                                : "text-red-500 hover:bg-red-100"
+                            }
+                        `}
+                        >
+                        <Trash2 size={18} />
+                        <span className="hidden sm:inline">Xóa</span>
                     </button>
                 </div>
-            ),
+                )
+            },
         },
     ];
     return(

@@ -141,6 +141,7 @@ const SlideShow = () => {
                 onDelete={handleDeleteClick}
                 filterType={filterType}
                 onFilterTypeChange={setFilterType}
+                showToast={showToast}
                 onOpenAddModal={() => {
                     setEditingSlideShow(null);
                     setFormData({ tenTrinhChieu: '', duongDanSanPham: '', SoThuTu: 1, TrangThai: true, HinhAnh: null });

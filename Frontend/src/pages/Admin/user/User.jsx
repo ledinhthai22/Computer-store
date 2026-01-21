@@ -85,6 +85,7 @@ const User = () => {
                 onLock={handleLock}
                 onUnlock={handleUnlock}
                 onDelete={handleDeleteClick}
+                showToast={showToast}
                 onOpenAddModal={() => setIsAddModalOpen(true)}
             />
 

@@ -148,6 +148,7 @@ const handleSave = async (e) => {
                 onDelete={handleDeleteClick}
                 onFilterTypeChange={setFilterType}
                 filterType={filterType}
+                showToast={showToast}
                 onOpenAddModal={() => {
                     setEditingBrand(null);
                     setBrandNameInput("");

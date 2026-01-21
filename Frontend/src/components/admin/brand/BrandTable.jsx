@@ -26,7 +26,7 @@ const BrandTable = ({
   const handleDeleteAttempt = (row) => {
     if (row.trangThai === true) {
       // Không cho xóa, hiển thị Toast cảnh báo
-      showToast("Không thể xóa thương hiệu đang hiển thị (Hiện)!", "error");
+      showToast("Không thể xóa thương hiệu đang hoạt động", "error");
       return;
     }
 
@@ -65,13 +65,13 @@ const BrandTable = ({
 
         return (
           <span
-            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border ${
+            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center ${
               isActive
                 ? "bg-green-100 text-green-700 border-green-200"
                 : "bg-gray-100 text-gray-600 border-gray-200"
             }`}
           >
-            {isActive ? "Hiện" : "Ẩn"}
+            {isActive ? "Hoạt động" : "Ẩn"}
           </span>
         );
       },
@@ -98,10 +98,9 @@ const BrandTable = ({
             {/* Nút Xóa */}
             <button
               onClick={() => handleDeleteAttempt(row)}
-              disabled={isDisabled}
               title={
                 isDisabled
-                  ? "Thương hiệu đang hiển thị (Hiện), không thể xóa"
+                  ? "Thương hiệu đang hoạt động, không thể xóa"
                   : "Xóa thương hiệu (xóa mềm)"
               }
               className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer

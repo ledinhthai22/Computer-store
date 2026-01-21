@@ -97,6 +97,7 @@ const Contact = () => {
                     onView={handleViewClick}
                     filterType={filterType}
                     onFilterTypeChange={setFilterType}
+                    showToast={showToast}
                 />
             </div>
             
