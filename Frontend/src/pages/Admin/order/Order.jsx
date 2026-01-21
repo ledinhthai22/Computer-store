@@ -204,7 +204,18 @@ const Order = () => {
         setSelectedOrder(order);
         setIsUpdateModalOpen(true);
     };
+   const handleUpdateOrderInfo = async (orderId, updatedData) => {
+        try {
+            await orderService.updateOrderInfo(orderId, updatedData);
 
+            await fetchOrders();
+            
+            showToast("Cập nhật thành công!", "success");
+        } catch (error) {
+            console.error("Update failed:", error);
+            showToast("Cập nhật thông tin thất bại: " + (error.response?.data || error.message), "error");
+        }
+    };
     // ✅ Xác nhận cập nhật trạng thái - Gọi từ modal
     const handleConfirmUpdate = async (newStatus) => {
         if (!selectedOrder) return;
@@ -269,6 +280,14 @@ const Order = () => {
             </div>
             
             {/* View Modal */}
+            {/* <OrderDetailModal
+                isOpen={isViewModalOpen}
+                order={selectedOrder}
+                onClose={() => {
+                    setIsViewModalOpen(false);
+                    setSelectedOrder(null);
+                }}
+            /> */}
             <OrderDetailModal
                 isOpen={isViewModalOpen}
                 order={selectedOrder}
@@ -276,6 +295,8 @@ const Order = () => {
                     setIsViewModalOpen(false);
                     setSelectedOrder(null);
                 }}
+                // ✅ Truyền hàm update xuống modal
+                onUpdate={handleUpdateOrderInfo}
             />
            
             {/* Update Status Modal */}

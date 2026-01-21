@@ -18,7 +18,8 @@ const OrderTable = ({
     const filteredItems = data.filter(
         item => item.maHoaDon && item.maHoaDon.toLowerCase().includes(filterText.toLowerCase()) ||
                 item.tenKhachHang && item.tenKhachHang.toLowerCase().includes(filterText.toLowerCase()) ||
-                item.email && item.email.toLowerCase().includes(filterText.toLowerCase())
+                item.soDienThoai && item.soDienThoai.toLowerCase().includes(filterText.toLowerCase())||
+                item.diaChiGiaoHang && item.diaChiGiaoHang.toLowerCase().includes(filterText.toLowerCase())
     );
 
     // ✅ Map trạng thái số sang text và màu sắc

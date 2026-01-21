@@ -606,12 +606,12 @@ namespace Backend.Services.Order
         }
         public async Task<List<OrderResult>> GetOrderByPhoneAsync(string Phone)
         {
-            if (string.IsNullOrWhiteSpace(Phone) || Phone.Length < 10)
+            if (string.IsNullOrWhiteSpace(Phone))
             {
-                throw new ArgumentException("Số điện thoại không hợp lệ (Phải từ 10 số trở lên).");
+                throw new ArgumentException("Số điện thoại không hợp lệ!");
             }
             return await _DbContext.DonHang
-                .Where(dh => dh.SoDienThoaiNguoiNhan == Phone)
+                .Where(dh => dh.SoDienThoaiNguoiNhan.Contains(Phone))
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.DiaChiNhanHang)
                 .Include(dh => dh.ChiTietDonHang)
