@@ -762,10 +762,25 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.BienThe)
                     .ThenInclude(bt => bt.thongSoKyThuat)
                 .FirstOrDefaultAsync(x =>
-                    x.MaSanPham == id &&
-                    x.NgayXoa == null &&
-                    x.TrangThai == true
+                    x.MaSanPham == id
+                    && x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc != null
+                    && x.DanhMuc.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu != null
+                    && x.ThuongHieu.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
                 );
+
 
             if (product == null)
                 return null;
@@ -831,8 +846,22 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.ThuongHieu)
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
-                .Where(x => x.NgayXoa == null && x.TrangThai == true)
-                .AsQueryable();
+                .Where(x =>
+                    x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc!.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu!.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
+                ).AsQueryable();
 
             // Lọc theo từ khóa
             if (!string.IsNullOrEmpty(filter.TuKhoa))
@@ -959,7 +988,22 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.ThuongHieu)
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
-                .Where(x => x.NgayXoa == null && x.TrangThai == true)
+                .Where(x =>
+                    x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc!.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu!.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
+                )
                 .OrderByDescending(x => x.LuotMua)
                 .Take(soLuong)
                 .Select(x => MapToProductListItem(x))
@@ -976,9 +1020,20 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                 .Where(x =>
-                    x.NgayXoa == null &&
-                    x.TrangThai == true &&
-                    x.NgayTao >= oneMonthAgo
+                    x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc!.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu!.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
                 )
                 .OrderByDescending(x => x.NgayTao)
                 .Take(soLuong)
@@ -994,9 +1049,20 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                 .Where(x =>
-                    x.NgayXoa == null &&
-                    x.TrangThai == true &&
-                    x.MaDanhMuc == maDanhMuc
+                    x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc!.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu!.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
                 )
                 .OrderByDescending(x => x.NgayTao)
                 .Take(soLuong)
@@ -1011,9 +1077,20 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                 .Where(x =>
-                    x.NgayXoa == null &&
-                    x.TrangThai == true &&
-                    x.MaThuongHieu == maThuongHieu
+                    x.NgayXoa == null
+                    && x.TrangThai == true
+
+                    && x.DanhMuc!.TrangThai == true
+                    && x.DanhMuc.NgayXoa == null
+
+                    && x.ThuongHieu!.TrangThai == true
+                    && x.ThuongHieu.NgayXoa == null
+
+                    && x.BienThe.Any(bt =>
+                        bt.NgayXoa == null &&
+                        bt.TrangThai == true &&
+                        bt.SoLuongTon > 0
+                    )
                 )
                 .OrderByDescending(x => x.NgayTao)
                 .Take(soLuong)
@@ -1022,72 +1099,85 @@ namespace Ecommerce.Services.Product
         }
         public async Task<List<ProductListItem>> GetRelatedProductsAsync(int maSanPham,int maDanhMuc,int maThuongHieu,int soLuong = 10)
         {
-            // 1. Giá sản phẩm hiện tại
-            var giaHienTai = await _db.SanPham
-                .Where(x => x.MaSanPham == maSanPham)
-                .Select(x => x.BienThe.Average(bt => bt.GiaBan))
-                .FirstOrDefaultAsync();
+           
+            var giaThamChieu = await _db.BienThe
+                .AsNoTracking()
+                .Where(bt => bt.MaSanPham == maSanPham)
+                .MinAsync(bt => (decimal?)bt.GiaBan);
 
-            if (giaHienTai == 0)
+            if (giaThamChieu == null)
                 return new List<ProductListItem>();
 
-            var giaMin = giaHienTai * 0.8m;
-            var giaMax = giaHienTai * 1.2m;
+            var giaMin = giaThamChieu.Value * 0.8m;
+            var giaMax = giaThamChieu.Value * 1.2m;
 
-            // 2. Query sản phẩm liên quan
             return await _db.SanPham
-                .Include(x => x.DanhMuc)
-                .Include(x => x.ThuongHieu)
-                .Include(x => x.HinhAnhSanPham)
-                .Include(x => x.BienThe)
-                .Where(x =>
-                    x.MaDanhMuc == maDanhMuc &&
-                    x.MaSanPham != maSanPham &&
-                    x.NgayXoa == null &&
-                    x.BienThe.Any(bt =>
+                .AsNoTracking()
+                .Where(sp =>
+                    sp.MaDanhMuc == maDanhMuc &&
+                    sp.MaSanPham != maSanPham &&
+
+                    // Ẩn sản phẩm
+                    sp.TrangThai == true &&
+                    sp.NgayXoa == null &&
+
+                    // Ẩn danh mục
+                    sp.DanhMuc!.TrangThai == true &&
+                    sp.DanhMuc.NgayXoa == null &&
+
+                    // Ẩn thương hiệu
+                    sp.ThuongHieu!.TrangThai == true &&
+                    sp.ThuongHieu.NgayXoa == null &&
+
+                    // Giá tương đương
+                    sp.BienThe.Any(bt =>
                         bt.GiaBan >= giaMin &&
                         bt.GiaBan <= giaMax
                     )
                 )
+
                 // Ưu tiên cùng thương hiệu
-                .OrderByDescending(x => x.MaThuongHieu == maThuongHieu)
-                // RANDOM
-                .ThenBy(x => Guid.NewGuid())
+                .OrderByDescending(sp => sp.MaThuongHieu == maThuongHieu)
+                .ThenBy(sp => sp.MaSanPham)
+
                 .Take(soLuong)
-                .Select(x => new ProductListItem
+
+               
+                .Select(sp => new ProductListItem
                 {
-                    MaSanPham = x.MaSanPham,
-                    TenSanPham = x.TenSanPham,
-                    Slug = x.Slug,
+                    MaSanPham = sp.MaSanPham,
+                    TenSanPham = sp.TenSanPham,
+                    Slug = sp.Slug,
 
-                    TenDanhMuc = x.DanhMuc!.TenDanhMuc,
-                    TenThuongHieu = x.ThuongHieu!.TenThuongHieu,
+                    TenDanhMuc = sp.DanhMuc!.TenDanhMuc,
+                    TenThuongHieu = sp.ThuongHieu!.TenThuongHieu,
 
-                    AnhDaiDien = x.HinhAnhSanPham
+                    AnhDaiDien = sp.HinhAnhSanPham
                         .Where(h => h.AnhChinh)
                         .Select(h => h.DuongDanAnh)
                         .FirstOrDefault(),
 
-                    GiaNhoNhat = x.BienThe.Min(bt => bt.GiaBan),
-                    GiaLonNhat = x.BienThe.Max(bt => bt.GiaBan),
+                    GiaNhoNhat = sp.BienThe.Min(bt => bt.GiaBan),
+                    GiaLonNhat = sp.BienThe.Max(bt => bt.GiaBan),
 
-                    GiaKhuyenMaiNhoNhat = x.BienThe
+                    GiaKhuyenMaiNhoNhat = sp.BienThe
                         .Where(bt => bt.GiaKhuyenMai != null)
                         .Min(bt => bt.GiaKhuyenMai),
 
-                    DanhGiaTrungBinh = x.DanhGia.Any()
-                        ? x.DanhGia.Average(dg => dg.SoSao)
+                    DanhGiaTrungBinh = sp.DanhGia.Any()
+                        ? sp.DanhGia.Average(dg => dg.SoSao)
                         : 0,
 
-                    LuotXem = x.LuotXem,
-                    LuotMua = x.LuotMua,
-                    NgayTao = x.NgayTao,
+                    LuotXem = sp.LuotXem,
+                    LuotMua = sp.LuotMua,
+                    NgayTao = sp.NgayTao,
 
-                    SoLuongBienThe = x.BienThe.Count,
-                    CoKhuyenMai = x.BienThe.Any(bt => bt.GiaKhuyenMai != null)
+                    SoLuongBienThe = sp.BienThe.Count,
+                    CoKhuyenMai = sp.BienThe.Any(bt => bt.GiaKhuyenMai != null)
                 })
                 .ToListAsync();
         }
+
 
         private ProductResult MapToProductResult(SanPham sp)
         {
@@ -1149,7 +1239,6 @@ namespace Ecommerce.Services.Product
                     .ToList()
             };
         }
-
         private static ProductListItem MapToProductListItem(SanPham sp)
         {
             var bienTheActive = sp.BienThe.Where(bt => bt.NgayXoa == null).ToList();
