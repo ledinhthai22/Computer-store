@@ -1,8 +1,77 @@
-import { X, Package, User, Phone, MapPin, CreditCard, Calendar, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Package, User, Phone, MapPin, CreditCard, Calendar, FileText, Edit, Save, RotateCcw } from "lucide-react";
 
-const OrderDetailModal = ({ isOpen, onClose, order }) => {
+// ✅ Thêm prop onUpdate vào component
+const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  // ✅ SỬA 1: Map dữ liệu đúng theo key của Backend (JSON dòng đầu bạn gửi)
+  useEffect(() => {
+    if (order) {
+      // 1. Tạo mảng chứa các thành phần địa chỉ
+      const addressParts = [
+        order.diaChi,      
+        order.phuongXa,    
+        order.tinhThanh    
+      ];
+
+      // 2. Lọc bỏ các giá trị null/undefined/rỗng và nối lại bằng dấu phẩy
+      const fullAddress = addressParts
+        .filter(part => part && part.toString().trim() !== "") 
+        .join(", "); 
+
+      // 3. Nếu không ghép được (do thiếu dữ liệu lẻ), dùng order.diaChiGiaoHang làm fallback
+      const finalAddress = fullAddress || order.diaChiGiaoHang || "";
+
+      setFormData({
+        nguoiNhan: order.tenKhachHang || "",
+        soDienThoaiNguoiNhan: order.soDienThoai || "",
+        
+        diaChi: finalAddress, // ✅ Đưa chuỗi đã ghép vào formData
+        
+        ghiChu: order.ghiChu || "",
+        ghiChuNoiBo: order.ghiChuNoiBo || "",
+        
+        tinhThanh: order.tinhThanh || "", 
+        phuongXa: order.phuongXa || ""
+      });
+    }
+    setIsEditing(false);
+  }, [order, isOpen]);
+
   if (!isOpen || !order) return null;
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+ const handleSave = () => {
+
+    const currentAddress = formData.diaChi || "";
+
+    const parts = currentAddress.split(",").map(p => p.trim());
+
+    const finalTinhThanh = parts.length > 0 ? parts[parts.length - 1] : (order.tinhThanh || "Khác");
+    const finalPhuongXa = parts.length > 1 ? parts[parts.length - 2] : (order.phuongXa || "Khác");
+
+    // 4. Tạo gói dữ liệu chuẩn để gửi
+    const payload = {
+      ...formData,
+      tinhThanh: finalTinhThanh, 
+      phuongXa: finalPhuongXa,   
+    };
+
+    try {
+        onUpdate(order.maDonHang, payload); 
+       
+        setIsEditing(false); 
+    } catch (error) {
+        console.error("Lỗi update ở modal", error);
+        // Không tắt form edit nếu lỗi
+    }
+  };
   const getStatusInfo = (status) => {
     const statusMap = {
       1: { text: "Chưa duyệt", color: "bg-gray-400 text-white" },
@@ -18,21 +87,13 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes} - ${day}/${month}/${year}`;
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} - ${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
 
   const statusInfo = getStatusInfo(order.trangThai);
@@ -45,19 +106,51 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/20 rounded-lg">
-              <Package size={24} />
+              <Package size={24} /> 
             </div>
             <div>
               <h3 className="text-lg font-bold">Chi tiết đơn hàng</h3>
               <p className="text-sm text-blue-100">Mã: {order.maHoaDon}</p>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
-          >
-            <X size={24} />
-          </button>
+          <div className="flex gap-2">
+            {/* ✅ Nút Toggle Chỉnh sửa */}
+            {!isEditing ? (
+                <button 
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors cursor-pointer flex items-center gap-2"
+                    title="Chỉnh sửa thông tin"
+                >
+                    <Edit size={20} />
+                    <span className="text-sm font-medium">Sửa</span>
+                </button>
+            ) : (
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => setIsEditing(false)}
+                        className="p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors cursor-pointer"
+                        title="Hủy bỏ"
+                    >
+                        <RotateCcw size={20} />
+                    </button>
+                    <button 
+                        onClick={handleSave}
+                        className="p-2 bg-green-500/80 hover:bg-green-500 rounded-lg transition-colors cursor-pointer flex items-center gap-2"
+                        title="Lưu thay đổi"
+                    >
+                        <Save size={20} />
+                        <span className="text-sm font-medium">Lưu</span>
+                    </button>
+                </div>
+            )}
+            
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -71,45 +164,80 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
 
           {/* Thông tin khách hàng */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-            <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <User size={20} className="text-blue-600" />
-              Thông tin khách hàng
-            </h4>
-            <div className="space-y-3">
+            {/* ... */}
+            <div className="space-y-4">
+              
+              {/* ✅ nguoiNhan */}
               <div className="flex items-start gap-3">
-                <User size={18} className="text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Họ tên</p>
-                  <p className="font-semibold text-gray-800">{order.tenKhachHang}</p>
+                <User size={18} className="text-gray-400 mt-2.5" />
+                <div className="w-full">
+                  <p className="text-xs text-gray-500 mb-1">Họ tên người nhận</p>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="nguoiNhan" 
+                      value={formData.nguoiNhan || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    />
+                  ) : (
+                    <p className="font-semibold text-gray-800 py-2">{order.tenKhachHang}</p>
+                  )}
                 </div>
               </div>
+
+              {/* ✅ soDienThoaiNguoiNhan */}
               <div className="flex items-start gap-3">
-                <Phone size={18} className="text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Số điện thoại</p>
-                  <p className="font-semibold text-gray-800">{order.soDienThoai}</p>
+                <Phone size={18} className="text-gray-400 mt-2.5" />
+                <div className="w-full">
+                  <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="soDienThoaiNguoiNhan" // 👈 QUAN TRỌNG
+                      value={formData.soDienThoaiNguoiNhan || ""} // 👈 Sửa value
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    />
+                  ) : (
+                    <p className="font-semibold text-gray-800 py-2">{order.soDienThoai}</p>
+                  )}
                 </div>
               </div>
+
+              {/* Email */}
               <div className="flex items-start gap-3">
                 <MapPin size={18} className="text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-800">{order.email}</p>
+                  <p className="font-semibold text-gray-800 py-1">{order.email}</p>
                 </div>
               </div>
+
+             {/* ✅ Địa chỉ */}
               <div className="flex items-start gap-3">
-                <MapPin size={18} className="text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Địa chỉ giao hàng</p>
-                  <p className="font-semibold text-gray-800">{order.diaChiGiaoHang}</p>
+                <MapPin size={18} className="text-gray-400 mt-2.5" />
+                <div className="w-full">
+                  <p className="text-xs text-gray-500 mb-1">Địa chỉ giao hàng</p>
+                  {isEditing ? (
+                    <textarea
+                      name="diaChi"
+                      value={formData.diaChi || ""} // Lúc này nó chứa: "Số 1, Phường 2, Quận 3"
+                      onChange={handleInputChange}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
+                    />
+                  ) : (
+                    <p className="font-semibold text-gray-800 py-2">{order.diaChiGiaoHang}</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Thông tin đơn hàng */}
+          {/* Thông tin đơn hàng*/}
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
-            <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+             <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <CreditCard size={20} className="text-green-600" />
               Thông tin thanh toán
             </h4>
@@ -131,16 +259,51 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
             </div>
           </div>
 
-          {/* Ghi chú */}
-          {order.ghiChu && (
-            <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
-              <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <FileText size={20} className="text-amber-600" />
-                Ghi chú
-              </h4>
-              <p className="text-gray-700 leading-relaxed">{order.ghiChu}</p>
+          {/* ✅ Ghi chú & Ghi chú nội bộ */}
+          <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
+            <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <FileText size={20} className="text-amber-600" />
+              Ghi chú
+            </h4>
+            
+            <div className="space-y-4">
+                {/* Ghi chú khách hàng */}
+                <div className="w-full">
+                    <p className="text-xs text-gray-500 mb-1 font-semibold">Ghi chú khách hàng:</p>
+                    {isEditing ? (
+                        <textarea
+                            name="ghiChu"
+                            value={formData.ghiChu}
+                            onChange={handleInputChange}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                        />
+                    ) : (
+                        <p className="text-gray-700 leading-relaxed">{order.ghiChu || "Không có ghi chú"}</p>
+                    )}
+                </div>
+
+                {/* ✅ Ghi chú nội bộ */}
+                <div className="w-full border-t border-amber-200 pt-3">
+                    <p className="text-xs text-gray-500 mb-1 font-semibold">Ghi chú nội bộ (Admin):</p>
+                    {isEditing ? (
+                        <textarea
+                            name="ghiChuNoiBo"
+                            value={formData.ghiChuNoiBo}
+                            onChange={handleInputChange}
+                            placeholder="Nhập ghi chú nội bộ..."
+                            rows={2}
+                            className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                        />
+                    ) : (
+                        <p className="text-gray-700 leading-relaxed italic">
+                            {order.ghiChuNoiBo || "Chưa có ghi chú nội bộ"}
+                        </p>
+                    )}
+                </div>
             </div>
-          )}
+          </div>
+
         </div>
 
         {/* Footer */}

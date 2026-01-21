@@ -17,26 +17,36 @@ export default function Cart() {
     document.title = "Giỏ hàng của bạn";
   }, []);
 
+  // ================== NORMALIZE DATA ==================
   const normalizeItem = (item) => {
     const id = item.maBienThe || item.MaBienThe;
     const qty = item.soLuong || item.SoLuong || 0;
+
     const name =
       item.tenSanPham || item.TenSanPham || item.tenBienThe || "Sản phẩm";
-    const price =
-      Number(item.giaKhuyenMai) ||
-      Number(item.GiaKhuyenMai) ||
-      Number(item.giaBan) ||
-      Number(item.GiaBan) ||
-      Number(item.gia) ||
-      0;
+
+    const giaBan = Number(item.giaBan || item.GiaBan || 0);
+    const giaKhuyenMai = Number(
+      item.giaKhuyenMai || item.GiaKhuyenMai || giaBan
+    );
+
     const image =
       item.hinhAnh || item.duongDanAnh
         ? `https://localhost:7012/Product/Image/${item.hinhAnh || item.duongDanAnh}`
         : "https://via.placeholder.com/100";
 
-    return { id, qty, name, price, image };
+    return {
+      id,
+      qty,
+      name,
+      price: giaKhuyenMai,       // giá KM
+      originalPrice: giaBan,     // giá bán
+      discount: giaBan - giaKhuyenMai,
+      image,
+    };
   };
 
+  // ================== SELECT ==================
   const isAllSelected =
     cart.length > 0 && selectedItems.length === cart.length;
 
@@ -52,13 +62,26 @@ export default function Cart() {
     );
   };
 
-  const totalPrice = useMemo(() => {
+  // ================== TẠM TÍNH (GIÁ BÁN) ==================
+  const subTotal = useMemo(() => {
     return cart
       .map(normalizeItem)
       .filter((item) => selectedItems.includes(item.id))
-      .reduce((sum, item) => sum + item.price * item.qty, 0);
+      .reduce((sum, item) => sum + item.originalPrice * item.qty, 0);
   }, [cart, selectedItems]);
 
+  // ================== ĐÃ GIẢM ==================
+  const totalDiscount = useMemo(() => {
+    return cart
+      .map(normalizeItem)
+      .filter((item) => selectedItems.includes(item.id))
+      .reduce((sum, item) => sum + item.discount * item.qty, 0);
+  }, [cart, selectedItems]);
+
+  // ================== TỔNG CỘNG ==================
+  const totalPrice = subTotal - totalDiscount;
+
+  // ================== DELETE ==================
   const handleConfirmDelete = () => {
     if (deleteMode === "single" && deleteId) {
       remove(deleteId);
@@ -76,6 +99,7 @@ export default function Cart() {
     setDeleteId(null);
   };
 
+  // ================== RENDER ==================
   return (
     <div className="bg-gray-200 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -85,7 +109,7 @@ export default function Cart() {
           <p className="text-gray-500">Giỏ hàng của bạn đang trống.</p>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* DANH SÁCH SẢN PHẨM */}
+            {/* ================== PRODUCT LIST ================== */}
             <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -129,10 +153,10 @@ export default function Cart() {
 
                       <img
                         src={item.image}
-                        onError={(e) => {
-                          e.target.src = "https://via.placeholder.com/100";
-                        }}
                         alt={item.name}
+                        onError={(e) =>
+                          (e.target.src = "https://via.placeholder.com/100")
+                        }
                         className="w-20 h-20 object-cover rounded-lg bg-white shadow-sm"
                       />
 
@@ -140,31 +164,46 @@ export default function Cart() {
                         <h3 className="text-sm font-medium line-clamp-2">
                           {item.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          {item.price.toLocaleString()}₫
-                        </p>
+
+                        {/* ===== PRICE ===== */}
+                        <div className="text-sm mt-1">
+                          {item.price < item.originalPrice ? (
+                            <>
+                              <span className="text-red-600 font-semibold">
+                                {item.price.toLocaleString()}₫
+                              </span>
+                              <span className="ml-2 text-gray-400 line-through">
+                                {item.originalPrice.toLocaleString()}₫
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-700 font-medium">
+                              {item.originalPrice.toLocaleString()}₫
+                            </span>
+                          )}
+                        </div>
                       </div>
 
+                      {/* ===== QUANTITY ===== */}
                       <div className="mr-12 flex items-center bg-white rounded-lg shadow-sm">
                         <button
                           onClick={() => decrease(item.id, item.qty)}
-                          className="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg"
+                          className="px-2 py-1 hover:bg-gray-100 rounded-l-lg"
                         >
                           −
                         </button>
-
                         <span className="px-3 text-sm font-medium">
                           {item.qty}
                         </span>
-
                         <button
                           onClick={() => increase(item.id, item.qty)}
-                          className="px-2 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
+                          className="px-2 py-1 hover:bg-gray-100 rounded-r-lg"
                         >
                           +
                         </button>
                       </div>
 
+                      {/* ===== DELETE ===== */}
                       <button
                         onClick={() => {
                           setDeleteMode("single");
@@ -182,7 +221,7 @@ export default function Cart() {
               </div>
             </div>
 
-            {/* TỔNG ĐƠN HÀNG */}
+            {/* ================== ORDER SUMMARY ================== */}
             <div className="bg-white rounded-2xl shadow-sm p-5 h-[360px] flex flex-col justify-between">
               <div>
                 <h2 className="text-lg font-semibold mb-4">Tổng đơn hàng</h2>
@@ -190,15 +229,20 @@ export default function Cart() {
                 <div className="space-y-3 text-sm text-gray-700">
                   <div className="flex justify-between">
                     <span>Tạm tính</span>
-                    <span>{totalPrice.toLocaleString()}₫</span>
+                    <span>{subTotal.toLocaleString()}₫</span>
                   </div>
 
-                  {selectedItems.length > 0 && (
-                    <div className="flex justify-between">
-                      <span>Phí vận chuyển</span>
-                      <span className="text-green-500">Miễn phí</span>
+                  {totalDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Đã giảm</span>
+                      <span>-{totalDiscount.toLocaleString()}₫</span>
                     </div>
                   )}
+
+                  <div className="flex justify-between">
+                    <span>Phí vận chuyển</span>
+                    <span className="text-green-600">Miễn phí</span>
+                  </div>
 
                   {selectedItems.length > 0 && (
                     <div className="flex justify-between text-base font-bold pt-2">

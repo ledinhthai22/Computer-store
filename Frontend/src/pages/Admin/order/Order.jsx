@@ -77,9 +77,9 @@ const Order = () => {
         return {
             maHoaDon: backendOrder.maDon,
             maDonHang: backendOrder.maDonHang,
-            tenKhachHang: backendOrder.khachHang?.hoTen || 'N/A',
+            tenKhachHang: backendOrder.diaChi?.tenNguoiNhan || 'N/A',
             email: backendOrder.khachHang?.email || 'N/A',
-            soDienThoai: backendOrder.khachHang?.soDienThoai || 'N/A',
+            soDienThoai: backendOrder.diaChi?.soDienThoai || 'N/A',
             
             diaChiGiaoHang: backendOrder.diaChi 
                 ? `${backendOrder.diaChi.diaChi}, ${backendOrder.diaChi.phuongXa}, ${backendOrder.diaChi.tinhThanh}`
@@ -92,7 +92,7 @@ const Order = () => {
             ngayDatHang: convertVietnameseDateToISO(backendOrder.ngayTao),
             
             ghiChu: backendOrder.ghiChu || '',
-            
+            ghiChuNoiBo: backendOrder.ghiChuNoiBo || '',
             _backend: backendOrder
         };
     };
@@ -204,7 +204,18 @@ const Order = () => {
         setSelectedOrder(order);
         setIsUpdateModalOpen(true);
     };
+   const handleUpdateOrderInfo = async (orderId, updatedData) => {
+        try {
+            await orderService.updateOrderInfo(orderId, updatedData);
 
+            await fetchOrders();
+            
+            showToast("Cập nhật thành công!", "success");
+        } catch (error) {
+            console.error("Update failed:", error);
+            showToast("Cập nhật thông tin thất bại: " + (error.response?.data || error.message), "error");
+        }
+    };
     // ✅ Xác nhận cập nhật trạng thái - Gọi từ modal
     const handleConfirmUpdate = async (newStatus) => {
         if (!selectedOrder) return;
@@ -212,12 +223,12 @@ const Order = () => {
         try {
             // ✅ Set pending update NGAY KHI BẮT ĐẦU cập nhật
             setPendingStatusUpdate({ 
-                maHoaDon: selectedOrder.maHoaDon, 
+                maHoaDon: selectedOrder.maDonHang, 
                 newStatus: newStatus 
             });
 
             // TODO: Uncomment khi API ready
-            // await orderService.updateStatus(selectedOrder.maHoaDon, { trangThai: newStatus });
+            await orderService.updateStatus(selectedOrder.maDonHang, { trangThai: newStatus });
             
             // ⚠️ MOCK: Simulate API call delay
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -269,6 +280,14 @@ const Order = () => {
             </div>
             
             {/* View Modal */}
+            {/* <OrderDetailModal
+                isOpen={isViewModalOpen}
+                order={selectedOrder}
+                onClose={() => {
+                    setIsViewModalOpen(false);
+                    setSelectedOrder(null);
+                }}
+            /> */}
             <OrderDetailModal
                 isOpen={isViewModalOpen}
                 order={selectedOrder}
@@ -276,8 +295,10 @@ const Order = () => {
                     setIsViewModalOpen(false);
                     setSelectedOrder(null);
                 }}
+                // ✅ Truyền hàm update xuống modal
+                onUpdate={handleUpdateOrderInfo}
             />
-
+           
             {/* Update Status Modal */}
             <OrderUpdateModal
                 isOpen={isUpdateModalOpen}

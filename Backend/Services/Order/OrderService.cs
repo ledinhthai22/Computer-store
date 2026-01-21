@@ -320,22 +320,19 @@ namespace Backend.Services.Order
                 throw new InvalidOperationException("Tổng tiền góc nhỏ hơn tổng thanh toán!");
             }
         }
-        private string CreateMaDH(int PhuongThucThanhToan)
+        private async Task<string> CreateMaDH()
         {
-            DateTime now = DateTime.Now;
-            if (OrderToday.Date != now.Date)
+            string NgayThang = DateTime.Now.ToString("yyMMdd");
+
+            Random random = new Random();
+            string ngaunhien, maDon;
+            do
             {
-                OrderToday = now;
-                OrderCountToday = 1;
+                ngaunhien = random.Next(1000, 9999).ToString();
+                maDon = $"ORD{NgayThang}-{ngaunhien}";
             }
-            else
-            {
-                OrderCountToday++;
-            }
-            string phuongThuc = (PhuongThucThanhToan == 1) ? "01" : "02";
-            string MaDon = $"ORD{now:yyyyMMddHHmmss}{phuongThuc}{OrderCountToday:D3}";
-            Console.WriteLine(MaDon);
-            return MaDon;
+            while (await _DbContext.DonHang.AnyAsync(x => x.MaDon == maDon));
+            return maDon;
         }
         private async Task<List<ChiTietDonHang>> CreateOrderDetails(int MaDH, List<CreateOrderDetailRequest> request)
         {
@@ -359,7 +356,7 @@ namespace Backend.Services.Order
         {
             await CheckValidateCreateOrder(request);
 
-            string MaDon = CreateMaDH(request.PhuongThucThanhToan);
+            string MaDon = await CreateMaDH();
 
             var newOrder = new DonHang
             {
@@ -484,7 +481,7 @@ namespace Backend.Services.Order
         {
 
             var data = await ValidateAndPrepareData(userId, request);
-            string maDon = CreateMaDH(request.PhuongThucThanhToan);
+            string maDon = await CreateMaDH();
 
             var newOrder = new DonHang
             {
@@ -609,12 +606,12 @@ namespace Backend.Services.Order
         }
         public async Task<List<OrderResult>> GetOrderByPhoneAsync(string Phone)
         {
-            if (string.IsNullOrWhiteSpace(Phone) || Phone.Length < 10)
+            if (string.IsNullOrWhiteSpace(Phone))
             {
-                throw new ArgumentException("Số điện thoại không hợp lệ (Phải từ 10 số trở lên).");
+                throw new ArgumentException("Số điện thoại không hợp lệ!");
             }
             return await _DbContext.DonHang
-                .Where(dh => dh.SoDienThoaiNguoiNhan == Phone)
+                .Where(dh => dh.SoDienThoaiNguoiNhan.Contains(Phone))
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.DiaChiNhanHang)
                 .Include(dh => dh.ChiTietDonHang)
@@ -954,6 +951,76 @@ namespace Backend.Services.Order
                 throw new InvalidOperationException("Hủy đơn hàng không thành công!");
 
             return true;
+        }
+        public async Task<OrderResult> GetUserOrderDetailAsync(int userId, int maDH)
+        {
+            var user = await _DbContext.NguoiDung
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == userId && u.NgayXoa == null);
+
+            if (user == null)
+                throw new InvalidOperationException("Người dùng không tồn tại!");
+
+            var order = await _DbContext.DonHang
+                .Where(dh => dh.MaDH == maDH && dh.MaKH == userId)
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.DiaChiNhanHang)
+                .Include(dh => dh.ChiTietDonHang)
+                    .ThenInclude(ct => ct.BienThe)
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                throw new InvalidOperationException("Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này!");
+
+            // Lấy danh sách mã biến thể
+            var listMaBienThe = order.ChiTietDonHang.Select(ct => ct.MaBienThe).ToList();
+
+            // Load hình ảnh riêng từ bảng HinhAnhBienThe
+            //var hinhAnhDict = await _DbContext.HinhAnhSanPham
+            //    .Where(ha => listMaBienThe.Contains(ha.MaHinhAnh) && ha.NgayXoa == null)
+            //    .GroupBy(ha => ha.MaSanPham)
+            //    .Select(g => new
+            //    {
+            //        MaBienThe = g.Key,
+            //        LinkAnh = g.OrderBy(ha => ha.MaHinhAnh).Select(ha => ha.DuongDanAnh).FirstOrDefault()
+            //    })
+            //    .ToDictionaryAsync(x => x.MaBienThe, x => x.LinkAnh);
+
+            return new OrderResult
+            {
+                MaDonHang = order.MaDH,
+                MaDon = order.MaDon,
+                TongTien = order.TongTienThanhToan,
+                PhuongThucThanhToan = order.PhuongThucThanhToan,
+                TrangThai = GetStatusText(order.TrangThai),
+                NgayTao = order.NgayTao.ToString("HH:mm dd/MM/yyyy"),
+                GhiChu = order.GhiChu,
+                GhiChuNoiBo = order.GhiChuNoiBo,
+                KhachHang = new OrderCustomer
+                {
+                    MaNguoiDung = order.KhachHang.MaNguoiDung,
+                    HoTen = order.KhachHang.HoTen,
+                    Email = order.KhachHang.Email,
+                    SoDienThoai = order.KhachHang.SoDienThoai
+                },
+                DiaChi = new OrderAddress
+                {
+                    TenNguoiNhan = order.NguoiNhan,
+                    TinhThanh = order.TinhThanh,
+                    PhuongXa = order.PhuongXa,
+                    DiaChi = order.DiaChi,
+                    SoDienThoai = order.SoDienThoaiNguoiNhan
+                },
+                ChiTietDonHang = order.ChiTietDonHang.Select(ct => new OrderDetail
+                {
+                    MaBienThe = ct.BienThe.MaBTSP,
+                    TenBienThe = ct.BienThe.TenBienThe,
+                    SoLuong = ct.SoLuong,
+                    GiaBan = ct.BienThe.GiaBan,
+                    GiaKhuyenMai = ct.BienThe.GiaKhuyenMai ?? ct.BienThe.GiaBan,
+                    ThanhTien = (ct.BienThe.GiaKhuyenMai ?? ct.BienThe.GiaBan) * ct.SoLuong,
+                    //HinhAnh = hinhAnhDict.ContainsKey(ct.MaBienThe) ? hinhAnhDict[ct.MaBienThe] : null
+                }).ToList()
+            };
         }
     }
 }

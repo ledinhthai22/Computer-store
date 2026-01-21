@@ -81,13 +81,13 @@ export const orderService = {
   },
 
   updateStatus: async (maDonHang, status) => {
-    const res = await axiosClient.put(`/admin/products/${maDonHang}`, status);
+    const res = await axiosClient.put(`/admin/order/${maDonHang}`, status);
     return res.data;
   },
 
   updateInfo: async (maDonHang, data) => {
     const res = await axiosClient.put(
-      `/admin/products/Admin-Cap-nhat-thong-tin/${maDonHang}`,
+      `/admin/order/Admin-Cap-nhat-thong-tin/${maDonHang}`,
       data,
     );
     return res.data;
