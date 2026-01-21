@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import TableSearch from '../TableSearch';
 import Pagination from '../Pagination';
 
-const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeChange, onOpenAddModal }) => {
+const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeChange, onOpenAddModal, showToast }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState('');
 
@@ -14,6 +14,18 @@ const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeC
         (item.email?.toLowerCase().includes(filterText.toLowerCase())) ||
         (item.soDienThoai?.includes(filterText))
     );
+
+    const handleDeleteAttempt = (row) => {
+        if (row.trangThai === true) {
+        // Không cho xóa, hiển thị Toast cảnh báo
+        showToast("Không thể xóa người dùng đang hoạt động", "error");
+        return;
+        }
+
+        // Gọi onDelete (xóa thực tế)
+        onDelete(row.maNguoiDung);
+        // Toast thành công sẽ do component cha xử lý (sau khi API delete xong)
+    };
 
     const columns = [
         { 
@@ -59,21 +71,26 @@ const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeC
             selector: row => row.trangThai,
             sortable: true,
             center: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase border ${
+            cell: row => {
+
+                return (
+                <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center ${
                     row.trangThai 
                         ? "bg-green-100 text-green-700 border-green-200" 
                         : "bg-red-100 text-red-700 border-red-200"
                 }`}>
                     {row.trangThai ? "Hoạt động" : "Bị khóa"}
                 </span>
-            )
+                )
+            }
         },
         {
             name: 'HÀNH ĐỘNG',
             width: '250px',
             center: true,
-            cell: row => (
+            cell: row => {
+                const isDisabled = row.trangThai === true;
+                return (
                 <div className="flex items-center justify-center gap-2">
                     {row.trangThai ? (
                         <button 
@@ -90,14 +107,27 @@ const UserTable = ({ data, onLock, onUnlock, onDelete, filterType, onFilterTypeC
                             <Unlock size={16} /> Mở
                         </button>
                     )}
-                    <button 
-                        onClick={() => onDelete(row.maNguoiDung)} 
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
-                    >
-                        <Trash2 size={16} /> Xóa
+                    <button
+                        onClick={() => handleDeleteAttempt(row)}
+                        title={
+                            isDisabled
+                            ? "Thương hiệu đang hiển thị (Hiện), không thể xóa"
+                            : "Xóa thương hiệu (xóa mềm)"
+                        }
+                        className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
+                            ${
+                            isDisabled
+                                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                                : "text-red-500 hover:bg-red-100"
+                            }
+                        `}
+                        >
+                        <Trash2 size={18} />
+                        <span className="hidden sm:inline">Xóa</span>
                     </button>
                 </div>
-            )
+                )
+            }
         }
     ];
 

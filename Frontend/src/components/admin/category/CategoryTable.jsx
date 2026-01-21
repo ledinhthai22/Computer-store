@@ -26,8 +26,8 @@ const CategoryTable = ({
 
   const handleDeleteAttempt = (row) => {
     if (row.trangThai === true) {
-      // Không cho xóa khi đang "Hiện" → Hiển thị Toast cảnh báo
-      showToast("Không thể xóa danh mục đang hiển thị (Hiện)!", "error");
+      // Không cho xóa khi đang "Hoạt động" → Hiển thị Toast cảnh báo
+      showToast("Không thể xóa danh mục đang hoạt động", "error");
       return;
     }
 
@@ -78,13 +78,13 @@ const CategoryTable = ({
 
         return (
           <span
-            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border ${
+            className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center ${
               isActive
                 ? "bg-green-100 text-green-700 border-green-200"
                 : "bg-gray-100 text-gray-600 border-gray-200"
             }`}
           >
-            {isActive ? "Hiện" : "Ẩn"}
+            {isActive ? "Hoạt động" : "Ẩn"}
           </span>
         );
       },
@@ -111,10 +111,9 @@ const CategoryTable = ({
             {/* Nút Xóa */}
             <button
               onClick={() => handleDeleteAttempt(row)}
-              disabled={isDisabled}
               title={
                 isDisabled
-                  ? "Danh mục đang hiển thị (Hiện), không thể xóa"
+                  ? "Danh mục đang hoạt động, không thể xóa"
                   : "Xóa danh mục (xóa mềm)"
               }
               className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer

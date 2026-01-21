@@ -4,13 +4,25 @@ import { Edit, Trash2, Plus, ArrowUpIcon, Filter } from "lucide-react";
 import TableSearch from '../TableSearch';
 import Pagination from '../Pagination';
 
-const SlideShowTable = ({ data, loading, onEdit, onDelete, onOpenAddModal, filterType, onFilterTypeChange }) => {
+const SlideShowTable = ({ data, loading, onEdit, onDelete, onOpenAddModal, filterType, onFilterTypeChange, showToast }) => {
     const API_BASE_URL = "https://localhost:7012";
     const [filterText, setFilterText] = useState('');
 
     const filteredItems = data.filter(
         item => item.tenTrinhChieu && item.tenTrinhChieu.toLowerCase().includes(filterText.toLowerCase()),
     );
+    
+    const handleDeleteAttempt = (row) => {
+        if (row.trangThai === true) {
+        // Không cho xóa, hiển thị Toast cảnh báo
+        showToast("Không thể xóa trình chiếu đang hoạt động", "error");
+        return;
+        }
+
+        // Gọi onDelete (xóa thực tế)
+        onDelete(row.maTrinhChieu);
+        // Toast thành công sẽ do component cha xử lý (sau khi API delete xong)
+    };
 
     const columns = [
         {
@@ -56,25 +68,45 @@ const SlideShowTable = ({ data, loading, onEdit, onDelete, onOpenAddModal, filte
             name: 'TRẠNG THÁI',
             selector: row => row.trangThai,
             cell: row => (
-                <span className={`px-5 py-1.5 text-sm font-semibold rounded-full border border-current text-center w-18
+                <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border w-25 text-center
                 ${row.trangThai
                             ? 'text-green-700 bg-green-100 border-green-400'
                             : 'text-red-700 bg-red-100 border-red-400'
                         }`}
                 >
-                    {row.trangThai ? ('Hiện') : ('Ẩn')}
+                    {row.trangThai ? ('Hoạt động') : ('Ẩn')}
                 </span>
             ),
         },
         {
             name: 'HÀNH ĐỘNG',
             width: '180px',
-            cell: row => (
+            cell: row => {
+                const isDisabled = row.trangThai === true;
+                return (
                 <div className="flex items-center gap-1">
                     <button onClick={() => onEdit(row)} className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors"><Edit size={18} /></button>
-                    <button onClick={() => onDelete(row.maTrinhChieu)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"><Trash2 size={18} /></button>
+                    <button
+                        onClick={() => handleDeleteAttempt(row)}
+                        title={
+                            isDisabled
+                            ? "Trình chiếu đang hoạt động, không thể xóa"
+                            : "Xóa trình chiếu"
+                        }
+                        className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
+                            ${
+                            isDisabled
+                                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                                : "text-red-500 hover:bg-red-100"
+                            }
+                        `}
+                        >
+                        <Trash2 size={18} />
+                        <span className="hidden sm:inline">Xóa</span>
+                    </button>
                 </div>
-            ),
+                )
+            },
         },
     ];
 

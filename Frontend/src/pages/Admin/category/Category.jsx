@@ -142,6 +142,7 @@ const Category = () => {
                 onDelete={handleDeleteClick}
                 onFilterTypeChange={setFilterType}
                 filterType={filterType}
+                showToast={showToast}
                 onOpenAddModal={openAddModal}
             />
 
