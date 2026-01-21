@@ -108,7 +108,7 @@ const WebInfoTable = ({
         {
             name: "HÀNH ĐỘNG",
             center: true,
-            width: "220px",
+            width: "200px",
             cell: (row) => {
                 const isDisabled = row.trangThaiHienThi === true;
 
@@ -170,7 +170,7 @@ const WebInfoTable = ({
 
                     <button
                         onClick={() =>
-                            navigate("/quan-ly/thong-tin-trang/khoi-phuc")
+                            navigate("/quan-ly/thong-ke/khoi-phuc")
                         }
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
                     >

@@ -114,17 +114,28 @@ export default function Details() {
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, index) => {
-      const filled = index < Math.floor(rating);
+      const fullStar = index < Math.floor(rating);
+      const halfStar = index === Math.floor(rating) && rating % 1 >= 0.5;
+      
       return (
-        <Star
-          key={`star-${index}`}
-          className={
-            filled
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
-          }
-          size={20}
-        />
+        <div key={`star-${index}`} className="relative inline-block">
+          <Star 
+            size={20}
+            className={fullStar ? "fill-yellow-400 text-yellow-400" : "fill-gray-300 text-gray-300"}
+          />
+          {halfStar && (
+            <div 
+              className="absolute top-0 left-0"
+              style={{ 
+                clipPath: 'polygon(0 0, 50% 0, 50% 100%, 0 100%)',
+                width: '20px',
+                height: '20px'
+              }}
+            >
+              <Star className="fill-yellow-400 text-yellow-400" size={20} />
+            </div>
+          )}
+        </div>
       );
     });
   };
@@ -278,7 +289,7 @@ export default function Details() {
                   <span className="font-semibold text-gray-700 gap-2 mr-2">Lượt xem: <span className="text-gray-500">{product.luotXem}</span></span>
                   <span className="font-semibold text-gray-700 min-w-22">Đánh giá:</span>
                   <div className="flex items-center gap-2">
-                    {renderStars(product.danhGiaTrungBinh || 0)}
+                    {renderStars(Number(product.danhGiaTrungBinh) || 0)}
                     <span className="text-gray-700">({product.luotMua || 0} đã bán)</span>
                   </div>
                 </div>
