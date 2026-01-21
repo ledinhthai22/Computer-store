@@ -215,59 +215,64 @@ namespace Backend.Services.Order
         }
         public async Task<bool> UpdateStatusAsync(int MaDH, UpdateOrderStatusRequest request)
         {
+            // 1. Lấy thông tin đơn hàng và chi tiết
             var order = await _DbContext.DonHang
-                                .Include(dh => dh.ChiTietDonHang)
-                                .FirstOrDefaultAsync(dh => dh.MaDH == MaDH);
-            Console.WriteLine(order);
-            if (order == null)
-            {
-                throw new InvalidOperationException("Không tồn tại Đơn hàng này!");
-            }
+                                    .Include(dh => dh.ChiTietDonHang)
+                                    .FirstOrDefaultAsync(dh => dh.MaDH == MaDH);
+
+            if (order == null) throw new InvalidOperationException("Không tồn tại Đơn hàng này!");
+
             if (request.TrangThai < 0 || request.TrangThai > 7)
-                throw new InvalidOperationException("Trạng thái không tồn tại (phải từ 0-7)!");
-            if (request.TrangThai <= order.TrangThai)
-                throw new InvalidOperationException($"Không thể cập nhật: Trạng thái mới ({request.TrangThai}) phải lớn hơn trạng thái hiện tại ({order.TrangThai}).");
-            if (request.TrangThai == 1)
+                throw new InvalidOperationException("Trạng thái không hợp lệ!");
+            if (request.TrangThai < order.TrangThai && request.TrangThai == 0)
             {
-                foreach (var BienThe in order.ChiTietDonHang)
+                foreach (var chiTiet in order.ChiTietDonHang)
                 {
                     var bt = await _DbContext.BienThe
-                                    .Where(bt => bt.NgayXoa == null)
-                                    .FirstOrDefaultAsync(bt => bt.MaBTSP == BienThe.MaBienThe);
+                                 .Include(bt => bt.SanPham)
+                                .FirstOrDefaultAsync(b => b.MaBTSP == chiTiet.MaBienThe && b.NgayXoa == null);
                     if (bt == null)
                     {
-                        throw new InvalidOperationException("Sản phẩm hiện tại không có!");
+                        throw new InvalidOperationException($"Sản phẩm (ID: {chiTiet.MaBienThe}) không tồn tại!");
                     }
-                    else if (bt.SoLuongTon < BienThe.SoLuong)
-                    {
-                        throw new InvalidOperationException("Số lượng sản phẩm tồn lớn hơn số lượng sản phẩm bán!");
-                    }
-                    else
-                    {
-                        bt.SoLuongTon -= BienThe.SoLuong;
-                        _DbContext.BienThe.Update(bt);
-                        if (!(await _DbContext.SaveChangesAsync() > 0))
-                        {
-                            throw new InvalidOperationException("Cập nhật số lượng sản phẩm không thành công!");
-                        }
-                        order.TrangThai = request.TrangThai;
-                        _DbContext.DonHang.Update(order);
-                        if (!(await _DbContext.SaveChangesAsync() > 0))
-                            return false;
-                        return true;
-
-                    }
+                    bt.SanPham.SoLuongTon += chiTiet.SoLuong;
+                    bt.SoLuongTon += chiTiet.SoLuong;
                 }
             }
-            else
+            order.TrangThai = request.TrangThai;
+            _DbContext.DonHang.Update(order);
+            if (request.TrangThai == 1)
             {
-                order.TrangThai = request.TrangThai;
-                _DbContext.DonHang.Update(order);
-                if (!(await _DbContext.SaveChangesAsync() > 0))
-                    return false;
-                return true;
+                foreach (var chiTiet in order.ChiTietDonHang)
+                {
+                    var bt = await _DbContext.BienThe
+                                 .Include(bt => bt.SanPham)
+                                .FirstOrDefaultAsync(b => b.MaBTSP == chiTiet.MaBienThe && b.NgayXoa == null);
+
+                    if (bt == null)
+                    {
+                        throw new InvalidOperationException($"Sản phẩm (ID: {chiTiet.MaBienThe}) không tồn tại!");
+                    }
+
+                    if (bt.SoLuongTon < chiTiet.SoLuong)
+                    {
+                        throw new InvalidOperationException($"Sản phẩm {bt.TenBienThe} không đủ hàng tồn (Còn: {bt.SoLuongTon}, Cần: {chiTiet.SoLuong})!");
+                    }
+                    bt.SanPham.SoLuongTon -= chiTiet.SoLuong;
+                    bt.SoLuongTon -= chiTiet.SoLuong;
+                }
             }
-            return false;
+            order.TrangThai = request.TrangThai;
+            _DbContext.DonHang.Update(order);
+            try
+            {
+                var result = await _DbContext.SaveChangesAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Lỗi hệ thống khi cập nhật đơn hàng: " + ex.Message);
+            }
         }
 
         private DateTime OrderToday { get; set; } = DateTime.Now;
@@ -404,7 +409,7 @@ namespace Backend.Services.Order
                 MaDon = newOrder.MaDon,
                 TongTien = newOrder.TongTienThanhToan,
                 PhuongThucThanhToan = newOrder.PhuongThucThanhToan,
-                TrangThai = GetStatusText(newOrder.TrangThai), 
+                TrangThai = GetStatusText(newOrder.TrangThai),
                 NgayTao = newOrder.NgayTao == null ? "Chưa cập nhật"
                           : newOrder.NgayTao.ToString("HH:mm dd/MM/yyyy"),
                 GhiChu = newOrder.GhiChu,
@@ -506,7 +511,7 @@ namespace Backend.Services.Order
             };
 
             _DbContext.DonHang.Add(newOrder);
-            if(!(await _DbContext.SaveChangesAsync()>0))
+            if (!(await _DbContext.SaveChangesAsync() > 0))
                 throw new InvalidOperationException("Tạo đơn hàng không thành công!");
 
             var orderDetailsEntities = new List<ChiTietDonHang>();
@@ -580,7 +585,7 @@ namespace Backend.Services.Order
             var order = await _DbContext.DonHang
                                 .FirstOrDefaultAsync(o => o.MaDH == MaDH);
             var user = await _DbContext.NguoiDung
-                                .Include(u=> u.VaiTro)
+                                .Include(u => u.VaiTro)
                                 .FirstOrDefaultAsync(u => u.MaNguoiDung == MaND && u.NgayXoa == null);
             if (order == null)
             {
