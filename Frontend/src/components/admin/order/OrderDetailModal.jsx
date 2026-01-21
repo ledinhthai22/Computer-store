@@ -84,14 +84,14 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
   };
   const getStatusInfo = (status) => {
     const statusMap = {
-      1: { text: "Chưa duyệt", color: "bg-gray-400 text-white" },
-      2: { text: "Đã duyệt", color: "bg-orange-500 text-white" },
-      3: { text: "Đang xử lý", color: "bg-orange-300 text-gray-800" },
-      4: { text: "Đang giao", color: "bg-yellow-400 text-gray-800" },
-      5: { text: "Đã giao", color: "bg-green-600 text-white" },
-      6: { text: "Hoàn thành", color: "bg-green-400 text-white" },
-      7: { text: "Đã hủy", color: "bg-red-400 text-white" },
-      8: { text: "Trả hàng", color: "bg-red-600 text-white" }
+      0: { text: "Chưa duyệt", color: "bg-gray-400 text-white" },
+      1: { text: "Đã duyệt", color: "bg-orange-500 text-white" },
+      2: { text: "Đang xử lý", color: "bg-orange-300 text-gray-800" },
+      3: { text: "Đang giao", color: "bg-yellow-400 text-gray-800" },
+      4: { text: "Đã giao", color: "bg-green-600 text-white" },
+      5: { text: "Hoàn thành", color: "bg-green-400 text-white" },
+      6: { text: "Đã hủy", color: "bg-red-400 text-white" },
+      7: { text: "Trả hàng", color: "bg-red-600 text-white" }
     };
     return statusMap[status] || { text: "Không xác định", color: "bg-gray-200 text-gray-600" };
   };
