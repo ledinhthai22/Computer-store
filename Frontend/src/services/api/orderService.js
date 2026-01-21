@@ -85,7 +85,14 @@ export const orderService = {
     const res = await axiosClient.get(`/admin/order/Ma-Don/${maDon}`);
     return res.data;
   },
-
+  softDelete: async (maDH) => {
+    const res = await axiosClient.delete(`/admin/order/${maDH}`);
+    return res.data;
+  },
+  getorderhiden: async () =>{
+    const res = await axiosClient.get(`/admin/order/SoftDelete/`);
+    return res.data;
+  },
   getBySoDienThoai: async (soDienThoai) => {
     const res = await axiosClient.get(
       `/admin/order/So-Dien-Thoai/${soDienThoai}`,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DataTable from "react-data-table-component";
-import { Eye, ArrowUpIcon, Filter, Edit } from "lucide-react";
+import { Eye, ArrowUpIcon, Filter, Edit,Trash2 } from "lucide-react";
 import TableSearch from "../../admin/TableSearch";
 import Pagination from "../Pagination";
 
@@ -9,6 +9,7 @@ const OrderTable = ({
     loading,
     onView, 
     onUpdate, 
+    onDelete,
     filterType, 
     onFilterTypeChange,
     updatingOrderId 
@@ -133,34 +134,46 @@ const OrderTable = ({
             width: '280px',
             cell: row => {
                 const isUpdating = updatingOrderId === row.maHoaDon;
+                const isDeletedView = filterType === 'deleted'; // Kiểm tra xem có đang ở tab đã xóa không
                 
                 return (
                     <div className="flex items-center gap-2 justify-center">
+                        {/* Nút Xem Chi Tiết */}
                         <button 
                             onClick={() => onView(row)}
                             className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                             title="Xem chi tiết"
                         >
                             <Eye size={18} /> 
-                            <span className="hidden sm:inline">Xem</span>
                         </button>
-                        <button 
-                            onClick={() => onUpdate(row)}
-                            disabled={updatingOrderId && !isUpdating}
-                            className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
-                                isUpdating
-                                    ? 'bg-amber-100 text-amber-700 border border-amber-300'
-                                    : updatingOrderId
-                                    ? 'text-gray-300 cursor-not-allowed'
-                                    : 'text-amber-500 hover:bg-amber-100 cursor-pointer'
-                            }`}
-                            title={isUpdating ? "Đang cập nhật..." : "Cập nhật trạng thái"}
-                        >
-                            <Edit size={18} /> 
-                            <span className="hidden sm:inline">
-                                {isUpdating ? "Đang..." : "Cập nhật"}
-                            </span>
-                        </button>
+                        {!isDeletedView && (
+                            <button 
+                                onClick={() => onUpdate(row)}
+                                disabled={updatingOrderId && !isUpdating}
+                                className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                                    isUpdating
+                                        ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                        : updatingOrderId
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-amber-500 hover:bg-amber-100 cursor-pointer'
+                                }`}
+                                title="Cập nhật trạng thái"
+                            >
+                                <Edit size={18} /> 
+                            </button>
+                        )}
+
+                        {/* ✅ NÚT XÓA (SOFT DELETE) */}
+                        {!isDeletedView && (
+                            <button 
+                                onClick={() => onDelete(row)}
+                                disabled={updatingOrderId} // Disable khi đang cập nhật cái khác
+                                className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                                title="Xóa đơn hàng"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        )}
                     </div>
                 );
             },
@@ -195,6 +208,7 @@ const OrderTable = ({
                         <option value="completed">Hoàn thành</option>
                         <option value="cancelled">Đã hủy</option>
                         <option value="returned">Trả hàng</option>
+                        <option value="deleted">Đã xóa (Thùng rác)</option>
                     </select>
                 </div>
             </div>

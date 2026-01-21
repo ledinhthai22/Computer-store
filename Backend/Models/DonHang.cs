@@ -35,5 +35,6 @@ namespace Backend.Models
         public string TinhThanh { get; set; } = string.Empty;
         public string PhuongXa { get; set; } = string.Empty;
         public string DiaChi { get; set; } = string.Empty;
+        public DateTime? NgayXoa { get; set; }
     }
 }

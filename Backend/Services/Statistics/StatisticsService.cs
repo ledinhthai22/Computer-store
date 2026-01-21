@@ -22,7 +22,7 @@ namespace Backend.Services.Statistics
         {
             var result = new SalesOverview();
             var orders = await _dbContext.DonHang
-                .Where(dh => dh.TrangThai == 5)
+                .Where(dh => dh.TrangThai == 5 && dh.NgayXoa == null)
                 .ToListAsync();
             result.TongDonHang = orders.Count;
             result.TongDoanhThu = orders.Sum(dh => dh.TongTienThanhToan);

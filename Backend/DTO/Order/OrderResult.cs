@@ -15,6 +15,7 @@ namespace Backend.DTO.Order
         public int PhuongThucThanhToan { get; set; }
         public string TrangThai { get; set; } = null!;
         public string NgayTao { get; set; } = null!;
+        public string NgayXoa { get; set; } = null!;
         public OrderCustomer KhachHang { get; set; } = null!;
         public OrderAddress DiaChi { get; set; } = null!;
         public List<OrderDetail> ChiTietDonHang { get; set; } = null!;

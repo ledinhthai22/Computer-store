@@ -29,5 +29,7 @@ namespace Backend.Services.Order
         //hủy đơn hàng khi admin chưa xác nhận
         Task<bool> CancelOrderByUserAsync(int userId, int maDH);
         Task<OrderResult> GetUserOrderDetailAsync(int userId, int maDH);
+        Task<OrderResult> SoftDeleteOrderAsync(int MaDH);
+        Task<List<OrderResult>> GetOrderHiden();
     }
 }

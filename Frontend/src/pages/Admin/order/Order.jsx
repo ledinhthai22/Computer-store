@@ -102,6 +102,7 @@ const Order = () => {
                 thanhTien: item.thanhTien,
                 hinhAnh: item.hinhAnh
             })) || [],
+            ngayXoa: backendOrder.ngayXoa || null,
             _backend: backendOrder,
         };
     };
@@ -127,60 +128,46 @@ const Order = () => {
             return new Date().toISOString();
         }
     };
-    // TODO: Thay thế bằng API call
     const fetchOrders = useCallback(async () => {
         try {
-            // setLoading(true);
-            
-            // // TODO: Uncomment khi API ready
-            // const res = await orderService.getByStatus(filterType);
-            // setOrders(Array.isArray(res) ? res : []);
-            // const transformedOrders = Array.isArray(res) 
-            //     ? res.map(order => transformOrderForUI(order))
-            //     : [];
-            // // ⚠️ MOCK: Filter data theo trạng thái
-            // let filteredData = transformedOrders;
-            // if (filterType !== 'all') {
-            //     const statusMap = {
-            //         'unread': 0,      // Chưa duyệt
-            //         'approved': 1,    // Đã duyệt
-            //         'processing': 2,  // Đang xử lý
-            //         'shipping': 3,    // Đang giao
-            //         'delivered': 4,   // Đã giao
-            //         'completed': 5,   // Hoàn thành
-            //         'cancelled': 6,   // Đã hủy
-            //         'returned': 7    // Trả hàng
-            //     };
-            //     filteredData = transformedOrders.filter(order => order.trangThai === statusMap[filterType]);
-            // }
             setLoading(true);
             const statusMap = {
-                'unread': 0,      // Chưa duyệt
-                'approved': 1,    // Đã duyệt
-                'processing': 2,  // Đang xử lý
-                'shipping': 3,    // Đang giao
-                'delivered': 4,   // Đã giao
-                'completed': 5,   // Hoàn thành
-                'cancelled': 6,   // Đã hủy
-                'returned': 7     // Trả hàng
+                'unread': 0, 'approved': 1, 'processing': 2, 'shipping': 3,
+                'delivered': 4, 'completed': 5, 'cancelled': 6, 'returned': 7
             };
 
             let res;
 
-            if (filterType === 'all') {
-                res = await orderService.getAdminList(); 
+            // --- BƯỚC 1: GỌI API DỰA TRÊN FILTER ---
+            if (filterType === 'deleted') {
+                // ✅ Gọi API lấy danh sách đã xóa mềm
+                res = await orderService.getorderhiden();
+            } else if (filterType === 'all') {
+                res = await orderService.getAdminList();
             } else {
-                const statusId = statusMap[filterType]; 
+                const statusId = statusMap[filterType];
                 res = await orderService.getByStatus(statusId);
             }
-            const transformedOrders = Array.isArray(res) 
+
+            // --- BƯỚC 2: CHUYỂN ĐỔI DỮ LIỆU ---
+            let transformedOrders = Array.isArray(res) 
                 ? res.map(order => transformOrderForUI(order))
                 : [];
 
+            // --- BƯỚC 3: LỌC HIỂN THỊ (Đoạn code của bạn) ---
+            if (filterType === 'deleted') {
+                // Nếu đang xem thùng rác: GIỮ LẠI các đơn ĐÃ xóa (có ngày xóa)
+                // Lưu ý: Nếu API getorderhiden đã chỉ trả về đơn đã xóa thì có thể không cần filter này, 
+                // nhưng thêm vào để chắc chắn.
+                transformedOrders = transformedOrders.filter(o => o.ngayXoa !== null);
+            } else {
+                // Nếu xem các tab bình thường: ẨN các đơn đã xóa
+                transformedOrders = transformedOrders.filter(o => o.ngayXoa === null);
+            }
+
             setOrders(transformedOrders);
-            // setOrders(filteredData);
         } catch (err) {
-            console.log(err)
+            console.log(err);
             showToast("Tải danh sách đơn hàng thất bại", "error");
             setOrders([]);
         } finally {
@@ -197,7 +184,24 @@ const Order = () => {
         setSelectedOrder(order);
         setIsViewModalOpen(true);
     };
+    const handleDeleteClick = async (order) => {
+        // ✅ Thông báo trước khi xóa
+        const confirmMsg = `CẢNH BÁO:\nBạn có chắc chắn muốn xóa đơn hàng ${order.maHoaDon}?\nĐơn hàng sẽ được chuyển vào mục "Đã xóa".`;
+        if (!window.confirm(confirmMsg)) return;
 
+        try {
+            // Gọi service softDelete với ID int (maDonHang)
+            await orderService.softDelete(order.maDonHang);
+            
+            showToast("Đã chuyển đơn hàng vào thùng rác!", "success");
+            
+            // Reload lại danh sách
+            await fetchOrders();
+        } catch (error) {
+            console.error("Delete error:", error);
+            showToast("Xóa thất bại: " + (error.response?.data?.message || error.message), "error");
+        }
+    };
     // ✅ Mở modal cập nhật trạng thái
     const handleUpdateClick = (order) => {
         // ⚠️ Kiểm tra xem có đang cập nhật order khác không
@@ -282,6 +286,7 @@ const Order = () => {
                     loading={loading}
                     onView={handleViewClick}
                     onUpdate={handleUpdateClick}
+                    onDelete={handleDeleteClick}
                     filterType={filterType}
                     onFilterTypeChange={setFilterType}
                     updatingOrderId={pendingStatusUpdate?.maHoaDon || null}

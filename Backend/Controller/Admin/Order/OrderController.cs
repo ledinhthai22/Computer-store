@@ -1,4 +1,5 @@
 ﻿    using System.Security.Claims;
+using Azure.Core;
 using Backend.DTO.Order;
 using Backend.Services.Order;
 using Microsoft.AspNetCore.Authorization;
@@ -108,6 +109,39 @@ namespace Backend.Controller.Admin.Order
                 return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
             }
         }
-       
+        [HttpDelete("{MaDH:int}")]
+        public async Task<IActionResult> SoftDeleteAsync(int MaDH)
+        {
+            try
+            {
+                var result = await _orderService.SoftDeleteOrderAsync(MaDH);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        [HttpGet("SoftDelete")]
+        public async Task<IActionResult> GetOrderHidenAsync()
+        {
+            try
+            {
+                var result = await _orderService.GetOrderHiden();
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
     }
 }
