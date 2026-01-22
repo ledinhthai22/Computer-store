@@ -228,7 +228,7 @@ export default function Details() {
                       ))}
                     </div>
                     {/* Discount Badge */}
-                    {discountPercent > 0 && (
+                    {selectedVariant?.giaKhuyenMai > 0 && discountPercent > 0 &&(
                       <div className="absolute top-4 -left-[6px] z-10">
                         <div className="relative">
                           {/* Thẻ giảm giá chính: Bo góc trên bên trái nhỏ hơn để trông tự nhiên khi quấn */}
@@ -322,7 +322,7 @@ export default function Details() {
                           <div className="text-sm text-gray-500 mb-2">{variant.mauSac}</div>
                           <div className="flex items-center justify-between">
                             <span className="text-lg font-bold text-[#2f9ea0]">
-                              {formatPrice(variant.giaKhuyenMai)}
+                              {formatPrice(variant.giaKhuyenMai || variant.giaBan)}
                             </span>
                             {variant.soLuongTon <= 5 && variant.soLuongTon > 0 && (
                               <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
@@ -340,9 +340,9 @@ export default function Details() {
                 <div className="bg-white rounded-2xl shadow-xl p-6">
                   <div className="flex items-end gap-4 mb-2">
                     <span className="text-4xl font-bold text-gray-900">
-                      {formatPrice(selectedVariant.giaKhuyenMai)}
+                      {formatPrice(selectedVariant.giaKhuyenMai || selectedVariant.giaBan)}
                     </span>
-                    {selectedVariant.giaBan > selectedVariant.giaKhuyenMai && (
+                    {selectedVariant.giaKhuyenMai > 0 && selectedVariant.giaBan > selectedVariant.giaKhuyenMai && (
                       <>
                         <span className="text-xl text-gray-400 line-through">
                           {formatPrice(selectedVariant.giaBan)}
