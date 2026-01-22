@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { X, Package, User, Phone, MapPin, CreditCard, Calendar, FileText, Edit, Save, RotateCcw,Wallet } from "lucide-react";
 
-// ✅ Thêm prop onUpdate vào component
+//  Thêm prop onUpdate vào component
 const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
-  // ✅ SỬA 1: Map dữ liệu đúng theo key của Backend (JSON dòng đầu bạn gửi)
+  //  SỬA 1: Map dữ liệu đúng theo key của Backend (JSON dòng đầu bạn gửi)
   useEffect(() => {
     if (order) {
       // 1. Tạo mảng chứa các thành phần địa chỉ
@@ -28,7 +28,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
         nguoiNhan: order.tenKhachHang || "",
         soDienThoaiNguoiNhan: order.soDienThoai || "",
         
-        diaChi: finalAddress, // ✅ Đưa chuỗi đã ghép vào formData
+        diaChi: finalAddress, //  Đưa chuỗi đã ghép vào formData
         
         ghiChu: order.ghiChu || "",
         ghiChuNoiBo: order.ghiChuNoiBo || "",
@@ -124,7 +124,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
             </div>
           </div>
           <div className="flex gap-2">
-            {/* ✅ Nút Toggle Chỉnh sửa */}
+            {/*  Nút Toggle Chỉnh sửa */}
             {!isEditing ? (
                 <button 
                     onClick={() => setIsEditing(true)}
@@ -177,7 +177,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
             {/* ... */}
             <div className="space-y-4">
               
-              {/* ✅ nguoiNhan */}
+              {/*  nguoiNhan */}
               <div className="flex items-start gap-3">
                 <User size={18} className="text-gray-400 mt-2.5" />
                 <div className="w-full">
@@ -196,7 +196,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                 </div>
               </div>
 
-              {/* ✅ soDienThoaiNguoiNhan */}
+              {/*  soDienThoaiNguoiNhan */}
               <div className="flex items-start gap-3">
                 <Phone size={18} className="text-gray-400 mt-2.5" />
                 <div className="w-full">
@@ -204,8 +204,8 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                   {isEditing ? (
                     <input
                       type="text"
-                      name="soDienThoaiNguoiNhan" // 👈 QUAN TRỌNG
-                      value={formData.soDienThoaiNguoiNhan || ""} // 👈 Sửa value
+                      name="soDienThoaiNguoiNhan" //  QUAN TRỌNG
+                      value={formData.soDienThoaiNguoiNhan || ""} //  Sửa value
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     />
@@ -224,7 +224,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                 </div>
               </div>
 
-             {/* ✅ Địa chỉ */}
+             {/*  Địa chỉ */}
               <div className="flex items-start gap-3">
                 <MapPin size={18} className="text-gray-400 mt-2.5" />
                 <div className="w-full">
@@ -319,7 +319,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
             </div>
           </div>
 
-          {/* ✅ Ghi chú & Ghi chú nội bộ */}
+          {/* Ghi chú & Ghi chú nội bộ */}
           <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
             <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
               <FileText size={20} className="text-amber-600" />
@@ -343,7 +343,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                     )}
                 </div>
 
-                {/* ✅ Ghi chú nội bộ */}
+                {/*  Ghi chú nội bộ */}
                 <div className="w-full border-t border-amber-200 pt-3">
                     <p className="text-xs text-gray-500 mb-1 font-semibold">Ghi chú nội bộ (Admin):</p>
                     {isEditing ? (
