@@ -5,9 +5,8 @@ export default function FilterSidebar({
     brands = [],
     
     // --- DỮ LIỆU MẶC ĐỊNH ---
-    chips = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'],
+    chips = ['i3', 'i5', 'i7', 'i9', 'Ryzen 5', 'Ryzen 7'],
     screens = ['14 inch', '15 inch', '15.6 inch', '16 inch', '17 inch'],
-    // Thêm danh sách GPU phổ biến dựa trên ảnh database của bạn
     gpus = ['RTX 2050','RTX 3050', 'RTX 4050', 'RTX 4060', 'RTX 5070', 'AMD Radeon'], 
     
     filters={},

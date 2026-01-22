@@ -15,7 +15,6 @@ const OrderTable = ({
     updatingOrderId 
 }) => { 
     const [filterText, setFilterText] = useState('');
-
     const filteredItems = data.filter(
         item => item.maHoaDon && item.maHoaDon.toLowerCase().includes(filterText.toLowerCase()) ||
                 item.tenKhachHang && item.tenKhachHang.toLowerCase().includes(filterText.toLowerCase()) ||
