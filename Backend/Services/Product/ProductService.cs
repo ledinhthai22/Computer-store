@@ -1049,6 +1049,7 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                 .Where(x =>
+                    x.MaDanhMuc == maDanhMuc &&
                     x.NgayXoa == null
                     && x.TrangThai == true
 
@@ -1077,6 +1078,7 @@ namespace Ecommerce.Services.Product
                 .Include(x => x.HinhAnhSanPham)
                 .Include(x => x.BienThe)
                 .Where(x =>
+                    x.MaThuongHieu == maThuongHieu &&
                     x.NgayXoa == null
                     && x.TrangThai == true
 
@@ -1097,23 +1099,16 @@ namespace Ecommerce.Services.Product
                 .Select(x => MapToProductListItem(x))
                 .ToListAsync();
         }
-        public async Task<List<ProductListItem>> GetRelatedProductsAsync(int maSanPham,int maDanhMuc,int maThuongHieu,int soLuong = 10)
+        public async Task<List<ProductListItem>> GetRelatedProductsAsync(
+    int maSanPham,
+    int maDanhMuc,
+    int maThuongHieu,
+    int soLuong = 10)
         {
-           
-            var giaThamChieu = await _db.BienThe
-                .AsNoTracking()
-                .Where(bt => bt.MaSanPham == maSanPham)
-                .MinAsync(bt => (decimal?)bt.GiaBan);
-
-            if (giaThamChieu == null)
-                return new List<ProductListItem>();
-
-            var giaMin = giaThamChieu.Value * 0.8m;
-            var giaMax = giaThamChieu.Value * 1.2m;
-
             return await _db.SanPham
                 .AsNoTracking()
                 .Where(sp =>
+                    // Cùng danh mục
                     sp.MaDanhMuc == maDanhMuc &&
                     sp.MaSanPham != maSanPham &&
 
@@ -1127,22 +1122,17 @@ namespace Ecommerce.Services.Product
 
                     // Ẩn thương hiệu
                     sp.ThuongHieu!.TrangThai == true &&
-                    sp.ThuongHieu.NgayXoa == null &&
-
-                    // Giá tương đương
-                    sp.BienThe.Any(bt =>
-                        bt.GiaBan >= giaMin &&
-                        bt.GiaBan <= giaMax
-                    )
+                    sp.ThuongHieu.NgayXoa == null
                 )
 
                 // Ưu tiên cùng thương hiệu
                 .OrderByDescending(sp => sp.MaThuongHieu == maThuongHieu)
-                .ThenBy(sp => sp.MaSanPham)
+
+                // Ưu tiên sản phẩm mới hơn (tuỳ chọn)
+                .ThenByDescending(sp => sp.NgayTao)
 
                 .Take(soLuong)
 
-               
                 .Select(sp => new ProductListItem
                 {
                     MaSanPham = sp.MaSanPham,
@@ -1177,6 +1167,7 @@ namespace Ecommerce.Services.Product
                 })
                 .ToListAsync();
         }
+
 
 
         private ProductResult MapToProductResult(SanPham sp)

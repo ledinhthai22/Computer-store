@@ -11,13 +11,11 @@ export default function BestSeller() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await productService.usergetBestSelling(20);
+                const data = await productService.usergetBestSelling(10);
 
-                const sortedProducts = data.sort((a, b) => 
-                    new Date(b.ngayTao) - new Date(a.ngayTao)
-                );
+                
 
-                setProducts(sortedProducts.slice(0, 20));
+                setProducts(data);
 
             } catch (error) {
                 handleApiError(error, "Lỗi fetch sản phẩm bán nhiều nhất");

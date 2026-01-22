@@ -38,7 +38,7 @@ export default function CategoryProduct() {
                 // Giả sử productService có hàm usergetByCategory, nếu chưa có bạn cần thêm vào service
                 const [productsData, brandsList] = await Promise.all([
                     productService.usergetByCategory(maDanhMuc, 50), 
-                    brandService.usergetAll()
+                    brandService.userGetAll()
                 ]);
 
                 // Sort sản phẩm

@@ -39,6 +39,7 @@ namespace Backend.Services.Contact
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
+                    NgayGui = l.NgayGui,
                     TrangThai = l.TrangThai ,
                     Message = "Chưa đọc"
                 })
@@ -56,6 +57,7 @@ namespace Backend.Services.Contact
                     MaLienHe = l.MaLienHe,
                     Email = l.Email,
                     NoiDung = l.NoiDung,
+                    NgayGui = l.NgayGui,
                     TrangThai = l.TrangThai,
                     Message = "Đã đọc"
                 })

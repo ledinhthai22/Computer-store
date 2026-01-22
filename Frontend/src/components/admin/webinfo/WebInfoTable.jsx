@@ -20,6 +20,7 @@ const WebInfoTable = ({
         item.tenKhoaCaiDat?.toLowerCase().includes(filterText.toLowerCase()) ||
         item.giaTriCaiDat?.toLowerCase().includes(filterText.toLowerCase()) ||
         item.moTa?.toLowerCase().includes(filterText.toLowerCase()) ||
+        item.tomTat?.toLowerCase().includes(filterText.toLowerCase()) ||
         String(item.trangThaiHienThi).includes(filterText)
     );
 
@@ -43,16 +44,16 @@ const WebInfoTable = ({
         {
             name: "STT",
             selector: (row, index) => index + 1,
-            width: "80px",
+            width: "70px",
+            center: true,
         },
         {
             name: "TÊN CẤU HÌNH",
             selector: (row) => row.tenKhoaCaiDat,
             sortable: true,
-            grow: 2,
-            minWidth: "220px",
+            width: "200px",
             cell: (row) => (
-                <span className="font-semibold text-gray-700">
+                <span className="font-semibold text-gray-700 truncate">
                     {row.tenKhoaCaiDat}
                 </span>
             ),
@@ -61,22 +62,30 @@ const WebInfoTable = ({
             name: "GIÁ TRỊ",
             selector: (row) => row.giaTriCaiDat,
             sortable: true,
-            grow: 3,
-            minWidth: "250px",
+            grow: 1,
             cell: (row) => (
-                <span className="text-gray-700" title={row.giaTriCaiDat}>
-                    {truncateText(row.giaTriCaiDat, 8)}
+                <span className="text-gray-700 truncate" title={row.giaTriCaiDat}>
+                    {truncateText(row.giaTriCaiDat, 6)}
                 </span>
             ),
         },
         {
             name: "MÔ TẢ",
             selector: (row) => row.moTa,
-            grow: 3,
-            minWidth: "250px",
+            grow: 1,
             cell: (row) => (
-                <span className="text-gray-600" title={row.moTa}>
-                    {truncateText(row.moTa, 10)}
+                <span className="text-gray-600 truncate" title={row.moTa}>
+                    {truncateText(row.moTa, 6)}
+                </span>
+            ),
+        },
+        {
+            name: "TÓM TẮT",
+            selector: (row) => row.tomTat,
+            grow: 1,
+            cell: (row) => (
+                <span className="text-gray-600 truncate" title={row.tomTat}>
+                    {truncateText(row.tomTat, 6)}
                 </span>
             ),
         },
@@ -84,18 +93,18 @@ const WebInfoTable = ({
             name: "TRẠNG THÁI",
             selector: (row) => row.trangThaiHienThi,
             sortable: true,
-            width: "140px",
+            width: "120px",
             center: true,
             cell: (row) => {
                 const isActive = row.trangThaiHienThi === true;
-
                 return (
                     <span
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase border ${
-                            isActive
-                                ? "bg-green-100 text-green-700 border-green-200"
-                                : "bg-gray-100 text-gray-600 border-gray-200"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase
+                        ${isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-600"
+                            }
+                    `}
                     >
                         {isActive ? "Hoạt động" : "Ngưng"}
                     </span>
@@ -104,39 +113,28 @@ const WebInfoTable = ({
         },
         {
             name: "HÀNH ĐỘNG",
+            width: "160px",
             center: true,
-            width: "200px",
             cell: (row) => {
                 const isDisabled = row.trangThaiHienThi === true;
-
                 return (
-                    <div className="flex items-center gap-2 justify-center">
+                    <div className="flex gap-2">
                         <button
                             onClick={() => onEdit(row)}
-                            className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                            title="Chỉnh sửa"
+                            className="p-2 text-amber-500 hover:bg-amber-100 rounded-lg"
                         >
-                            <Edit size={18} />
-                            <span className="hidden sm:inline">Sửa</span>
+                            <Edit size={16} />
                         </button>
 
                         <button
                             onClick={() => handleDelete(row)}
-                            title={
-                                isDisabled
-                                    ? "Cấu hình đang hoạt động, không thể xóa"
-                                    : "Xóa (xóa mềm)"
-                            }
-                            className={`p-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer
-                                ${
-                                    isDisabled
-                                        ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                                        : "text-red-500 hover:bg-red-100"
-                                }
-                            `}
+                            disabled={isDisabled}
+                            className={`p-2 rounded-lg ${isDisabled
+                                    ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                                    : "text-red-500 hover:bg-red-100"
+                                }`}
                         >
-                            <Trash2 size={18} />
-                            <span className="hidden sm:inline">Xóa</span>
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 );
@@ -144,63 +142,63 @@ const WebInfoTable = ({
         },
     ];
 
-    return (
-        <div className="w-full space-y-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex-1 max-w">
-                    <TableSearch
-                        filterText={filterText}
-                        onFilter={(e) => setFilterText(e.target.value)}
-                        placeholder="Tìm kiếm..."
-                    />
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={onOpenAddModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
-                    >
-                        <Plus size={16} />
-                        <span>Thêm mới</span>
-                    </button>
-
-                    <button
-                        onClick={() =>
-                            navigate("/quan-ly/thong-ke/khoi-phuc")
-                        }
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
-                    >
-                        <History size={16} />
-                        <span className="hidden lg:inline">
-                            Danh sách đã xóa
-                        </span>
-                        <span className="lg:hidden">Khôi phục</span>
-                    </button>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    progressPending={loading}
-                    pagination
-                    paginationComponent={Pagination}
-                    paginationPerPage={5}
-                    persistTableHead
-                    className="custom-datatable"
-                    sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
-                    highlightOnHover
-                    responsive
-                    noDataComponent={
-                        <div className="p-12 text-center text-gray-400 font-medium">
-                            Không tìm thấy cấu hình nào.
-                        </div>
-                    }
+return (
+    <div className="w-full space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex-1 max-w">
+                <TableSearch
+                    filterText={filterText}
+                    onFilter={(e) => setFilterText(e.target.value)}
+                    placeholder="Tìm kiếm..."
                 />
             </div>
+
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={onOpenAddModal}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
+                >
+                    <Plus size={16} />
+                    <span>Thêm mới</span>
+                </button>
+
+                <button
+                    onClick={() =>
+                        navigate("/quan-ly/thong-ke/khoi-phuc")
+                    }
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md cursor-pointer"
+                >
+                    <History size={16} />
+                    <span className="hidden lg:inline">
+                        Danh sách đã xóa
+                    </span>
+                    <span className="lg:hidden">Khôi phục</span>
+                </button>
+            </div>
         </div>
-    );
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
+            <DataTable
+                columns={columns}
+                data={filteredItems}
+                progressPending={loading}
+                pagination
+                paginationComponent={Pagination}
+                paginationPerPage={5}
+                persistTableHead
+                className="custom-datatable"
+                sortIcon={<ArrowUpIcon size={14} className="ml-1 text-gray-400" />}
+                highlightOnHover
+                responsive
+                noDataComponent={
+                    <div className="p-12 text-center text-gray-400 font-medium">
+                        Không tìm thấy cấu hình nào.
+                    </div>
+                }
+            />
+        </div>
+    </div>
+);
 };
 
 export default WebInfoTable;

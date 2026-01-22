@@ -11,7 +11,7 @@ export default function TopNew() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await productService.usergetNewest(20);
+                const data = await productService.usergetNewest(10);
 
                 const sortedProducts = data.sort((a, b) => 
                     new Date(b.ngayTao) - new Date(a.ngayTao)

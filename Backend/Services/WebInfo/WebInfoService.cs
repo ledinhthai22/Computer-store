@@ -92,6 +92,7 @@ namespace Backend.Services.WebInfo
                 TenKhoaCaiDat = request.TenKhoaCaiDat,
                 GiaTriCaiDat = request.GiaTriCaiDat,
                 MoTa = request.MoTa,
+                TomTat = request.TomTat,
                 TrangThai = true,
                 NgayCapNhat = DateTime.Now
             };
@@ -120,6 +121,7 @@ namespace Backend.Services.WebInfo
                 MaThongTinTrang = entity.MaThongTinTrang,
                 TenKhoaCaiDat = entity.TenKhoaCaiDat,
                 GiaTriCaiDat = entity.GiaTriCaiDat,
+                TomTat = entity.TomTat,
                 MoTa = entity.MoTa,
                 TrangThaiHienThi = entity.TrangThai,
                 NgayCapNhat = entity.NgayCapNhat,

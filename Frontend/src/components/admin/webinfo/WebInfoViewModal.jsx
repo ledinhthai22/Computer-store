@@ -52,6 +52,19 @@ const WebInfoViewModal = ({ isOpen, onClose, data }) => {
               </div>
             </div>
           </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <FileText size={18} className="text-green-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-1">Tóm tắt</p>
+                <p className="text-gray-800 whitespace-pre-wrap break-all">
+                  {data.tomTat || "—"}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* DESCRIPTION */}
           <div className="bg-gray-50 rounded-xl p-4">

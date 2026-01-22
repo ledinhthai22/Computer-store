@@ -56,17 +56,23 @@ export default function NavBar() {
               </Link>
 
               <div
-                title="Danh mục sản phẩm"
-                className="relative flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg cursor-pointer"
+                className="relative"
                 onMouseEnter={() => setOpenDanhMuc(true)}
                 onMouseLeave={() => setOpenDanhMuc(false)}
               >
-                <span className="hidden md:inline font-medium">Danh mục</span>
-                <IoMenu className="text-2xl" />
+                <div
+                  title="Danh mục sản phẩm"
+                  className="flex items-center gap-1 px-3 py-2 hover:bg-white/20 rounded-lg cursor-pointer"
+                >
+                  <span className="hidden md:inline font-medium">Danh mục</span>
+                  <IoMenu className="text-2xl" />
+                </div>
+
                 {openDanhMuc && (
-                  <MenuCategory onClose={() => setOpenDanhMuc(false)} />
+                  <MenuCategory />
                 )}
               </div>
+
 
               <Link
                 to="/gui-lien-he"
