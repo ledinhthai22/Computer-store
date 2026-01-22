@@ -6,7 +6,7 @@ export default function About() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "Giới thiệu";
+    document.title = "Chính Sách";
 
     const fetchData = async () => {
       try {
@@ -46,7 +46,7 @@ export default function About() {
       <section className="bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-14">
           <header className="mb-14 text-center">
-            <h1 className="text-4xl font-bold text-gray-800">Giới thiệu</h1>
+            <h1 className="text-4xl font-bold text-gray-800">Chính sách</h1>
             <div className="mt-4 h-1 w-20 bg-teal-600 mx-auto rounded-full" />
           </header>
           <div className="text-center text-gray-600 text-lg">
@@ -62,7 +62,7 @@ export default function About() {
       <div className="max-w-4xl mx-auto px-4 py-14">
         {/* Header */}
         <header className="mb-14 text-center">
-          <h1 className="text-4xl font-bold text-gray-800">Giới thiệu</h1>
+          <h1 className="text-4xl font-bold text-gray-800">Chính sách</h1>
           <div className="mt-4 h-1 w-20 bg-teal-600 mx-auto rounded-full" />
         </header>
 

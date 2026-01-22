@@ -8,7 +8,7 @@ export default function MenuCategory({ onClose }) {
   const [brands, setBrand] = useState([]);
   const [categories, setCategory] = useState([]);
 
-  const chipList = ['Core i3', 'Core i5', 'Core i7', 'Core i9', 'Ryzen 5', 'Ryzen 7'];
+  const chipList = ['i3', 'i5', 'i7', 'i9', 'Ryzen 5', 'Ryzen 7'];
   const screenList = ['14 inch','15 inch', '15.6 inch', '16 inch', '17 inch'];
 
   useEffect(() => {
