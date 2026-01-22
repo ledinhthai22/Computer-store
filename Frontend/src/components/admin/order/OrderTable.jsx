@@ -23,7 +23,7 @@ const OrderTable = ({
                 item.diaChiGiaoHang && item.diaChiGiaoHang.toLowerCase().includes(filterText.toLowerCase())
     );
 
-    // ✅ Map trạng thái số sang text và màu sắc
+    // Map trạng thái số sang text và màu sắc
     const getStatusInfo = (status) => {
         const statusMap = {
             0: { text: "Chưa duyệt", color: "bg-gray-400 text-white border-gray-500" },
@@ -163,7 +163,7 @@ const OrderTable = ({
                             </button>
                         )}
 
-                        {/* ✅ NÚT XÓA (SOFT DELETE) */}
+                        {/* NÚT XÓA (SOFT DELETE) */}
                         {!isDeletedView && (
                             <button 
                                 onClick={() => onDelete(row)}

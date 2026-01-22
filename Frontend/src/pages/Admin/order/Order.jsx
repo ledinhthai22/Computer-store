@@ -55,20 +55,17 @@ const Order = () => {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
-    // ✅ State quản lý trạng thái đang được cập nhật
+    // State quản lý trạng thái đang được cập nhật
     const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null); // { maHoaDon, newStatus }
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState(null);
-
-    // ... (giữ nguyên fetchOrders, v.v...)
-
-    // 👇 3. Sửa lại hàm handleDeleteClick (Chỉ mở modal, không xóa ngay)
+    //HandleDeleteClick (Chỉ mở modal và không xóa ngay)
     const handleDeleteClick = (order) => {
         setOrderToDelete(order);
         setIsDeleteModalOpen(true);
     };
 
-    // 👇 4. Thêm hàm Xử lý xóa thật sự (Gọi khi bấm nút Xóa trong Modal)
+    //Hàm Xử lý xóa thật sự (Gọi khi bấm nút Xóa trong Modal)
     const handleConfirmDelete = async () => {
         if (!orderToDelete) return;
 
@@ -170,9 +167,9 @@ const Order = () => {
 
             let res;
 
-            // --- BƯỚC 1: GỌI API DỰA TRÊN FILTER ---
+            //  GỌI API DỰA TRÊN FILTER 
             if (filterType === 'deleted') {
-                // ✅ Gọi API lấy danh sách đã xóa mềm
+                // Gọi API lấy danh sách đã xóa mềm
                 res = await orderService.getorderhiden();
             } else if (filterType === 'all') {
                 res = await orderService.getAdminList();
@@ -181,19 +178,15 @@ const Order = () => {
                 res = await orderService.getByStatus(statusId);
             }
 
-            // --- BƯỚC 2: CHUYỂN ĐỔI DỮ LIỆU ---
+            //  CHUYỂN ĐỔI DỮ LIỆU 
             let transformedOrders = Array.isArray(res) 
                 ? res.map(order => transformOrderForUI(order))
                 : [];
 
-            // --- BƯỚC 3: LỌC HIỂN THỊ (Đoạn code của bạn) ---
+            // LỌC HIỂN THỊ (Đoạn code của bạn)
             if (filterType === 'deleted') {
-                // Nếu đang xem thùng rác: GIỮ LẠI các đơn ĐÃ xóa (có ngày xóa)
-                // Lưu ý: Nếu API getorderhiden đã chỉ trả về đơn đã xóa thì có thể không cần filter này, 
-                // nhưng thêm vào để chắc chắn.
                 transformedOrders = transformedOrders.filter(o => o.ngayXoa !== null);
             } else {
-                // Nếu xem các tab bình thường: ẨN các đơn đã xóa
                 transformedOrders = transformedOrders.filter(o => o.ngayXoa === null);
             }
 
@@ -211,12 +204,12 @@ const Order = () => {
         fetchOrders();
     }, [fetchOrders]);
 
-    // ✅ Xem chi tiết đơn hàng
+    //  Xem chi tiết đơn hàng
     const handleViewClick = (order) => {
         setSelectedOrder(order);
         setIsViewModalOpen(true);
     };
-    // ✅ Mở modal cập nhật trạng thái
+    //  Mở modal cập nhật trạng thái
     const handleUpdateClick = (order) => {
         // ⚠️ Kiểm tra xem có đang cập nhật order khác không
         if (pendingStatusUpdate && pendingStatusUpdate.maHoaDon !== order.maHoaDon) {
@@ -227,7 +220,7 @@ const Order = () => {
             return;
         }
         
-        // ✅ Chỉ set selectedOrder và mở modal, KHÔNG set pendingStatusUpdate ở đây
+        // Chỉ set selectedOrder và mở modal, KHÔNG set pendingStatusUpdate ở đây
         setSelectedOrder(order);
         setIsUpdateModalOpen(true);
     };
@@ -243,12 +236,12 @@ const Order = () => {
             showToast("Cập nhật thông tin thất bại: " + (error.response?.data || error.message), "error");
         }
     };
-    // ✅ Xác nhận cập nhật trạng thái - Gọi từ modal
+    // Xác nhận cập nhật trạng thái - Gọi từ modal
     const handleConfirmUpdate = async (newStatus) => {
         if (!selectedOrder) return;
 
         try {
-            // ✅ Set pending update NGAY KHI BẮT ĐẦU cập nhật
+            // Set pending update NGAY KHI BẮT ĐẦU cập nhật
             setPendingStatusUpdate({ 
                 maHoaDon: selectedOrder.maDonHang, 
                 newStatus: newStatus 
@@ -257,10 +250,10 @@ const Order = () => {
             // TODO: Uncomment khi API ready
             await orderService.updateStatus(selectedOrder.maDonHang, { trangThai: newStatus });
             
-            // ⚠️ MOCK: Simulate API call delay
+            // MOCK: Simulate API call delay
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // ⚠️ MOCK: Cập nhật state local
+            // MOCK: Cập nhật state local
             setOrders(prev => prev.map(order => 
                 order.maHoaDon === selectedOrder.maHoaDon 
                     ? { ...order, trangThai: newStatus }
@@ -269,7 +262,7 @@ const Order = () => {
             
             showToast("Cập nhật trạng thái đơn hàng thành công!", "success");
             
-            // ✅ Đóng modal
+            // Đóng modal
             setIsUpdateModalOpen(false);
             setSelectedOrder(null);
             
@@ -280,16 +273,16 @@ const Order = () => {
             console.log(err);
             showToast("Cập nhật trạng thái thất bại", "error");
         } finally {
-            // ✅ CRITICAL: LUÔN LUÔN reset pendingStatusUpdate sau khi hoàn thành (success hoặc fail)
+            // CRITICAL: LUÔN LUÔN reset pendingStatusUpdate sau khi hoàn thành (success hoặc fail)
             setPendingStatusUpdate(null);
         }
     };
 
-    // ✅ Đóng modal cập nhật - Chỉ reset selectedOrder
+    // Đóng modal cập nhật - Chỉ reset selectedOrder
     const handleCloseUpdateModal = () => {
         setIsUpdateModalOpen(false);
         setSelectedOrder(null);
-        // ⚠️ KHÔNG reset pendingStatusUpdate ở đây - chỉ reset sau khi API call xong
+        // KHÔNG reset pendingStatusUpdate ở đây - chỉ reset sau khi API call xong
     };
 
     return (
