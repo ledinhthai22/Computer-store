@@ -10,7 +10,8 @@ const WebInfoTable = ({
     loading,
     onEdit,
     onDelete,
-    onOpenAddModal
+    onOpenAddModal,
+    showToast,
 }) => {
     const navigate = useNavigate();
     const [filterText, setFilterText] = useState("");
@@ -31,8 +32,10 @@ const WebInfoTable = ({
     };
 
     const handleDelete = (row) => {
-        if (row.trangThaiHienThi === true) return;
-
+        if (row.trangThaiHienThi === true) {
+            showToast("Không thể xóa cấu hình đang hoạt động", "error");
+            return;
+        }
         onDelete(row.maThongTinTrang);
     };
 
@@ -119,7 +122,6 @@ const WebInfoTable = ({
 
                         <button
                             onClick={() => handleDelete(row)}
-                            disabled={isDisabled}
                             title={
                                 isDisabled
                                     ? "Cấu hình đang hoạt động, không thể xóa"

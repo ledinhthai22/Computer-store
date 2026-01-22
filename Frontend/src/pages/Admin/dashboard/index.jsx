@@ -135,31 +135,29 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="bg-gray-50">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <StatCard 
                     title="Người dùng" 
                     value={loading ? "..." : totalUsers} 
-                    icon={<Users className="text-blue-600" />}
+                    icon={<Users size={18} className="text-blue-600" />}
                 />
                 <StatCard 
                     title="Đơn hàng" 
                     value={sales?.tongDonHang || 0} 
-                    icon={<ShoppingCart className="text-orange-600" />}
+                    icon={<ShoppingCart size={18} className="text-orange-600" />}
                 />
                 <StatCard 
                     title="Doanh thu" 
                     value={`${(sales?.tongDoanhThu || 0).toLocaleString('vi-VN')} đ`} 
-                    icon={<DollarSign className="text-green-600" />}
-                    trend="Ổn định"
-                    trendColor="text-blue-500"
+                    icon={<DollarSign size={18}  className="text-green-600" />}
                 />
             </div>
 
             {/* WebInfo Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2">
+                <h2 className="text-xl font-bold text-gray-800 px-4 py-3">
                     Cấu hình Website
                 </h2>
                 <WebInfoTable
@@ -168,6 +166,7 @@ const Dashboard = () => {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onView={handleView}
+                    showToast={showToast}
                     onOpenAddModal={handleOpenAddModal}
                 />
             </div>
