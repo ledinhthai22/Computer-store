@@ -33,7 +33,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await userService.getAll();
+                const response = await userService.getAllUnlock();
                 setTotalUsers(response.length || 0);
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu người dùng:", error);

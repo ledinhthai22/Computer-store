@@ -156,9 +156,10 @@ namespace Backend
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseCors("AllowReact");
+                
 
             }
+            app.UseCors("AllowReact");
             app.UseStaticFiles();
 
             app.UseHttpsRedirection();

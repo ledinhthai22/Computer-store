@@ -79,16 +79,16 @@ const WebInfoTable = ({
                 </span>
             ),
         },
-        {
-            name: "TÓM TẮT",
-            selector: (row) => row.tomTat,
-            grow: 1,
-            cell: (row) => (
-                <span className="text-gray-600 truncate" title={row.tomTat}>
-                    {truncateText(row.tomTat, 6)}
-                </span>
-            ),
-        },
+        // {
+        //     name: "TÓM TẮT",
+        //     selector: (row) => row.tomTat,
+        //     grow: 1,
+        //     cell: (row) => (
+        //         <span className="text-gray-600 truncate" title={row.tomTat}>
+        //             {truncateText(row.tomTat, 6)}
+        //         </span>
+        //     ),
+        // },
         {
             name: "TRẠNG THÁI",
             selector: (row) => row.trangThaiHienThi,

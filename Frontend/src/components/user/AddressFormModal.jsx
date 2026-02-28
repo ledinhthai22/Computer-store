@@ -30,7 +30,7 @@ const AddressFormModal = ({
     initialData.diaChiMacDinh || false
   );
 
-  /* ================= RESET FORM ================= */
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -46,7 +46,7 @@ const AddressFormModal = ({
     }
   }, [isOpen, initialData]);
 
-  /* ================= FETCH PROVINCES ================= */
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -65,7 +65,6 @@ const AddressFormModal = ({
     fetchProvinces();
   }, [isOpen]);
 
-  /* ================= LOAD WARDS ================= */
   useEffect(() => {
     if (!formData.province) {
       setWards([]);
@@ -87,14 +86,14 @@ const AddressFormModal = ({
     label: w.name,
   }));
 
-  /* ================= HANDLE CHANGE ================= */
+
   const handleChange = (e) => {
     let { name, value } = e.target;
 
     // Họ tên: không số, không ký tự đặc biệt
-    if (name === "name") {
-      value = value.replace(/[^A-Za-zÀ-ỹ\s]/g, "").slice(0, 100);
-    }
+    // if (name === "name") {
+    //   value = value.replace(/[^A-Za-zÀ-ỹ\s]/g, "").slice(0, 100);
+    // }
 
     // SĐT: chỉ số, tối đa 10
     if (name === "phone") {

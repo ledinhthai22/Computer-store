@@ -1037,7 +1037,7 @@ namespace Backend.Services.Order
                                 .FirstOrDefaultAsync();
             if(order == null)
                 throw new InvalidOperationException("Không tìm thấy đơn hàng!");
-            if (order.TrangThai >= 3 && order.TrangThai <= 5)
+            if (order.TrangThai == 0 || order.TrangThai >= 3 && order.TrangThai <= 5)
                     throw new InvalidOperationException("Không thể xóa đơn hàng!");
             order.NgayXoa = DateTime.Now;
             await _DbContext.SaveChangesAsync();

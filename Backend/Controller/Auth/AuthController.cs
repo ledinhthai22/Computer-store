@@ -47,8 +47,8 @@ namespace Backend.Controllers.Auth
             Response.Cookies.Append("access_token", accessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddMinutes(60)
             });
 
@@ -60,15 +60,15 @@ namespace Backend.Controllers.Auth
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            // ✅ THÊM: Trả token trong response body để frontend có thể lưu vào localStorage
+
             return Ok(new
             {
                 Message = "Đăng nhập thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
-                Email = request.Email, // ✅ Thêm email
+                Email = request.Email,
                 VaiTro = result.VaiTro,
-                Token = accessToken,   // ✅ Thêm token
+
                 Success = true
             });
         }
@@ -89,7 +89,7 @@ namespace Backend.Controllers.Auth
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
@@ -98,8 +98,7 @@ namespace Backend.Controllers.Auth
                 Message = "Đăng ký thành công",
                 MaNguoiDung = result.MaNguoiDung,
                 HoTen = result.HoTen,
-                Email = request.Email, // ✅ Thêm email
-                VaiTro = result.VaiTro,
+                Email = request.Email, 
                 Success = true
             });
         }

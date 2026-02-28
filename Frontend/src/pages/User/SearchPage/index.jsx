@@ -18,7 +18,7 @@ const SearchPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
   
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
 
   // Reset về trang 1 khi keyword thay đổi
   useEffect(() => {

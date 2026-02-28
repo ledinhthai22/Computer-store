@@ -265,8 +265,8 @@ const OrderDetailModal = ({ isOpen, onClose, order, onUpdate }) => {
                 <p className="text-xs text-gray-500">Phương thức thanh toán</p>
                 <p className="font-semibold text-gray-800">
                   {order.phuongThucThanhToan === 1 
-                    ? 'Thanh toán khi nhận hàng (COD)' 
-                    : 'Thanh toán Online / Chuyển khoản'}
+                    ? 'Thanh toán Online / Chuyển khoản' 
+                    : 'Thanh toán khi nhận hàng (COD)'}
                 </p>
                 </div>
               </div>

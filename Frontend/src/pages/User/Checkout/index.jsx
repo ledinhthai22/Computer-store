@@ -42,7 +42,7 @@ export default function Checkout() {
 
   if (!user) return null;
 
-  // --- HÀM ĐÃ SỬA (FIX LỖI ẢNH) ---
+ 
   const normalizeItem = (item) => {
     const variantId = item.maBienThe || item.MaBienThe;
     const qty = item.soLuong || item.SoLuong || item.qty || 0;

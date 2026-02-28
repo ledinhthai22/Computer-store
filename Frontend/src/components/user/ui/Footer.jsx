@@ -100,10 +100,10 @@ export default function Footer() {
             Chính sách hỗ trợ
           </h3>
           <ul className="space-y-3 text-sm text-gray-600">
-            <li><Link to="/warranty-policy" className="hover:text-[#2f9ea0]">Chính sách bảo hành</Link></li>
-            <li><Link to="/return-policy" className="hover:text-[#2f9ea0]">Chính sách đổi trả</Link></li>
-            <li><Link to="/shipping-policy" className="hover:text-[#2f9ea0]">Giao hàng & Lắp đặt</Link></li>
-            <li><Link to="/privacy-policy" className="hover:text-[#2f9ea0]">Bảo mật thông tin</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Chính sách bảo hành</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Chính sách đổi trả</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Giao hàng & Lắp đặt</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Bảo mật thông tin</Link></li>
           </ul>
         </div>
 
@@ -113,9 +113,9 @@ export default function Footer() {
             Hỗ trợ khách hàng
           </h3>
           <ul className="space-y-3 text-sm text-gray-600">
-            <li><Link to="/payment-guide" className="hover:text-[#2f9ea0]">Hướng dẫn thanh toán</Link></li>
-            <li><Link to="/installment" className="hover:text-[#2f9ea0]">Hướng dẫn trả góp</Link></li>
-            <li><Link to="/check-order" className="hover:text-[#2f9ea0]">Tra cứu đơn hàng</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Hướng dẫn thanh toán</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Hướng dẫn trả góp</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Tra cứu đơn hàng</Link></li>
           </ul>
         </div>
 
@@ -125,9 +125,9 @@ export default function Footer() {
             Về chúng tôi
           </h3>
           <ul className="space-y-3 text-sm text-gray-600">
-            <li><Link to="/about-us" className="hover:text-[#2f9ea0]">Giới thiệu công ty</Link></li>
-            <li><Link to="/store-system" className="hover:text-[#2f9ea0]">Hệ thống cửa hàng</Link></li>
-            <li><Link to="/careers" className="hover:text-[#2f9ea0]">Tuyển dụng</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Giới thiệu công ty</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Hệ thống cửa hàng</Link></li>
+            <li><Link to="/about" className="hover:text-[#2f9ea0]">Tuyển dụng</Link></li>
 
             {webInfo?.soDienThoai && (
               <li className="pt-4 border-t border-gray-200">

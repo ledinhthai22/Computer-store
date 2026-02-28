@@ -195,7 +195,7 @@ export default function Details() {
               </ol>
             </nav>
 
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <div className="flex flex-col lg:flex-row gap-8 items-start mb-6">
               {/* Left Column - Images - Fixed Height */}
               <div className="lg:w-1/2 h-[600px] lg:h-[800px]">
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 h-full flex flex-col">
@@ -268,7 +268,7 @@ export default function Details() {
               </div>
 
               {/* Right Column - Details - Fixed Height with Scroll */}
-              <div className="lg:w-1/2 h-[600px] lg:h-[800px]">
+              <div className="lg:w-1/2 h-[600px] lg:h-[800px] mb-20">
                 {/* Product Info - Moved to top */}
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
                   <h1 className="text-3xl font-bold text-gray-900 mb-6">{product.tenSanPham}</h1>

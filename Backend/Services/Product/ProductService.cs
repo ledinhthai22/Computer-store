@@ -857,9 +857,7 @@ namespace Ecommerce.Services.Product
                     && x.ThuongHieu.NgayXoa == null
 
                     && x.BienThe.Any(bt =>
-                        bt.NgayXoa == null &&
-                        bt.TrangThai == true &&
-                        bt.SoLuongTon > 0
+                        bt.NgayXoa == null
                     )
                 ).AsQueryable();
 
@@ -1099,11 +1097,7 @@ namespace Ecommerce.Services.Product
                 .Select(x => MapToProductListItem(x))
                 .ToListAsync();
         }
-        public async Task<List<ProductListItem>> GetRelatedProductsAsync(
-    int maSanPham,
-    int maDanhMuc,
-    int maThuongHieu,
-    int soLuong = 10)
+        public async Task<List<ProductListItem>> GetRelatedProductsAsync(int maSanPham,int maDanhMuc,int maThuongHieu,int soLuong = 10)
         {
             return await _db.SanPham
                 .AsNoTracking()
